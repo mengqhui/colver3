@@ -180,7 +180,7 @@ rem ===========================================================================
 if not defined BUILD_TOOL_CHAIN set BUILD_TOOL_CHAIN=%BUILD_TOOL_CHAIN_DEFAULT%
 if not defined BUILD_TARGET set BUILD_TARGET=%BUILD_TARGET_DEFAULT%
 if not defined BUILD_ARCH set BUILD_ARCH=%BUILD_ARCH_DEFAULT%
-if not defined BUILD_SOURCE set BUILD_SOURCE=%PROJECT_DIR_SOURCE%\%PROJECT_PACKAGE%.dsc
+if not defined BUILD_SOURCE set BUILD_SOURCE=%PROJECT_DIR_SOURCE%\Package.dsc
 
 if not defined PROJECT_DIR_SUPPORT set PROJECT_DIR_SUPPORT=%PROJECT_DIR_SOURCE%\Build\Support
 if not defined PROJECT_DIR_STAGE set PROJECT_DIR_STAGE=%PROJECT_DIR_SOURCE%\Build\Stage

@@ -1,0 +1,273 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="$(MSBuildToolsVersion)" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug All|ARM">
+      <Configuration>Debug All</Configuration>
+      <Platform>ARM</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug All|Win32">
+      <Configuration>Debug All</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug All|X64">
+      <Configuration>Debug All</Configuration>
+      <Platform>X64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug Lite All|ARM">
+      <Configuration>Debug Lite All</Configuration>
+      <Platform>ARM</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug Lite All|Win32">
+      <Configuration>Debug Lite All</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug Lite All|X64">
+      <Configuration>Debug Lite All</Configuration>
+      <Platform>X64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug ISO All|ARM">
+      <Configuration>Debug ISO All</Configuration>
+      <Platform>ARM</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug ISO All|Win32">
+      <Configuration>Debug ISO All</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug ISO All|X64">
+      <Configuration>Debug ISO All</Configuration>
+      <Platform>X64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug ISO|ARM">
+      <Configuration>Debug ISO</Configuration>
+      <Platform>ARM</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug ISO|Win32">
+      <Configuration>Debug ISO</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug ISO|X64">
+      <Configuration>Debug ISO</Configuration>
+      <Platform>X64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug Lite|ARM">
+      <Configuration>Debug Lite</Configuration>
+      <Platform>ARM</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug Lite|Win32">
+      <Configuration>Debug Lite</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug Lite|X64">
+      <Configuration>Debug Lite</Configuration>
+      <Platform>X64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|ARM">
+      <Configuration>Debug</Configuration>
+      <Platform>ARM</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|X64">
+      <Configuration>Debug</Configuration>
+      <Platform>X64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Documentation|ARM">
+      <Configuration>Documentation</Configuration>
+      <Platform>ARM</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Documentation|Win32">
+      <Configuration>Documentation</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Documentation|X64">
+      <Configuration>Documentation</Configuration>
+      <Platform>X64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release All|ARM">
+      <Configuration>Release All</Configuration>
+      <Platform>ARM</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release All|Win32">
+      <Configuration>Release All</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release All|X64">
+      <Configuration>Release All</Configuration>
+      <Platform>X64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release Lite All|ARM">
+      <Configuration>Release Lite All</Configuration>
+      <Platform>ARM</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release Lite All|Win32">
+      <Configuration>Release Lite All</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release Lite All|X64">
+      <Configuration>Release Lite All</Configuration>
+      <Platform>X64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release ISO All|ARM">
+      <Configuration>Release ISO All</Configuration>
+      <Platform>ARM</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release ISO All|Win32">
+      <Configuration>Release ISO All</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release ISO All|X64">
+      <Configuration>Release ISO All</Configuration>
+      <Platform>X64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release ISO|ARM">
+      <Configuration>Release ISO</Configuration>
+      <Platform>ARM</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release ISO|Win32">
+      <Configuration>Release ISO</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release ISO|X64">
+      <Configuration>Release ISO</Configuration>
+      <Platform>X64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release Lite|ARM">
+      <Configuration>Release Lite</Configuration>
+      <Platform>ARM</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release Lite|Win32">
+      <Configuration>Release Lite</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release Lite|X64">
+      <Configuration>Release Lite</Configuration>
+      <Platform>X64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|ARM">
+      <Configuration>Release</Configuration>
+      <Platform>ARM</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|X64">
+      <Configuration>Release</Configuration>
+      <Platform>X64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{37FAFBD1-4E6C-4B81-95C5-BDB44DA5C466}</ProjectGuid>
+    <Keyword>MakeFileProj</Keyword>
+    <ProjectName>$(PROJECT_NAME)</ProjectName>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <PropertyGroup Label="Configuration">
+    <ConfigurationType>Makefile</ConfigurationType>
+    <IntDir>$(TEMP)</IntDir>
+    <OutDir>$(TEMP)</OutDir>
+    <BaseIntermediateOutputPath>$(TEMP)</BaseIntermediateOutputPath>
+    <ProjectBuildTarget>
+    </ProjectBuildTarget>
+    <ProjectBuildArch>
+    </ProjectBuildArch>
+    <ProjectBuildISO>
+    </ProjectBuildISO>
+    <ProjectBuildLite>
+    </ProjectBuildLite>
+    <ProjectBuildDocs>
+    </ProjectBuildDocs>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(VisualStudioVersion)'=='12.0'" Label="Configuration">
+    <PlatformToolset>v120</PlatformToolset>
+    <ProjectPlatformToolset Condition="'$(PROCESSOR_ARCHITEW6432)'=='AMD64'"> --tagname VS2013x86</ProjectPlatformToolset>
+    <ProjectPlatformToolset Condition="'$(ProjectPlatformToolset)|$(PROCESSOR_ARCHITECTURE)'=='|AMD64'"> --tagname VS2013x86</ProjectPlatformToolset>
+    <ProjectPlatformToolset Condition="'$(ProjectPlatformToolset)'==''"> --tagname VS2013</ProjectPlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(VisualStudioVersion)'=='11.0'" Label="Configuration">
+    <PlatformToolset>v110</PlatformToolset>
+    <ProjectPlatformToolset Condition="'$(PROCESSOR_ARCHITEW6432)'=='AMD64'"> --tagname VS2012x86</ProjectPlatformToolset>
+    <ProjectPlatformToolset Condition="'$(ProjectPlatformToolset)|$(PROCESSOR_ARCHITECTURE)'=='|AMD64'"> --tagname VS2012x86</ProjectPlatformToolset>
+    <ProjectPlatformToolset Condition="'$(ProjectPlatformToolset)'==''"> --tagname VS2012</ProjectPlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(VisualStudioVersion)'=='10.0'" Label="Configuration">
+    <PlatformToolset>v100</PlatformToolset>
+    <ProjectPlatformToolset Condition="'$(PROCESSOR_ARCHITEW6432)'=='AMD64'"> --tagname VS2010x86</ProjectPlatformToolset>
+    <ProjectPlatformToolset Condition="'$(ProjectPlatformToolset)|$(PROCESSOR_ARCHITECTURE)'=='|AMD64'"> --tagname VS2010x86</ProjectPlatformToolset>
+    <ProjectPlatformToolset Condition="'$(ProjectPlatformToolset)'==''"> --tagname VS2010</ProjectPlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)'=='Debug' Or '$(Configuration)'=='Debug All' Or '$(Configuration)'=='Debug Lite' Or '$(Configuration)'=='Debug Lite All' Or '$(Configuration)'=='Debug ISO'" Label="Configuration">
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <ProjectBuildTarget> -b DEBUG</ProjectBuildTarget>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(ProjectBuildTarget)'=='' And '$(Configuration)'!='Documentation'" Label="Configuration">
+    <ProjectBuildTarget> -b RELEASE</ProjectBuildTarget>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)'!='Debug All' And '$(Configuration)'!='Debug Lite All' And '$(Configuration)'!='Debug ISO All' And '$(Configuration)'!='Release All' And '$(Configuration)'!='Release Lite All' And '$(Configuration)'!='Release ISO All' And '$(Configuration)'!='Documentation' And '$(Platform)'!='Win32'" Label="Configuration">
+    <ProjectBuildArch> -a $(Platform)</ProjectBuildArch>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)'!='Debug All' And '$(Configuration)'!='Debug Lite All' And '$(Configuration)'!='Debug ISO All' And '$(Configuration)'!='Release All' And '$(Configuration)'!='Release Lite All' And '$(Configuration)'!='Release ISO All' And '$(Configuration)'!='Documentation' And '$(Platform)'=='Win32'" Label="Configuration">
+    <ProjectBuildArch> -a IA32</ProjectBuildArch>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)'!='Debug ISO' And '$(Configuration)'!='Debug ISO All' And '$(Configuration)'!='Release ISO' And '$(Configuration)'!='Release ISO All'" Label="Configuration">
+    <ProjectBuildISO> --no-iso</ProjectBuildISO>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(ProjectBuildISO)'!='' Or '$(Configuration)'=='Debug Lite' Or '$(Configuration)'=='Debug Lite All' Or '$(Configuration)'=='Release Lite' Or '$(Configuration)'=='Release Lite All'" Label="Configuration">
+    <ProjectBuildLite> --lite</ProjectBuildLite>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)'=='Documentation'" Label="Configuration">
+    <ProjectBuildDocs> --docs-only</ProjectBuildDocs>
+  </PropertyGroup>
+  <PropertyGroup>
+    <IncludePath>$(SolutionDir)..\..\Include;$(SolutionDir)..\..\..\MdePkg\Include;$(SolutionDir)..\..\..\MdeModulePkg\Include;$(SolutionDir)..\..\..\IntelFrameworkPkg\Include;$(SolutionDir)..\..\..\IntelFrameworkModulePkg\Include;$(SolutionDir)..\..\..\MdePkg\Include\X64;$(IncludePath)</IncludePath>
+    <NMakeIncludeSearchPath>$(VC_IncludePath)</NMakeIncludeSearchPath>
+    <NMakeBuildCommandLine>"$(SolutionDir)..\..\Build\Windows\BuildProject.bat" --no-log --platform="$(SolutionDir)..\..\Package.dsc"$(ProjectBuildISO)$(ProjectBuildDocs)$(ProjectBuildLite)$(ProjectPlatformToolset)$(ProjectBuildTarget)$(ProjectBuildArch)</NMakeBuildCommandLine>
+    <NMakeCleanCommandLine>"$(SolutionDir)..\..\Build\Windows\BuildProject.bat" --no-log --platform="$(SolutionDir)..\..\Package.dsc"$(ProjectBuildISO)$(ProjectBuildDocs)$(ProjectBuildLite)$(ProjectPlatformToolset)$(ProjectBuildTarget)$(ProjectBuildArch) clean</NMakeCleanCommandLine>
+    <NMakeReBuildCommandLine>"$(SolutionDir)..\..\Build\Windows\BuildProject.bat" --no-log --platform="$(SolutionDir)..\..\Package.dsc"$(ProjectBuildISO)$(ProjectBuildDocs)$(ProjectBuildLite)$(ProjectPlatformToolset)$(ProjectBuildTarget)$(ProjectBuildArch) clean
+"$(SolutionDir)..\..\Build\Windows\BuildProject.bat" --no-log --platform="$(SolutionDir)..\..\Package.dsc"$(ProjectBuildISO)$(ProjectBuildDocs)$(ProjectBuildLite)$(ProjectPlatformToolset)$(ProjectBuildTarget)$(ProjectBuildArch)</NMakeReBuildCommandLine>
+  </PropertyGroup>
+  <ItemDefinitionGroup>
+    <BuildLog>
+      <Path>$(TEMP)\$(SolutionName)\$(SolutionName).log</Path>
+    </BuildLog>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\Application\GUI\GUI.c" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\Application\GUI\GUI.inf" />
+    <None Include="..\..\Build\Support\Doxygen\Doxyfile" />
+    <None Include="..\..\Build\Support\Version" />
+    <None Include="..\..\Build\Windows\BuildProject.bat" />
+    <None Include="..\..\Build\Windows\Config\00_ConfigureBuild.bat" />
+    <None Include="..\..\Build\Windows\Config\10_ConfigureDeveloper.bat" />
+    <None Include="..\..\Build\Windows\Config\20_ConfigureProject.bat" />
+    <None Include="..\..\Build\Windows\Config\30_ConfigurePackage.bat" />
+    <None Include="..\..\Build\Windows\Config\40_ConfigureDocumentation.bat" />
+    <None Include="..\..\Build\Windows\Post\30_BuildPackage.bat" />
+    <None Include="..\..\Build\Windows\Post\40_GenerateDocumentation.bat" />
+    <None Include="..\..\Build\Windows\Support\Align.vbs" />
+    <None Include="..\..\Build\Windows\Support\Clean.bat" />
+    <None Include="..\..\Build\Windows\Support\DateTime.vbs" />
+    <None Include="..\..\Build\Windows\Support\InternalBuild.bat" />
+    <None Include="..\..\Build\Windows\Support\MkDir.bat" />
+    <None Include="..\..\Build\Windows\Support\Tee.vbs" />
+    <None Include="..\..\Build\Windows\Support\Unquote.bat" />
+    <None Include="..\..\Package.dec" />
+    <None Include="..\..\Package.dsc" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\Include\Version.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <Xml Include="..\..\Build\Support\Doxygen\Layout.xml" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

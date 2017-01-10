@@ -1,4 +1,4 @@
-## @file
+## @file GUI.inf
 #
 #  This program and the accompanying materials
 #  are licensed and made available under the terms and conditions of the BSD License
@@ -11,17 +11,19 @@
 ##
 
 [Defines]
-  INF_VERSION                    = 0x00010005
-  BASE_NAME                      = $(PROJECT_NAME)$(ARCH)
+  INF_VERSION                    = 0x00010016
+  BASE_NAME                      = $(PROJECT_SAFE_NAME)$(ARCH)
   FILE_GUID                      = A474E038-7652-4E4D-8B96-6141F6ECFCF5
   MODULE_TYPE                    = UEFI_APPLICATION
   VERSION_STRING                 = $(PROJECT_VERSION_BASE)
+  SUPPORTED_ARCHITECTURES        = X64|IA32|ARM|AARCH64
+  ENTRY_POINT                    = GUIMain
 
 [Sources]
-  Clover.c
+  GUI.c
 
 [Packages]
-  $(PROJECT_PACKAGE)/CloverPkg.dec
+  $(PROJECT_PACKAGE)/Package.dec
   MdePkg/MdePkg.dec
 
 [LibraryClasses]

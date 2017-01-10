@@ -1,0 +1,113 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Include">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="Application">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Application\GUI">
+      <UniqueIdentifier>{75dadf51-0888-4bf0-9292-3001f30be9b7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Library">
+      <UniqueIdentifier>{c94a125e-1a6f-4abb-a809-ec642fbcab5e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Build">
+      <UniqueIdentifier>{4634002f-ab70-483a-a158-dcab854df56d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Build\Windows">
+      <UniqueIdentifier>{7d26e8f0-0bfd-47f5-abab-2996fea21e64}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Build\Support">
+      <UniqueIdentifier>{6c555d0e-aca1-4071-badc-68d154ae6e77}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Build\Support\Doxygen">
+      <UniqueIdentifier>{f1067760-65bf-4ead-8186-42afd38c36a7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Build\Windows\Support">
+      <UniqueIdentifier>{22fef2a7-1179-46b9-aeb9-5bd6caab6f3d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Build\Windows\Config">
+      <UniqueIdentifier>{a4194a4f-d2dd-46ce-a35f-495504a792d5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Build\Windows\Post">
+      <UniqueIdentifier>{b0d93acd-4040-45bb-9467-0603c5b44fef}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\Application\GUI\GUI.c">
+      <Filter>Application\GUI</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\Application\GUI\GUI.inf">
+      <Filter>Application\GUI</Filter>
+    </None>
+    <None Include="..\..\Build\Support\Version">
+      <Filter>Build\Support</Filter>
+    </None>
+    <None Include="..\..\Build\Support\Doxygen\Doxyfile">
+      <Filter>Build\Support\Doxygen</Filter>
+    </None>
+    <None Include="..\..\Build\Windows\Config\00_ConfigureBuild.bat">
+      <Filter>Build\Windows\Config</Filter>
+    </None>
+    <None Include="..\..\Build\Windows\Config\10_ConfigureDeveloper.bat">
+      <Filter>Build\Windows\Config</Filter>
+    </None>
+    <None Include="..\..\Build\Windows\Config\20_ConfigureProject.bat">
+      <Filter>Build\Windows\Config</Filter>
+    </None>
+    <None Include="..\..\Build\Windows\Config\30_ConfigurePackage.bat">
+      <Filter>Build\Windows\Config</Filter>
+    </None>
+    <None Include="..\..\Build\Windows\Config\40_ConfigureDocumentation.bat">
+      <Filter>Build\Windows\Config</Filter>
+    </None>
+    <None Include="..\..\Build\Windows\Post\30_BuildPackage.bat">
+      <Filter>Build\Windows\Post</Filter>
+    </None>
+    <None Include="..\..\Build\Windows\Post\40_GenerateDocumentation.bat">
+      <Filter>Build\Windows\Post</Filter>
+    </None>
+    <None Include="..\..\Build\Windows\Support\Align.vbs">
+      <Filter>Build\Windows\Support</Filter>
+    </None>
+    <None Include="..\..\Build\Windows\Support\Clean.bat">
+      <Filter>Build\Windows\Support</Filter>
+    </None>
+    <None Include="..\..\Build\Windows\Support\DateTime.vbs">
+      <Filter>Build\Windows\Support</Filter>
+    </None>
+    <None Include="..\..\Build\Windows\Support\InternalBuild.bat">
+      <Filter>Build\Windows\Support</Filter>
+    </None>
+    <None Include="..\..\Build\Windows\Support\MkDir.bat">
+      <Filter>Build\Windows\Support</Filter>
+    </None>
+    <None Include="..\..\Build\Windows\Support\Tee.vbs">
+      <Filter>Build\Windows\Support</Filter>
+    </None>
+    <None Include="..\..\Build\Windows\Support\Unquote.bat">
+      <Filter>Build\Windows\Support</Filter>
+    </None>
+    <None Include="..\..\Build\Windows\BuildProject.bat">
+      <Filter>Build\Windows</Filter>
+    </None>
+    <None Include="..\..\Package.dec" />
+    <None Include="..\..\Package.dsc" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\Include\Version.h">
+      <Filter>Include</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Xml Include="..\..\Build\Support\Doxygen\Layout.xml">
+      <Filter>Build\Support\Doxygen</Filter>
+    </Xml>
+  </ItemGroup>
+</Project>
