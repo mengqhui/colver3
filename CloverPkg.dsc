@@ -22,7 +22,7 @@
   SKUID_IDENTIFIER               = DEFAULT
 
 [Components]
-  $(PROJECT_PACKAGE)/Application/Clover/Clover.inf
+  $(PROJECT_PACKAGE)/Application/GUI/GUI.inf
 
 [BuildOptions]
   XCODE:*_*_*_CC_FLAGS = -Os -D DISABLE_NEW_DEPRECATED_INTERFACES $(PROJECT_BUILD_OPTIONS)

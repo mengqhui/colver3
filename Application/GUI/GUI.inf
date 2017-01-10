@@ -12,17 +12,16 @@
 
 [Defines]
   INF_VERSION                    = 0x00010005
-  BASE_NAME                      = Clover$(ARCH)
-  MODULE_UNI_FILE                = Clover.uni
+  BASE_NAME                      = $(PROJECT_NAME)$(ARCH)
   FILE_GUID                      = A474E038-7652-4E4D-8B96-6141F6ECFCF5
   MODULE_TYPE                    = UEFI_APPLICATION
-  VERSION_STRING                 = 3.0
+  VERSION_STRING                 = $(PROJECT_VERSION_BASE)
 
 [Sources]
   Clover.c
 
 [Packages]
-  CloverPkg/CloverPkg.dec
+  $(PROJECT_PACKAGE)/CloverPkg.dec
   MdePkg/MdePkg.dec
 
 [LibraryClasses]
