@@ -50,7 +50,7 @@
 #define PROJECT_FIRMWARE_VERSIONCODE _PROJECT_FIRMWARE_VERSIONCODE
 
 // VERSIONCODE
-/// A packed integer representation of a major.minor.update version.
+/// A packed integer representation of a major.minor.update version.<br>
 /// The update version is packed in bits 0 ... 11<br>
 /// The minor version is packed in bits 12 ... 23<br>
 /// The major version is packed in bits 24 ... 31<br>
