@@ -103,6 +103,7 @@ rem ===========================================================================
     )
     set PROJECT_PACKAGE=!TEMP_PACKAGE:~0,%COUNTER%!
     set PROJECT_DIR_SOURCE=%WORKSPACE%\%PROJECT_PACKAGE%
+    set PACKAGES_PATH=%PROJECT_DIR_SOURCE%
 
   rem =========================================================================
   rem Set the default log directory

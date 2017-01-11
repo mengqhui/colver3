@@ -18,12 +18,13 @@
   VERSION_STRING                 = $(PROJECT_VERSION_BASE)
   SUPPORTED_ARCHITECTURES        = X64|IA32|ARM|AARCH64
   ENTRY_POINT                    = GUIMain
+  UNLOAD_IMAGE                   = GUIUnload
 
 [Sources]
   GUI.c
 
 [Packages]
-  $(PROJECT_PACKAGE)/Package.dec
+  Package.dec
   MdePkg/MdePkg.dec
 
 [LibraryClasses]
