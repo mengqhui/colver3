@@ -36,10 +36,31 @@
     <Filter Include="Build\Windows\Post">
       <UniqueIdentifier>{b0d93acd-4040-45bb-9467-0603c5b44fef}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Library\GUILib">
+      <UniqueIdentifier>{8ce82ee3-94c2-44d6-b2b1-affda688dbb3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Include\Library">
+      <UniqueIdentifier>{66abf7c9-c364-4a71-b5e3-21e09080ada4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Build\Unix">
+      <UniqueIdentifier>{53723ee8-ee7a-45a7-aadf-d32607789390}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Build\Unix\Config">
+      <UniqueIdentifier>{a0cabad5-1ccb-4001-9533-aac001f32ec3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Build\Unix\Post">
+      <UniqueIdentifier>{ead2ce47-1c48-40e8-bac9-2faef9887baa}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Build\Unix\Support">
+      <UniqueIdentifier>{89307a02-a71e-49db-b796-96f07f50c45b}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\Application\GUI\GUI.c">
       <Filter>Application\GUI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Library\GUILib\GUILib.c">
+      <Filter>Library\GUILib</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -99,10 +120,43 @@
     </None>
     <None Include="..\..\Package.dec" />
     <None Include="..\..\Package.dsc" />
+    <None Include="..\..\Library\GUILib\GUILib.inf">
+      <Filter>Library\GUILib</Filter>
+    </None>
+    <None Include="..\..\Build\Unix\BuildProject.sh">
+      <Filter>Build\Unix</Filter>
+    </None>
+    <None Include="..\..\Build\Unix\Config\10_ConfigureDeveloper.sh">
+      <Filter>Build\Unix\Config</Filter>
+    </None>
+    <None Include="..\..\Build\Unix\Config\20_ConfigureProject.sh">
+      <Filter>Build\Unix\Config</Filter>
+    </None>
+    <None Include="..\..\Build\Unix\Config\30_ConfigurePackage.sh">
+      <Filter>Build\Unix\Config</Filter>
+    </None>
+    <None Include="..\..\Build\Unix\Config\40_ConfigureDocumentation.sh">
+      <Filter>Build\Unix\Config</Filter>
+    </None>
+    <None Include="..\..\Build\Unix\Post\30_BuildPackage.sh">
+      <Filter>Build\Unix\Post</Filter>
+    </None>
+    <None Include="..\..\Build\Unix\Post\40_GenerateDocumentation.sh">
+      <Filter>Build\Unix\Post</Filter>
+    </None>
+    <None Include="..\..\Build\Unix\Support\InternalBuild.sh">
+      <Filter>Build\Unix\Support</Filter>
+    </None>
+    <None Include="..\..\Build\Unix\Config\00_ConfigureBuild.sh">
+      <Filter>Build\Unix\Config</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\Include\Version.h">
       <Filter>Include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\Library\GUILib.h">
+      <Filter>Include\Library</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -5,7 +5,7 @@ rem ===========================================================================
 
 set PROJECT_DIR_PACKAGE=%PROJECT_DIR_SOURCE%\Package
 
-set PROJECT_ISO=%PROJECT_DIR_PACKAGE%\%PROJECT_SAFE_NAME%
+set PROJECT_ISO=%PROJECT_DIR_PACKAGE%\%PROJECT_NAME%
 if "%BUILD_TARGET%" == "RELEASE" (
   set PROJECT_ISO=%PROJECT_ISO%-%PROJECT_VERSION_BASE%
 ) else (

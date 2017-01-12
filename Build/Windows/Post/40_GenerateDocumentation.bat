@@ -1,6 +1,10 @@
 @echo off
 rem ===========================================================================
+rem
+rem @file Build/Windows/Post/40_GenerateDocumentation.bat
+rem
 rem Generate documentation
+rem
 rem ===========================================================================
 
 if not defined BUILD_DOCS goto:eof

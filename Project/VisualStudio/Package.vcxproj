@@ -238,11 +238,21 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\..\Application\GUI\GUI.c" />
+    <ClCompile Include="..\..\Library\GUILib\GUILib.c" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\Application\GUI\GUI.inf" />
     <None Include="..\..\Build\Support\Doxygen\Doxyfile" />
     <None Include="..\..\Build\Support\Version" />
+    <None Include="..\..\Build\Unix\BuildProject.sh" />
+    <None Include="..\..\Build\Unix\Config\00_ConfigureBuild.sh" />
+    <None Include="..\..\Build\Unix\Config\10_ConfigureDeveloper.sh" />
+    <None Include="..\..\Build\Unix\Config\20_ConfigureProject.sh" />
+    <None Include="..\..\Build\Unix\Config\30_ConfigurePackage.sh" />
+    <None Include="..\..\Build\Unix\Config\40_ConfigureDocumentation.sh" />
+    <None Include="..\..\Build\Unix\Post\30_BuildPackage.sh" />
+    <None Include="..\..\Build\Unix\Post\40_GenerateDocumentation.sh" />
+    <None Include="..\..\Build\Unix\Support\InternalBuild.sh" />
     <None Include="..\..\Build\Windows\BuildProject.bat" />
     <None Include="..\..\Build\Windows\Config\00_ConfigureBuild.bat" />
     <None Include="..\..\Build\Windows\Config\10_ConfigureDeveloper.bat" />
@@ -258,10 +268,12 @@
     <None Include="..\..\Build\Windows\Support\MkDir.bat" />
     <None Include="..\..\Build\Windows\Support\Tee.vbs" />
     <None Include="..\..\Build\Windows\Support\Unquote.bat" />
+    <None Include="..\..\Library\GUILib\GUILib.inf" />
     <None Include="..\..\Package.dec" />
     <None Include="..\..\Package.dsc" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\Include\Library\GUILib.h" />
     <ClInclude Include="..\..\Include\Version.h" />
   </ItemGroup>
   <ItemGroup>

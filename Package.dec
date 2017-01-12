@@ -22,7 +22,7 @@
   Include
 
 [LibraryClasses]
-  
+  GUILib|$(PROJECT_PACKAGE)/Include/Library/GUILib.h
 
 [Guids]
   

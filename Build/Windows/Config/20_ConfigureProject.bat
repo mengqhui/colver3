@@ -1,6 +1,10 @@
 @echo off
 rem ===========================================================================
+rem
+rem @file Build/Windows/Config/20_ConfigureProject.bat
+rem
 rem Configure project options
+rem
 rem ===========================================================================
 
 set PROJECT_NAME=

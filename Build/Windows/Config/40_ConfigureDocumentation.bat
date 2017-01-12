@@ -1,6 +1,10 @@
 @echo off
 rem ===========================================================================
+rem
+rem @file Build/Windows/Config/40_ConfigureDocumentation.sh
+rem
 rem Configure documentation options
+rem
 rem ===========================================================================
 
 set BUILD_DOCS=

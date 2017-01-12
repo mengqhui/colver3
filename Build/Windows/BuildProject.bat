@@ -1,6 +1,10 @@
 @echo off
 rem ===========================================================================
+rem
+rem @file Build/Windows/BuildProject.bat
+rem
 rem Project package build script
+rem
 rem ===========================================================================
 
 setlocal enableDelayedExpansion

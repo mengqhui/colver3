@@ -1,6 +1,10 @@
 @echo off
 rem ===========================================================================
+rem
+rem @file Build/Windows/Config/10_ConfigureDeveloper.bat
+rem
 rem Configure developer options
+rem
 rem ===========================================================================
 
 set BUILD_DEVELOPER=

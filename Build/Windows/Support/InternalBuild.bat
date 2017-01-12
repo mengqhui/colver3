@@ -1,6 +1,10 @@
 @echo off
 rem ===========================================================================
+rem
+rem @file Build/Windows/Support/InternalBuild.bat
+rem
 rem Project package internal build script
+rem
 rem ===========================================================================
 
 setlocal enableDelayedExpansion
@@ -80,10 +84,10 @@ if defined BUILD_DRYRUN (
   call:printStripe DRY RUN: Skipping building package
   goto postBuild
 )
-set PROJECT_BUILD_OPTIONS=%PROJECT_BUILD_OPTIONS% /I"%PROJECT_DIR_BUILD%\Include"
 set PROJECT_DIR_STAGE_RELATIVE=!PROJECT_DIR_STAGE:%WORKSPACE%\=!
+set PROJECT_BUILD_OPTIONS=%PROJECT_BUILD_OPTIONS% /I"%PROJECT_DIR_BUILD%\Include"
 set BUILD_PROJECT_ARGUMENTS=--platform="%BUILD_SOURCE%" -D "PROJECT_DIR_STAGE=%PROJECT_DIR_STAGE_RELATIVE:\=/%"
-set BUILD_PROJECT_ARGUMENTS=%BUILD_PROJECT_ARGUMENTS% -D "PROJECT_NAME=%PROJECT_NAME%" -D PROJECT_PACKAGE=%PROJECT_PACKAGE%
+set BUILD_PROJECT_ARGUMENTS=%BUILD_PROJECT_ARGUMENTS% -D "PROJECT_NAME=%PROJECT_NAME%" -D "PROJECT_PACKAGE=%PROJECT_PACKAGE%"
 call:printStripe Building package
 %TOOL_ALIGN% Architecture: %BUILD_ARCH%
 if defined PROJECT_BUILD_ARGUMENTS %TOOL_ALIGN% Arguments: %PROJECT_BUILD_ARGUMENTS%

@@ -1,6 +1,10 @@
 @echo off
 rem ===========================================================================
+rem
+rem @file Build/Windows/Config/00_ConfigureBuild.bat
+rem
 rem Configure build options
+rem
 rem ===========================================================================
 
 set BUILD_CONFIG_DIR=
