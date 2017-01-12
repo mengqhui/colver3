@@ -226,10 +226,10 @@
   <PropertyGroup>
     <IncludePath>$(SolutionDir)..\..\Include;$(SolutionDir)..\..\..\MdePkg\Include;$(SolutionDir)..\..\..\MdeModulePkg\Include;$(SolutionDir)..\..\..\IntelFrameworkPkg\Include;$(SolutionDir)..\..\..\IntelFrameworkModulePkg\Include;$(SolutionDir)..\..\..\MdePkg\Include\X64;$(IncludePath)</IncludePath>
     <NMakeIncludeSearchPath>$(VC_IncludePath)</NMakeIncludeSearchPath>
-    <NMakeBuildCommandLine>"$(SolutionDir)..\..\Build\Windows\BuildProject.bat" --no-log --platform="$(SolutionDir)..\..\Package.dsc"$(ProjectBuildISO)$(ProjectBuildDocs)$(ProjectBuildLite)$(ProjectPlatformToolset)$(ProjectBuildTarget)$(ProjectBuildArch)</NMakeBuildCommandLine>
-    <NMakeCleanCommandLine>"$(SolutionDir)..\..\Build\Windows\BuildProject.bat" --no-log --platform="$(SolutionDir)..\..\Package.dsc"$(ProjectBuildISO)$(ProjectBuildDocs)$(ProjectBuildLite)$(ProjectPlatformToolset)$(ProjectBuildTarget)$(ProjectBuildArch) clean</NMakeCleanCommandLine>
-    <NMakeReBuildCommandLine>"$(SolutionDir)..\..\Build\Windows\BuildProject.bat" --no-log --platform="$(SolutionDir)..\..\Package.dsc"$(ProjectBuildISO)$(ProjectBuildDocs)$(ProjectBuildLite)$(ProjectPlatformToolset)$(ProjectBuildTarget)$(ProjectBuildArch) clean
-"$(SolutionDir)..\..\Build\Windows\BuildProject.bat" --no-log --platform="$(SolutionDir)..\..\Package.dsc"$(ProjectBuildISO)$(ProjectBuildDocs)$(ProjectBuildLite)$(ProjectPlatformToolset)$(ProjectBuildTarget)$(ProjectBuildArch)</NMakeReBuildCommandLine>
+    <NMakeBuildCommandLine>"$(SolutionDir)..\..\Build\Windows\BuildProject.bat" --no-log$(ProjectBuildISO)$(ProjectBuildDocs)$(ProjectBuildLite)$(ProjectPlatformToolset)$(ProjectBuildTarget)$(ProjectBuildArch)</NMakeBuildCommandLine>
+    <NMakeCleanCommandLine>"$(SolutionDir)..\..\Build\Windows\BuildProject.bat" --no-log$(ProjectBuildISO)$(ProjectBuildDocs)$(ProjectBuildLite)$(ProjectPlatformToolset)$(ProjectBuildTarget)$(ProjectBuildArch) clean</NMakeCleanCommandLine>
+    <NMakeReBuildCommandLine>"$(SolutionDir)..\..\Build\Windows\BuildProject.bat" --no-log$(ProjectBuildISO)$(ProjectBuildDocs)$(ProjectBuildLite)$(ProjectPlatformToolset)$(ProjectBuildTarget)$(ProjectBuildArch) clean
+"$(SolutionDir)..\..\Build\Windows\BuildProject.bat" --no-log$(ProjectBuildISO)$(ProjectBuildDocs)$(ProjectBuildLite)$(ProjectPlatformToolset)$(ProjectBuildTarget)$(ProjectBuildArch)</NMakeReBuildCommandLine>
   </PropertyGroup>
   <ItemDefinitionGroup>
     <BuildLog>
