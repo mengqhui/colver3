@@ -4,7 +4,7 @@
 /// GUI entry
 ///
 
-#include <Uefi.h>
+#include <Version.h>
 
 // GUIMain
 /// GUI entry point

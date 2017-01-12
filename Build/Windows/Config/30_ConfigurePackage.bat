@@ -5,7 +5,13 @@ rem ===========================================================================
 
 set PROJECT_DIR_PACKAGE=%PROJECT_DIR_SOURCE%\Package
 
-set PROJECT_ISO=%PROJECT_DIR_PACKAGE%\%PROJECT_SAFE_NAME%-%PROJECT_VERSION%.iso
+set PROJECT_ISO=%PROJECT_DIR_PACKAGE%\%PROJECT_SAFE_NAME%
+if "%BUILD_TARGET%" == "RELEASE" (
+  set PROJECT_ISO=%PROJECT_ISO%-%PROJECT_VERSION_BASE%
+) else (
+  set PROJECT_ISO=%PROJECT_ISO%-%PROJECT_VERSION%
+)
+set PROJECT_ISO=%PROJECT_ISO%.iso
 
 rem ===========================================================================
 rem Parse script arguments

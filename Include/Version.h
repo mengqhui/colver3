@@ -109,7 +109,9 @@ typedef UINT32 SIGNATURE;
 /// Get the count of elements in an array
 /// @param arr The array to get the count of elements
 /// @return The count of elements in the array
-#define ARRAY_SIZE(arr) ((arr == NULL) ? 0 : ((sizeof(arr) <= sizeof(arr[0])) ? 1 : (sizeof(arr) / sizeof(arr[0]))))
+#ifndef ARRAY_SIZE
+  #define ARRAY_SIZE(arr) ((arr == NULL) ? 0 : ((sizeof(arr) <= sizeof(arr[0])) ? 1 : (sizeof(arr) / sizeof(arr[0]))))
+#endif
 
 // ADDRESS_OF
 /// Get the address of a structure member

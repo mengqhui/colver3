@@ -201,7 +201,7 @@
     <ProjectPlatformToolset Condition="'$(ProjectPlatformToolset)|$(PROCESSOR_ARCHITECTURE)'=='|AMD64'"> --tagname VS2010x86</ProjectPlatformToolset>
     <ProjectPlatformToolset Condition="'$(ProjectPlatformToolset)'==''"> --tagname VS2010</ProjectPlatformToolset>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)'=='Debug' Or '$(Configuration)'=='Debug All' Or '$(Configuration)'=='Debug Lite' Or '$(Configuration)'=='Debug Lite All' Or '$(Configuration)'=='Debug ISO'" Label="Configuration">
+  <PropertyGroup Condition="'$(Configuration)'=='Debug' Or '$(Configuration)'=='Debug All' Or '$(Configuration)'=='Debug Lite' Or '$(Configuration)'=='Debug Lite All' Or '$(Configuration)'=='Debug ISO' Or '$(Configuration)'=='Debug ISO All'" Label="Configuration">
     <UseDebugLibraries>true</UseDebugLibraries>
     <ProjectBuildTarget> -b DEBUG</ProjectBuildTarget>
   </PropertyGroup>
