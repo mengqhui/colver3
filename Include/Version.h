@@ -72,7 +72,8 @@ typedef UINT32 SIGNATURE;
 /// @param minor  The minor version
 /// @param update The update version
 /// @return The version code
-#define PACK_VERSIONCODE_FULL(major, minor, update) (VERSIONCODE)((((VERSIONCODE)(major) & 0xff) << 24) | (((VERSIONCODE)(minor) & 0xfff) << 12) | ((VERSIONCODE)(update) & 0xfff))
+#define PACK_VERSIONCODE_FULL(major, minor, update) \
+  (VERSIONCODE)((((VERSIONCODE)(major) & 0xff) << 24) | (((VERSIONCODE)(minor) & 0xfff) << 12) | ((VERSIONCODE)(update) & 0xfff))
 
 // PACK_VERSIONCODE
 /// Pack a version code
@@ -105,13 +106,11 @@ typedef UINT32 SIGNATURE;
 /// @return The update version
 #define UNPACK_VERSIONCODE_UPDATE(version) ((VERSIONCODE)(version) & 0xfff)
 
-// ARRAY_SIZE
+// ARRAY_COUNT
 /// Get the count of elements in an array
 /// @param arr The array to get the count of elements
 /// @return The count of elements in the array
-#ifndef ARRAY_SIZE
-  #define ARRAY_SIZE(arr) ((arr == NULL) ? 0 : ((sizeof(arr) <= sizeof(arr[0])) ? 1 : (sizeof(arr) / sizeof(arr[0]))))
-#endif
+#define ARRAY_COUNT(arr) ((arr == NULL) ? 0 : ((sizeof(arr) <= sizeof(arr[0])) ? 1 : (sizeof(arr) / sizeof(arr[0]))))
 
 // ADDRESS_OF
 /// Get the address of a structure member
