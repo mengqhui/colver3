@@ -36,11 +36,11 @@
   #
   BaseLib|MdePkg/Library/BaseLib/BaseLib.inf
   BaseMemoryLib|MdePkg/Library/UefiMemoryLib/UefiMemoryLib.inf
-#if TARGET == "DEBUG"
+!if $(TARGET) == "RELEASE"
   DebugLib|MdePkg/Library/BaseDebugLibNull/BaseDebugLibNull.inf
-#else
+!else
   DebugLib|MdePkg/Library/UefiDebugLibStdErr/UefiDebugLibStdErr.inf
-#endif
+!endif
   DebugPrintErrorLevelLib|MdePkg/Library/BaseDebugPrintErrorLevelLib/BaseDebugPrintErrorLevelLib.inf
   PcdLib|MdePkg/Library/BasePcdLibNull/BasePcdLibNull.inf
   PrintLib|MdePkg/Library/BasePrintLib/BasePrintLib.inf

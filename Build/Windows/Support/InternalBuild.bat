@@ -147,7 +147,8 @@ rem =========================================================================
   set ARCH=%~1
   %TOOL_ALIGN% Stage(%~1): !PROJECT_DIR_BUILD:%WORKSPACE%\=!\%~1
   echo.
-  %WORKSPACE%\BaseTools\Source\Python\build\build.py --arch=%~1 %BUILD_PROJECT_ARGUMENTS% %PROJECT_BUILD_ARGUMENTS% 2>&1
+  %PYTHONPATH%\build\build.py --arch=%~1 %BUILD_PROJECT_ARGUMENTS% %PROJECT_BUILD_ARGUMENTS% 2>&1
+  rem build --arch=%~1 %BUILD_PROJECT_ARGUMENTS% %PROJECT_BUILD_ARGUMENTS% 2>&1
   goto:eof
 
 rem =========================================================================
