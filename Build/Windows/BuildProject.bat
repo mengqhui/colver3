@@ -35,6 +35,8 @@ set TOOL_ALIGN="%TOOL_CSCRIPT%" /Nologo "%BUILD_DIR_SUPPORT%\Align.vbs"
 set TOOL_DATETIME="%TOOL_CSCRIPT%" /Nologo "%BUILD_DIR_SUPPORT%\DateTime.vbs"
 set TOOL_TEE="%TOOL_CSCRIPT%" /Nologo "%BUILD_DIR_SUPPORT%\Tee.vbs"
 
+set NASM_PREFIX=%BUILD_DIR_SUPPORT%\
+
 rem ===========================================================================
 rem Check if run from console
 rem ===========================================================================
@@ -173,6 +175,10 @@ rem ===========================================================================
   if defined BUILD_LOG (
     call "%TOOL_MKDIR%" "%PROJECT_DIR_LOG%"
     if errorlevel 1 goto failScript
+  )
+
+  if not defined PYTHONPATH (
+    set PYTHONPATH=%BASE_TOOLS_PATH%\Source\Python
   )
 
   cd %PROJECT_DIR_SOURCE%

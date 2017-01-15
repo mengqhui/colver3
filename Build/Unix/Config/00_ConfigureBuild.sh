@@ -31,118 +31,117 @@ PROJECT_DIR_BUILD=
 
 COUNTER=1
 while [ ${COUNTER} -le $# ]; do
-  echo ${*:${COUNTER}:1}
-  case ${*:${COUNTER}:1} in
-    clean)
+  case "${*:${COUNTER}:1}" in
+    "clean")
       BUILD_CLEAN=Yes
       ;;
-    cleanall)
+    "cleanall")
       BUILD_CLEAN=All
       ;;
-    --dryrun)
+    "--dryrun")
       BUILD_DRYRUN=Yes
       ;;
-    --lite)
-      PROJECT_BUILD_ARGUMENTS=${PROJECT_BUILD_ARGUMENTS} -DPROJECT_LITE
-      PROJECT_BUILD_OPTIONS${PROJECT_BUILD_OPTIONS} -DPROJECT_LITE
+    "--lite")
+      PROJECT_BUILD_ARGUMENTS=${PROJECT_BUILD_ARGUMENTS}\ -DPROJECT_LITE
+      PROJECT_BUILD_OPTIONS${PROJECT_BUILD_OPTIONS}\ -DPROJECT_LITE
       ;;
-    -a)
+    "-a")
       let COUNTER+=1
       if [ ${COUNTER} -gt $# ]; then
         break;
       fi
       BUILD_ARCH=${*:${COUNTER}:1}
       ;;
-    -p)
+    "-p")
       let COUNTER+=1
       if [ ${COUNTER} -gt $# ]; then
         break;
       fi
       BUILD_SOURCE=${*:${COUNTER}:1}
       ;;
-    -b)
+    "-b")
       let COUNTER+=1
       if [ ${COUNTER} -gt $# ]; then
         break;
       fi
       BUILD_TARGET=${*:${COUNTER}:1}
-      PROJECT_BUILD_ARGUMENTS=${PROJECT_BUILD_ARGUMENTS} -b ${BUILD_TARGET}
+      PROJECT_BUILD_ARGUMENTS=${PROJECT_BUILD_ARGUMENTS}\ -b\ ${BUILD_TARGET}
       ;;
-    -t)
+    "-t")
       let COUNTER+=1
       if [ ${COUNTER} -gt $# ]; then
         break;
       fi
       BUILD_TOOL_CHAIN=${*:${COUNTER}:1}
-      PROJECT_BUILD_ARGUMENTS=${PROJECT_BUILD_ARGUMENTS} -t ${BUILD_TOOL_CHAIN}
+      PROJECT_BUILD_ARGUMENTS=${PROJECT_BUILD_ARGUMENTS}\ -t\ ${BUILD_TOOL_CHAIN}
       ;;
-    --arch)
+    "--arch")
       let COUNTER+=1
       if [ ${COUNTER} -gt $# ]; then
         break;
       fi
       BUILD_ARCH=${*:${COUNTER}:1}
       ;;
-    --platform)
+    "--platform")
       let COUNTER+=1
       if [ ${COUNTER} -gt $# ]; then
         break;
       fi
       BUILD_SOURCE=${*:${COUNTER}:1}
       ;;
-    --buildtarget)
+    "--buildtarget")
       let COUNTER+=1
       if [ ${COUNTER} -gt $# ]; then
         break;
       fi
       BUILD_TARGET=${*:${COUNTER}:1}
-      PROJECT_BUILD_ARGUMENTS=${PROJECT_BUILD_ARGUMENTS} -b ${BUILD_TARGET}
+      PROJECT_BUILD_ARGUMENTS=${PROJECT_BUILD_ARGUMENTS}\ -b\ ${BUILD_TARGET}
       ;;
-    --tagname)
+    "--tagname")
       let COUNTER+=1
       if [ ${COUNTER} -gt $# ]; then
         break;
       fi
       BUILD_TOOL_CHAIN=${*:${COUNTER}:1}
-      PROJECT_BUILD_ARGUMENTS=${PROJECT_BUILD_ARGUMENTS} -t ${BUILD_TOOL_CHAIN}
+      PROJECT_BUILD_ARGUMENTS=${PROJECT_BUILD_ARGUMENTS}\ -t\ ${BUILD_TOOL_CHAIN}
       ;;
-    --build-dir)
+    "--build-dir")
       let COUNTER+=1
       if [ ${COUNTER} -gt $# ]; then
         break;
       fi
       PROJECT_DIR_BUILD=${*:${COUNTER}:1}
       ;;
-    --conf)
+    "--conf")
       let COUNTER+=1
       if [ ${COUNTER} -gt $# ]; then
         break;
       fi
       BUILD_CONFIG_DIR=${*:${COUNTER}:1}
       ;;
-    --arch=*)
+    "--arch=*")
       BUILD_ARCH=${*:${COUNTER}:1}
       BUILD_ARCH=${BUILD_ARCH:7}
       ;;
-    --platform=*)
+    "--platform=*")
       BUILD_SOURCE=${*:${COUNTER}:1}
       BUILD_SOURCE=${BUILD_SOURCE:11}
       ;;
-    --buildtarget=*)
+    "--buildtarget=*")
       BUILD_TARGET=${*:${COUNTER}:1}
       BUILD_TARGET=${BUILD_TARGET:14}
-      PROJECT_BUILD_ARGUMENTS=${PROJECT_BUILD_ARGUMENTS} -b ${BUILD_TARGET}
+      PROJECT_BUILD_ARGUMENTS=${PROJECT_BUILD_ARGUMENTS}\ -b\ ${BUILD_TARGET}
       ;;
-    --tagname=*)
+    "--tagname=*")
       BUILD_TOOL_CHAIN=${*:${COUNTER}:1}
       BUILD_TOOL_CHAIN=${BUILD_TOOL_CHAIN:10}
-      PROJECT_BUILD_ARGUMENTS=${PROJECT_BUILD_ARGUMENTS} -t ${BUILD_TOOL_CHAIN}
+      PROJECT_BUILD_ARGUMENTS=${PROJECT_BUILD_ARGUMENTS}\ -t\ ${BUILD_TOOL_CHAIN}
       ;;
-    --build-dir=*)
+    "--build-dir=*")
       PROJECT_DIR_BUILD=${*:${COUNTER}:1}
       PROJECT_DIR_BUILD=${PROJECT_DIR_BUILD:12}
       ;;
-    --conf=*)
+    "--conf=*")
       BUILD_CONFIG_DIR=${*:${COUNTER}:1}
       BUILD_CONFIG_DIR=${BUILD_CONFIG_DIR:7}
       ;;

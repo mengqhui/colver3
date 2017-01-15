@@ -28,6 +28,7 @@
   MdePkg/MdePkg.dec
 
 [LibraryClasses]
+  UefiApplicationEntryPoint
   GUILib
 
 [Guids]

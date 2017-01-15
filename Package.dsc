@@ -25,7 +25,31 @@
   $(PROJECT_PACKAGE)/Application/GUI/GUI.inf
 
 [LibraryClasses]
+
+  #
+  # GUI libraries
+  #
   GUILib|$(PROJECT_PACKAGE)/Library/GUILib/GUILib.inf
+
+  #
+  # Misc libraries
+  #
+  BaseLib|MdePkg/Library/BaseLib/BaseLib.inf
+  BaseMemoryLib|MdePkg/Library/UefiMemoryLib/UefiMemoryLib.inf
+#if TARGET == "DEBUG"
+  DebugLib|MdePkg/Library/BaseDebugLibNull/BaseDebugLibNull.inf
+#else
+  DebugLib|MdePkg/Library/UefiDebugLibStdErr/UefiDebugLibStdErr.inf
+#endif
+  DebugPrintErrorLevelLib|MdePkg/Library/BaseDebugPrintErrorLevelLib/BaseDebugPrintErrorLevelLib.inf
+  PcdLib|MdePkg/Library/BasePcdLibNull/BasePcdLibNull.inf
+  PrintLib|MdePkg/Library/BasePrintLib/BasePrintLib.inf
+
+  #
+  # UEFI Application libraries
+  #
+  UefiBootServicesTableLib|MdePkg/Library/UefiBootServicesTableLib/UefiBootServicesTableLib.inf
+  UefiApplicationEntryPoint|MdePkg/Library/UefiApplicationEntryPoint/UefiApplicationEntryPoint.inf
 
 [BuildOptions]
   XCODE:*_*_*_CC_FLAGS = -Os -D DISABLE_NEW_DEPRECATED_INTERFACES $(PROJECT_BUILD_OPTIONS)

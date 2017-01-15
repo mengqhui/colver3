@@ -17,7 +17,7 @@ PROJECT_BUILD_ARGUMENTS=
 
 function printAlign () {
   printf "% -16s" "${1}"
-  printf "${*:2}\r\n"
+  printf "%s\r\n" "${*:2}"
 }
 
 ###############################################################################
@@ -25,7 +25,7 @@ function printAlign () {
 ###############################################################################
 
 printStripe Build started at ${BUILD_START_TIME} on ${BUILD_START_DATE}
-printAlign Parameters: $*
+printAlign Parameters: "$*"
 printAlign Workspace: ${WORKSPACE}
 printAlign Package: ${PROJECT_PACKAGE}
 if [ ! -z ${BUILD_LOG:+x} ]; then
@@ -75,18 +75,18 @@ if [ ! -z ${BUILD_CLEAN:+x} ]; then
     if [ ! -d "${PROJECT_DIR_STAGE}" ]; then
       printAlign Cleaned: ${PROJECT_DIR_STAGE/#${WORKSPACE}\//}
     else
-      cleanDirectory  "${PROJECT_DIR_STAGE}"
+      cleanDirectory "${PROJECT_DIR_STAGE}"
     fi
     if [ ! -d "${PROJECT_DIR_LOG}" ]; then
       printAlign Cleaned: ${PROJECT_DIR_LOG/#${WORKSPACE}\//}
     else
-      cleanDirectory  "${PROJECT_DIR_LOG}"
+      cleanDirectory "${PROJECT_DIR_LOG}"
     fi
   else
     if [ ! -d "${PROJECT_DIR_BUILD}" ]; then
       printAlign Cleaned: ${PROJECT_DIR_BUILD/#${WORKSPACE}\//}
     else
-      cleanDirectory  "${PROJECT_DIR_BUILD}"
+      cleanDirectory "${PROJECT_DIR_BUILD}"
     fi
   fi
   printf "\r\n"
@@ -102,6 +102,7 @@ function buildArchitecture () {
   printStripe Building package for ${1}
   printAlign "Stage(${1}):" ${PROJECT_DIR_BUILD/#${WORKSPACE}\//}/${1}
   printf "\r\n"
+  ARCH=${1}
   build --arch=${1} ${BUILD_PROJECT_ARGUMENTS} ${PROJECT_BUILD_ARGUMENTS} 2>&1
   RESULT=$?
   if [ ${RESULT} -ne 0 ]; then
@@ -119,8 +120,8 @@ if [ ! -z ${BUILD_DRYRUN:+x} ]; then
 else
   PROJECT_DIR_STAGE_RELATIVE=${PROJECT_DIR_STAGE/#${WORKSPACE}\//}
   PROJECT_BUILD_OPTIONS="${PROJECT_BUILD_OPTIONS} /I\"${PROJECT_DIR_BUILD}/Include\""
-  BUILD_PROJECT_ARGUMENTS="--platform="${BUILD_SOURCE}" -D \"PROJECT_DIR_STAGE=${PROJECT_DIR_STAGE_RELATIVE}\""
-  BUILD_PROJECT_ARGUMENTS="${BUILD_PROJECT_ARGUMENTS} -D \"PROJECT_NAME=${PROJECT_NAME}\" -D \"PROJECT_PACKAGE=${PROJECT_PACKAGE}\""
+  BUILD_PROJECT_ARGUMENTS=--platform="${BUILD_SOURCE}"\ -D\ "PROJECT_DIR_STAGE=${PROJECT_DIR_STAGE_RELATIVE}"
+  BUILD_PROJECT_ARGUMENTS=${BUILD_PROJECT_ARGUMENTS}\ -D\ "PROJECT_NAME=${PROJECT_NAME}"\ -D\ "PROJECT_PACKAGE=${PROJECT_PACKAGE}"
   printStripe Building package
   printAlign Architectures: ${BUILD_ARCH}
   if [ ! -z ${PROJECT_BUILD_ARGUMENTS:+x} ]; then

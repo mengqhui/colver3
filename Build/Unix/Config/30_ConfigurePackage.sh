@@ -24,29 +24,29 @@ PROJECT_ISO=${PROJECT_ISO}.iso
 
 COUNTER=1
 while [ ${COUNTER} -le $# ]; do
-  case ${*:${COUNTER}:1} in
-    --no-iso)
+  case "${*:${COUNTER}:1}" in
+    "--no-iso")
       PROJECT_ISO=
       ;;
-    --iso)
+    "--iso")
       let COUNTER+=1
       if [ ${COUNTER} -gt $# ]; then
         break
       fi
       PROJECT_ISO=${*:${COUNTER}:1}
       ;;
-    --package-dir)
+    "--package-dir")
       let COUNTER+=1
       if [ ${COUNTER} -gt $# ]; then
         break
       fi
       PROJECT_DIR_PACKAGE=${*:${COUNTER}:1}
       ;;
-    --iso=*)
+    "--iso=*")
       PROJECT_ISO=${*:${COUNTER}:1}
       PROJECT_ISO=${PROJECT_ISO:6}
       ;;
-    --package-dir=*)
+    "--package-dir=*")
       PROJECT_DIR_PACKAGE=${*:${COUNTER}:1}
       PROJECT_DIR_PACKAGE=${PROJECT_DIR_PACKAGE:16}
       ;;

@@ -87,7 +87,7 @@ if defined BUILD_DRYRUN (
 set PROJECT_DIR_STAGE_RELATIVE=!PROJECT_DIR_STAGE:%WORKSPACE%\=!
 set PROJECT_BUILD_OPTIONS=%PROJECT_BUILD_OPTIONS% /I"%PROJECT_DIR_BUILD%\Include"
 set BUILD_PROJECT_ARGUMENTS=--platform="%BUILD_SOURCE%" -D "PROJECT_DIR_STAGE=%PROJECT_DIR_STAGE_RELATIVE:\=/%"
-set BUILD_PROJECT_ARGUMENTS=%BUILD_PROJECT_ARGUMENTS% -D "PROJECT_NAME=%PROJECT_NAME%" -D "PROJECT_PACKAGE=%PROJECT_PACKAGE%"
+set BUILD_PROJECT_ARGUMENTS=%BUILD_PROJECT_ARGUMENTS% -D "PROJECT_NAME=%PROJECT_NAME%" -D "PROJECT_SAFE_NAME=%PROJECT_SAFE_NAME%" -D "PROJECT_PACKAGE=%PROJECT_PACKAGE%"
 call:printStripe Building package
 %TOOL_ALIGN% Architecture: %BUILD_ARCH%
 if defined PROJECT_BUILD_ARGUMENTS %TOOL_ALIGN% Arguments: %PROJECT_BUILD_ARGUMENTS%
@@ -144,9 +144,10 @@ rem =========================================================================
 :buildArchitecture
 
   call:printStripe Building package for %~1
+  set ARCH=%~1
   %TOOL_ALIGN% Stage(%~1): !PROJECT_DIR_BUILD:%WORKSPACE%\=!\%~1
   echo.
-  build --arch=%~1 %BUILD_PROJECT_ARGUMENTS% %PROJECT_BUILD_ARGUMENTS% 2>&1
+  %WORKSPACE%\BaseTools\Source\Python\build\build.py --arch=%~1 %BUILD_PROJECT_ARGUMENTS% %PROJECT_BUILD_ARGUMENTS% 2>&1
   goto:eof
 
 rem =========================================================================

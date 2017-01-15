@@ -130,7 +130,7 @@ TEMP_PACKAGE=${TEMP_PACKAGE/${WORKSPACE}\//}
 
 PROJECT_PACKAGE=${TEMP_PACKAGE/\/*/}
 PROJECT_DIR_SOURCE=${WORKSPACE}/${PROJECT_PACKAGE}
-PACKAGES_PATH=${PROJECT_DIR_SOURCE}
+PACKAGES_PATH="${PROJECT_DIR_SOURCE}"
 
 ###############################################################################
 # Set the default log directory
@@ -150,33 +150,33 @@ BUILD_LOG=${PROJECT_DIR_LOG}/${PROJECT_PACKAGE}-${BUILD_START_DATE:4:2}-${BUILD_
 
 COUNTER=1
 while [ ${COUNTER} -le $# ]; do
-  case ${*:${COUNTER}:1} in
-    --no-log)
+  case "${*:${COUNTER}:1}" in
+    "--no-log")
       BUILD_LOG=
       ;;
-    cleanall)
+    "cleanall")
       BUILD_LOG=
       ;;
-    --build-log)
+    "--build-log")
       let COUNTER+=1
       if [ ${COUNTER} -gt $# ]; then
         break;
       fi
       BUILD_LOG=${*:${COUNTER}:1}
       ;;
-    -?)
+    "-?")
       build --help
       exit
       ;;
-    -h)
+    "-h")
       build --help
       exit
       ;;
-    --help)
+    "--help")
       build --help
       exit
       ;;
-    --version)
+    "--version")
       build --version
       exit
       ;;
@@ -198,6 +198,9 @@ if [ ! -z ${BUILD_LOG:+x} ]; then
   RESULT=$?
   if [ ${RESULT} -ne 0 ]; then
     exitScript ${RESULT}
+  fi
+  if [ -z ${PYTHONPATH:+x} ]; then
+    PYTHONPATH=${BASE_TOOLS_PATH}/Source/Python
   fi
   (source ${TOOL_BUILD} $* 2>&1) | ${TOOL_TEE} "${BUILD_LOG}"
 else

@@ -25,34 +25,34 @@ DOCS_PUBLIC=
 
 COUNTER=1
 while [ ${COUNTER} -le $# ]; do
-  case ${*:${COUNTER}:1} in
-    --no-docs)
+  case "${*:${COUNTER}:1}" in
+    "--no-docs")
       BUILD_DOCS=
       ;;
-    --dev-docs)
+    "--dev-docs")
       BUILD_DOCS=Yes
       ;;
-    --docs)
+    "--docs")
       BUILD_DOCS=Yes
       DOCS_PUBLIC=Yes
       ;;
-    --dev-docs-only)
+    "--dev-docs-only")
       BUILD_DOCS=Yes
       BUILD_DRYRUN=Yes
       ;;
-    --docs-only)
+    "--docs-only")
       BUILD_DOCS=Yes
       BUILD_DRYRUN=Yes
       DOCS_PUBLIC=Yes
       ;;
-    --docs-dir)
+    "--docs-dir")
       let COUNTER+=1
       if [ ${COUNTER} -gt $# ]; then
         break
       fi
       PROJECT_DIR_DOCS=${*:${COUNTER}:1}
       ;;
-    --docs-dir=*)
+    "--docs-dir=*")
       PROJECT_DIR_DOCS=${*:${COUNTER}:1}
       PROJECT_DIR_DOCS=${PROJECT_DIR_DOCS:11}
       ;;

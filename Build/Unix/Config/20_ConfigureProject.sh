@@ -28,118 +28,118 @@ PROJECT_USER_VERSION=
 
 COUNTER=1
 while [ ${COUNTER} -le $# ]; do
-  echo ${*:${COUNTER}:1}
-  case ${*:${COUNTER}:1} in
-    --project-name)
+  case "${*:${COUNTER}:1}" in
+    "--project-name")
       let COUNTER+=1
       if [ ${COUNTER} -gt $# ]; then
         break
       fi
       PROJECT_NAME=${*:${COUNTER}:1}
       ;;
-    --project-version)
+    "--project-version")
       let COUNTER+=1
       if [ ${COUNTER} -gt $# ]; then
         break
       fi
       PROJECT_USER_VERSION=${*:${COUNTER}:1}
       ;;
-    --project-version-file)
+    "--project-version-file")
       let COUNTER+=1
       if [ ${COUNTER} -gt $# ]; then
         break
       fi
       PROJECT_VERSION_FILE=${*:${COUNTER}:1}
       ;;
-    --project-major)
+    "--project-major")
       let COUNTER+=1
       if [ ${COUNTER} -gt $# ]; then
         break
       fi
       PROJECT_VERSION_MAJOR=${*:${COUNTER}:1}
       ;;
-    --project-minor)
+    "--project-minor")
       let COUNTER+=1
       if [ ${COUNTER} -gt $# ]; then
         break
       fi
       PROJECT_VERSION_MINOR=${*:${COUNTER}:1}
       ;;
-    --project-update)
+    "--project-update")
       let COUNTER+=1
       if [ ${COUNTER} -gt $# ]; then
         break
       fi
       PROJECT_VERSION_UPDATE=${*:${COUNTER}:1}
       ;;
-    --project-tag)
+    "--project-tag")
       let COUNTER+=1
       if [ ${COUNTER} -gt $# ]; then
         break
       fi
       PROJECT_VERSION_TAG=${*:${COUNTER}:1}
       ;;
-    --firmware-major)
+    "--firmware-major")
       let COUNTER+=1
       if [ ${COUNTER} -gt $# ]; then
         break
       fi
       PROJECT_FIRMWARE_MAJOR=${*:${COUNTER}:1}
       ;;
-    --firmware-minor)
+    "--firmware-minor")
       let COUNTER+=1
       if [ ${COUNTER} -gt $# ]; then
         break
       fi
       PROJECT_FIRMWARE_MINOR=${*:${COUNTER}:1}
       ;;
-    --firmware-update)
+    "--firmware-update")
       let COUNTER+=1
       if [ ${COUNTER} -gt $# ]; then
         break
       fi
       PROJECT_FIRMWARE_UPDATE=${*:${COUNTER}:1}
       ;;
-    --project-name=*)
+    "--project-name=*")
       PROJECT_NAME=${*:${COUNTER}:1}
       PROJECT_NAME=${PROJECT_NAME:15}
       ;;
-    --project-version=*)
+    "--project-version=*")
       PROJECT_USER_VERSION=${*:${COUNTER}:1}
       PROJECT_USER_VERSION=${PROJECT_USER_VERSION:18}
       ;;
-    --project-version-file=*)
+    "--project-version-file=*")
       PROJECT_VERSION_FILE=${*:${COUNTER}:1}
       PROJECT_VERSION_FILE=${PROJECT_VERSION_FILE:23}
       ;;
-    --project-major=*)
+    "--project-major=*")
       PROJECT_VERSION_MAJOR=${*:${COUNTER}:1}
       PROJECT_VERSION_MAJOR=${PROJECT_VERSION_MAJOR:16}
       ;;
-    --project-minor=*)
+    "--project-minor=*")
       PROJECT_VERSION_MINOR=${*:${COUNTER}:1}
       PROJECT_VERSION_MINOR=${PROJECT_VERSION_MINOR:16}
       ;;
-    --project-update=*)
+    "--project-update=*")
       PROJECT_VERSION_UPDATE=${*:${COUNTER}:1}
       PROJECT_VERSION_UPDATE=${PROJECT_VERSION_UPDATE:17}
       ;;
-    --project-tag=*)
+    "--project-tag=*")
       PROJECT_VERSION_TAG=${*:${COUNTER}:1}
       PROJECT_VERSION_TAG=${PROJECT_VERSION_TAG:14}
       ;;
-    --firmware-major=*)
+    "--firmware-major=*")
       PROJECT_FIRMWARE_MAJOR=${*:${COUNTER}:1}
       PROJECT_FIRMWARE_MAJOR=${PROJECT_FIRMWARE_MAJOR:17}
       ;;
-    --firmware-minor=*)
+    "--firmware-minor=*")
       PROJECT_FIRMWARE_MINOR=${*:${COUNTER}:1}
       PROJECT_FIRMWARE_MINOR=${PROJECT_FIRMWARE_MINOR:17}
       ;;
-    --firmware-update=*)
+    "--firmware-update=*")
       PROJECT_FIRMWARE_UPDATE=${*:${COUNTER}:1}
       PROJECT_FIRMWARE_UPDATE=${PROJECT_FIRMWARE_UPDATE:18}
       ;;
+    *) ;;
   esac
   let COUNTER+=1
 done
