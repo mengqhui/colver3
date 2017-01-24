@@ -12,6 +12,10 @@
 
 #include <Uefi.h>
 
+#include <Library/UefiLib.h>
+#include <Library/BaseMemoryLib.h>
+#include <Library/MemoryAllocationLib.h>
+
 // PROJECT_NAME
 /// The project name string
 #define PROJECT_NAME _PROJECT_NAME

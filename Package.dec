@@ -22,7 +22,9 @@
   Include
 
 [LibraryClasses]
+  CPUInformationLib|$(PROJECT_PACKAGE)/Include/Library/CPUInformationLib.h
   GUILib|$(PROJECT_PACKAGE)/Include/Library/GUILib.h
+  MpInitLib|$(PROJECT_PACKAGE)/Include/Library/MpInitLib.h
 
 [Guids]
   

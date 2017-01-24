@@ -54,6 +54,18 @@
     <Filter Include="Build\Unix\Support">
       <UniqueIdentifier>{89307a02-a71e-49db-b796-96f07f50c45b}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Library\CPUInformationLib">
+      <UniqueIdentifier>{30a34f9f-cb43-41d2-ae82-b66b8a5bd34b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Library\MpInitLib">
+      <UniqueIdentifier>{9446af92-f27d-4f8f-ad13-2603d885c922}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Library\MpInitLib\IA32">
+      <UniqueIdentifier>{bda2db70-eb14-4e55-84ba-1589013bc1ef}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Library\MpInitLib\X64">
+      <UniqueIdentifier>{bd4cde66-cb75-43a2-8ff7-99f08bad3e95}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\Application\GUI\GUI.c">
@@ -61,6 +73,24 @@
     </ClCompile>
     <ClCompile Include="..\..\Library\GUILib\GUILib.c">
       <Filter>Library\GUILib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Library\CPUInformationLib\CPUInformationLib.c">
+      <Filter>Library\CPUInformationLib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Library\MpInitLib\Microcode.c">
+      <Filter>Library\MpInitLib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Library\MpInitLib\MpLib.c">
+      <Filter>Library\MpInitLib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Library\MpInitLib\MpInitLib.c">
+      <Filter>Library\MpInitLib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Library\CPUInformationLib\AMD.c">
+      <Filter>Library\CPUInformationLib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Library\CPUInformationLib\Intel.c">
+      <Filter>Library\CPUInformationLib</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -150,12 +180,51 @@
     <None Include="..\..\Build\Unix\Config\00_ConfigureBuild.sh">
       <Filter>Build\Unix\Config</Filter>
     </None>
+    <None Include="..\..\Library\CPUInformationLib\CPUInformationLib.inf">
+      <Filter>Library\CPUInformationLib</Filter>
+    </None>
+    <None Include="..\..\Library\MpInitLib\MpInitLib.inf">
+      <Filter>Library\MpInitLib</Filter>
+    </None>
+    <None Include="..\..\Library\MpInitLib\MpInitLib.uni">
+      <Filter>Library\MpInitLib</Filter>
+    </None>
+    <None Include="..\..\Library\MpInitLib\X64\MpEqu.inc">
+      <Filter>Library\MpInitLib\X64</Filter>
+    </None>
+    <None Include="..\..\Library\MpInitLib\X64\MpFuncs.nasm">
+      <Filter>Library\MpInitLib\X64</Filter>
+    </None>
+    <None Include="..\..\Library\MpInitLib\Ia32\MpEqu.inc">
+      <Filter>Library\MpInitLib\IA32</Filter>
+    </None>
+    <None Include="..\..\Library\MpInitLib\Ia32\MpFuncs.nasm">
+      <Filter>Library\MpInitLib\IA32</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\Include\Version.h">
       <Filter>Include</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Include\Library\GUILib.h">
+      <Filter>Include\Library</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\Library\CPUInformationLib.h">
+      <Filter>Include\Library</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Library\MpInitLib\MpLib.h">
+      <Filter>Library\MpInitLib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\Library\MpInitLib.h">
+      <Filter>Include\Library</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Library\CPUInformationLib\CPUInformation.h">
+      <Filter>Library\CPUInformationLib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\Library\CPUModelsAMD.h">
+      <Filter>Include\Library</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\Library\CPUModelsIntel.h">
       <Filter>Include\Library</Filter>
     </ClInclude>
   </ItemGroup>

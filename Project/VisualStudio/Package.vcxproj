@@ -238,7 +238,13 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\..\Application\GUI\GUI.c" />
+    <ClCompile Include="..\..\Library\CPUInformationLib\AMD.c" />
+    <ClCompile Include="..\..\Library\CPUInformationLib\CPUInformationLib.c" />
+    <ClCompile Include="..\..\Library\CPUInformationLib\Intel.c" />
     <ClCompile Include="..\..\Library\GUILib\GUILib.c" />
+    <ClCompile Include="..\..\Library\MpInitLib\MpInitLib.c" />
+    <ClCompile Include="..\..\Library\MpInitLib\Microcode.c" />
+    <ClCompile Include="..\..\Library\MpInitLib\MpLib.c" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\Application\GUI\GUI.inf" />
@@ -268,13 +274,26 @@
     <None Include="..\..\Build\Windows\Support\MkDir.bat" />
     <None Include="..\..\Build\Windows\Support\Tee.vbs" />
     <None Include="..\..\Build\Windows\Support\Unquote.bat" />
+    <None Include="..\..\Library\CPUInformationLib\CPUInformationLib.inf" />
     <None Include="..\..\Library\GUILib\GUILib.inf" />
+    <None Include="..\..\Library\MpInitLib\Ia32\MpEqu.inc" />
+    <None Include="..\..\Library\MpInitLib\Ia32\MpFuncs.nasm" />
+    <None Include="..\..\Library\MpInitLib\MpInitLib.inf" />
+    <None Include="..\..\Library\MpInitLib\MpInitLib.uni" />
+    <None Include="..\..\Library\MpInitLib\X64\MpEqu.inc" />
+    <None Include="..\..\Library\MpInitLib\X64\MpFuncs.nasm" />
     <None Include="..\..\Package.dec" />
     <None Include="..\..\Package.dsc" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\Include\Library\CPUInformationLib.h" />
+    <ClInclude Include="..\..\Include\Library\CPUModelsAMD.h" />
+    <ClInclude Include="..\..\Include\Library\CPUModelsIntel.h" />
     <ClInclude Include="..\..\Include\Library\GUILib.h" />
+    <ClInclude Include="..\..\Include\Library\MpInitLib.h" />
     <ClInclude Include="..\..\Include\Version.h" />
+    <ClInclude Include="..\..\Library\CPUInformationLib\CPUInformation.h" />
+    <ClInclude Include="..\..\Library\MpInitLib\MpLib.h" />
   </ItemGroup>
   <ItemGroup>
     <Xml Include="..\..\Build\Support\Doxygen\Layout.xml" />
