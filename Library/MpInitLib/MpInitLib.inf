@@ -14,13 +14,13 @@
 
 [Defines]
   INF_VERSION                    = 0x00010005
-  BASE_NAME                      = $(PROJECT_NAME)MpInitLib
+  BASE_NAME                      = MpInitLib
   MODULE_UNI_FILE                = MpInitLib.uni
   FILE_GUID                      = B88F7146-9834-4c55-BFAC-481CC0C33736
   MODULE_TYPE                    = BASE
   VERSION_STRING                 = 1.1
-  LIBRARY_CLASS                  = MpInitLib
-  CONSTRUCTOR                    = MpInitLibInitialize
+  LIBRARY_CLASS                  = TimerLib
+  #CONSTRUCTOR                    = MpInitLibInitialize
 
 #
 # The following information is for reference only and not required by the build tools.
@@ -29,18 +29,25 @@
 #
 
 [Sources.IA32]
-  Ia32/MpEqu.inc
-  Ia32/MpFuncs.nasm
+  X86TimerLib.c
+  BaseXApicX2ApicLib.c
+  #Ia32/MpEqu.inc
+  #Ia32/MpFuncs.nasm
 
 [Sources.X64]
-  X64/MpEqu.inc
-  X64/MpFuncs.nasm
+  X86TimerLib.c
+  BaseXApicX2ApicLib.c
+  #X64/MpEqu.inc
+  #X64/MpFuncs.nasm
+
+[Sources.IPF]
+  IpfTimerLib.c
 
 [Sources.common]
-  MpInitLib.c
-  MpLib.c
-  MpLib.h
-  Microcode.c
+  #MpInitLib.c
+  #MpLib.c
+  #MpLib.h
+  #Microcode.c
 
 [Packages]
   Package.dec
@@ -50,15 +57,13 @@
 
 [LibraryClasses]
   BaseLib
-  LocalApicLib
   MemoryAllocationLib
   HobLib
+  IoLib
   MtrrLib
   CpuLib
   UefiCpuLib
   UefiBootServicesTableLib
-  DebugAgentLib
-  SynchronizationLib
 
 [Protocols]
   gEfiTimerArchProtocolGuid                     ## SOMETIMES_CONSUMES
@@ -66,6 +71,10 @@
 [Guids]
   gEfiEventExitBootServicesGuid                 ## CONSUMES  ## Event
   gEfiEventLegacyBootGuid                       ## CONSUMES  ## Event
+
+
+[Pcd.IA32, Pcd.X64]
+  gEfiMdePkgTokenSpaceGuid.PcdFSBClock  ## SOMETIMES_CONSUMES
 
 [Pcd]
   gUefiCpuPkgTokenSpaceGuid.PcdCpuMaxLogicalProcessorNumber        ## CONSUMES
@@ -75,4 +84,5 @@
   gUefiCpuPkgTokenSpaceGuid.PcdCpuMicrocodePatchRegionSize         ## CONSUMES
   gUefiCpuPkgTokenSpaceGuid.PcdCpuApLoopMode                       ## CONSUMES
   gUefiCpuPkgTokenSpaceGuid.PcdCpuApTargetCstate                   ## SOMETIMES_CONSUMES
-
+  gUefiCpuPkgTokenSpaceGuid.PcdCpuInitIpiDelayInMicroSeconds       ## SOMETIMES_CONSUMES
+  gUefiCpuPkgTokenSpaceGuid.PcdCpuLocalApicBaseAddress             ## SOMETIMES_CONSUMES

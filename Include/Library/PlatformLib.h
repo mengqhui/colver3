@@ -1,19 +1,23 @@
 //
-/// @file Include/Library/CPUInformationLib.h
+/// @file Include/Library/PlatformLib.h
 ///
-/// CPU information library
+/// Platform information library
 ///
 
 #pragma once
 #ifndef __CPU_INFORMATION_LIBRARY_HEADER__
 #define __CPU_INFORMATION_LIBRARY_HEADER__
 
-#include <Version.h>
+#include <Library/LogLib.h>
 
-#include <Library/MpInitLib.h>
+#include <Protocol/PciIo.h>
 
-#include "CPUModelsIntel.h"
-#include "CPUModelsAMD.h"
+#include "CPU/Intel.h"
+#include "CPU/AMD.h"
+
+// PACKAGE_COUNT
+/// The maximum count of physical packages
+#define PACKAGE_COUNT 4
 
 // CPU_TURBO_COUNT
 /// The maximum count of turbo multipliers
@@ -21,6 +25,26 @@
 // CPU_DESCRIPTION_SIZE
 /// The size of CPU description string in characters
 #define CPU_DESCRIPTION_SIZE 48
+
+// SLOT_COUNT
+/// The maximum count of physical RAM slots
+#define SLOT_COUNT 24
+
+// FIND_DEVICE_VENDOR_ID
+/// Find devices by vendor id
+#define FIND_DEVICE_VENDOR_ID 0x1
+// FIND_DEVICE_DEVICE_ID
+/// Find devices by device id
+#define FIND_DEVICE_DEVICE_ID 0x2
+// FIND_DEVICE_BASE_CLASS
+/// Find devices by base class
+#define FIND_DEVICE_BASE_CLASS 0x4
+// FIND_DEVICE_SUB_CLASS
+/// Find devices by sub class
+#define FIND_DEVICE_SUB_CLASS 0x8
+// FIND_DEVICE_ALL
+/// Find devices by vendor id, device id, base class and sub class
+#define FIND_DEVICE_ALL (FIND_DEVICE_VENDOR_ID | FIND_DEVICE_DEVICE_ID | FIND_DEVICE_BASE_CLASS | FIND_DEVICE_SUB_CLASS)
 
 // CPU_VENDOR
 /// CPU vendor information
@@ -278,7 +302,7 @@ struct _CPU_FREQUENCY {
 
   // Clock
   /// Base clock frequency in Hz
-  UINT32 Clock;
+  UINT64 Clock;
   // Minimum
   /// Minimum multiplier
   UINT8  Minimum;
@@ -631,10 +655,10 @@ struct _CPU_FEATURES {
 
 };
 
-// CPU_INFORMATION
+// PACKAGE_INFORMATION
 /// CPU information such as type, family, frequency, and features
-typedef struct _CPU_INFORMATION CPU_INFORMATION;
-struct _CPU_INFORMATION {
+typedef struct _PACKAGE_INFORMATION PACKAGE_INFORMATION;
+struct _PACKAGE_INFORMATION {
 
   // Vendor
   /// CPU vendor information
@@ -645,12 +669,12 @@ struct _CPU_INFORMATION {
   // Model
   /// CPU model information
   CPU_MODEL     Model;
-  // Count
-  /// CPU physical cores count
-  UINT32        Count;
   // LogicalCount
-  /// CPUT logical threads count
+  /// CPU package logical threads count
   UINT32        LogicalCount;
+  // CoreCount
+  /// CPU package physical cores count
+  UINT32        CoreCount;
   // Frequency
   /// CPU frequency information
   CPU_FREQUENCY Frequency;
@@ -663,17 +687,60 @@ struct _CPU_INFORMATION {
 
 };
 
-// GetCPUInformation
-/// Get CPU information such as type, family, frequency, and features
-/// @param Information On output, the CPU information, needs freeing
-/// @return Whether the CPU information was returned successfully or not
+// SLOT_INFORMATION
+/// RAM slot information
+typedef struct _SLOT_INFORMATION SLOT_INFORMATION;
+struct _SLOT_INFORMATION {
+
+  // Populated
+  /// Whether this slot is populated or not
+  BOOLEAN Populated;
+  // Type
+  /// The type of RAM module in the slot
+  UINT8   Type;
+  // Size
+  /// The size in bytes of the RAM module in the slot
+  UINT64  Size;
+
+};
+
+// SYSTEM_INFORMATION
+/// System information such as CPU and RAM
+typedef struct _SYSTEM_INFORMATION SYSTEM_INFORMATION;
+struct _SYSTEM_INFORMATION {
+
+  // LogicalCount
+  /// CPU total logical threads count
+  UINT32              LogicalCount;
+  // CoreCount
+  /// CPU total physical cores count
+  UINT32              CoreCount;
+  // PackageCount
+  /// CPU total physical package count
+  UINT32              PackageCount;
+  // Packages
+  /// CPU physical packages
+  PACKAGE_INFORMATION Packages[PACKAGE_COUNT];
+  // SlotCount
+  /// RAM physical slots count
+  UINT32              SlotCount;
+  // Slots
+  /// RAM physicak slots
+  SLOT_INFORMATION    Slots[SLOT_COUNT];
+
+};
+
+// GetSystemInformation
+/// Get system information
+/// @param Information On output, the system information, needs freeing
+/// @return Whether the ssytem information was returned successfully or not
 /// @retval EFI_INVALID_PARAMETER If Information is NULL or *Information is not NULL
 /// @retval EFI_OUT_OF_RESOURCES  If memory could not be allocated
-/// @retval EFI_SUCCESS           If the CPU information was returned
+/// @retval EFI_SUCCESS           If the system information was returned
 EFI_STATUS
 EFIAPI
-GetCPUInformation (
-  OUT CPU_INFORMATION **Information
+GetSystemInformation (
+  OUT SYSTEM_INFORMATION **Information
 );
 
 // GetCPUVendor
@@ -714,6 +781,118 @@ BOOLEAN
 EFIAPI
 IsCPUMobile (
   VOID
+);
+// IsCPUBigEndian
+/// Check if CPU is little-endian byte order
+BOOLEAN
+EFIAPI
+IsCPUBigEndian (
+  VOID
+);
+// IsCPULittleEndian
+/// Check if CPU is little-endian byte order
+BOOLEAN
+EFIAPI
+IsCPULittleEndian (
+  VOID
+);
+
+// FindDevices
+/// Find PCI devices
+/// @param VendorId  The vendor id of the PCI device
+/// @param DeviceId  The device id of the PCI device
+/// @param BaseClass The base class of the PCI device
+/// @param SubClass  The sub class of the PCI device
+/// @param Options   The options for matching the PCI devices
+/// @param Count     On output, the count of PCI devices
+/// @param Devices   On output, the PCI devices, which needs freed
+/// @return Whether any devices were found or not
+/// @retval EFI_INVALID_PARAMETER If Count or Devices is NULL or *Devices is not NULL
+/// @retval EFI_OUT_OF_RESOURCES  If memory could not be allocated
+/// @retval EFI_NOT_FOUND         If no devices were found
+/// @retval EFI_SUCCESS           If devices were found successfully
+STATIC EFI_STATUS
+EFIAPI
+FindDevices (
+  IN  UINT16                 VendorId,
+  IN  UINT16                 DeviceId,
+  IN  UINT8                  BaseClass,
+  IN  UINT8                  SubClass,
+  IN  UINTN                  Options,
+  OUT UINTN                 *Count,
+  OUT EFI_PCI_IO_PROTOCOL ***Devices
+);
+// FindDevicesById
+/// Find PCI devices by base and sub classes
+/// @param VendorId  The vendor id of the PCI device
+/// @param DeviceId  The device id of the PCI device
+/// @param Count     On output, the count of PCI devices
+/// @param Devices   On output, the PCI devices, which needs freed
+/// @return Whether any devices were found or not
+/// @retval EFI_INVALID_PARAMETER If Count or Devices is NULL or *Devices is not NULL
+/// @retval EFI_OUT_OF_RESOURCES  If memory could not be allocated
+/// @retval EFI_NOT_FOUND         If no devices were found
+/// @retval EFI_SUCCESS           If devices were found successfully
+EFI_STATUS
+EFIAPI
+FindDevicesById (
+  IN  UINT16                 VendorId,
+  IN  UINT16                 DeviceId,
+  OUT UINTN                 *Count,
+  OUT EFI_PCI_IO_PROTOCOL ***Devices
+);
+// FindDevicesByVendorId
+/// Find PCI devices by base classes
+/// @param VendorId The vendor id of the PCI device
+/// @param Count    On output, the count of PCI devices
+/// @param Devices  On output, the PCI devices, which needs freed
+/// @return Whether any devices were found or not
+/// @retval EFI_INVALID_PARAMETER If Count or Devices is NULL or *Devices is not NULL
+/// @retval EFI_OUT_OF_RESOURCES  If memory could not be allocated
+/// @retval EFI_NOT_FOUND         If no devices were found
+/// @retval EFI_SUCCESS           If devices were found successfully
+EFI_STATUS
+EFIAPI
+FindDevicesByVendorId (
+  IN  UINT16                 VendorId,
+  OUT UINTN                 *Count,
+  OUT EFI_PCI_IO_PROTOCOL ***Devices
+);
+// FindDevicesByClass
+/// Find PCI devices by base and sub classes
+/// @param BaseClass The base class of the PCI device
+/// @param SubClass  The sub class of the PCI device
+/// @param Count     On output, the count of PCI devices
+/// @param Devices   On output, the PCI devices, which needs freed
+/// @return Whether any devices were found or not
+/// @retval EFI_INVALID_PARAMETER If Count or Devices is NULL or *Devices is not NULL
+/// @retval EFI_OUT_OF_RESOURCES  If memory could not be allocated
+/// @retval EFI_NOT_FOUND         If no devices were found
+/// @retval EFI_SUCCESS           If devices were found successfully
+EFI_STATUS
+EFIAPI
+FindDevicesByClass (
+  IN  UINT8                  BaseClass,
+  IN  UINT8                  SubClass,
+  OUT UINTN                 *Count,
+  OUT EFI_PCI_IO_PROTOCOL ***Devices
+);
+// FindDevicesByBaseClass
+/// Find PCI devices by base classes
+/// @param BaseClass The base class of the PCI device
+/// @param Count     On output, the count of PCI devices
+/// @param Devices   On output, the PCI devices, which needs freed
+/// @return Whether any devices were found or not
+/// @retval EFI_INVALID_PARAMETER If Count or Devices is NULL or *Devices is not NULL
+/// @retval EFI_OUT_OF_RESOURCES  If memory could not be allocated
+/// @retval EFI_NOT_FOUND         If no devices were found
+/// @retval EFI_SUCCESS           If devices were found successfully
+EFI_STATUS
+EFIAPI
+FindDevicesByBaseClass (
+  IN  UINT8                  BaseClass,
+  OUT UINTN                 *Count,
+  OUT EFI_PCI_IO_PROTOCOL ***Devices
 );
 
 #endif // __CPU_INFORMATION_LIBRARY_HEADER__

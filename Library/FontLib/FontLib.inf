@@ -1,0 +1,46 @@
+## @file Library/FontLib/FontLib.inf
+#
+#  This program and the accompanying materials
+#  are licensed and made available under the terms and conditions of the BSD License
+#  which accompanies this distribution. The full text of the license may be found at
+#  http://opensource.org/licenses/bsd-license.php.
+#  THE PROGRAM IS DISTRIBUTED UNDER THE BSD LICENSE ON AN "AS IS" BASIS,
+#  WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
+#
+#
+##
+
+[Defines]
+  INF_VERSION                    = 0x00010016
+  BASE_NAME                      = FontLib
+  FILE_GUID                      = 4C523EF6-65C1-4EE2-82F6-189E9CF5A696
+  MODULE_TYPE                    = BASE
+  VERSION_STRING                 = $(PROJECT_VERSION_BASE)
+  SUPPORTED_ARCHITECTURES        = X64|IA32|ARM|AARCH64
+  CONSTRUCTOR                    = FontLibInitialize
+  DESTRUCTOR                     = FontLibFinish
+  LIBRARY_CLASS                  = FontLib
+
+[Sources]
+  FontLib.c
+
+[Packages]
+  Package.dec
+  MdePkg/MdePkg.dec
+
+[LibraryClasses]
+  UefiLib
+  StringLib
+  FileLib
+
+[Guids]
+  
+
+[Protocols]
+  
+
+[Pcd]
+  
+
+[FeaturePcd]
+  

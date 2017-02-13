@@ -87,11 +87,11 @@ rem ===========================================================================
 rem Prepare documentation
 rem ===========================================================================
 
-call "%TOOL_UNQUOTE%" PROJECT_DIR_DOCS %PROJECT_DIR_DOCS%
+%TOOL_UNQUOTE% PROJECT_DIR_DOCS %PROJECT_DIR_DOCS%
 if not defined PROJECT_DIR_DOCS set PROJECT_DIR_DOCS=%PROJECT_DIR_PACKAGE%\Documentation
 if defined BUILD_DOCS %TOOL_ALIGN% Documentation: !PROJECT_DIR_DOCS:%WORKSPACE%\=!
 
-call "%TOOL_UNQUOTE%" BUILD_DOCS_FILE %BUILD_DOCS_FILE%
+%TOOL_UNQUOTE% BUILD_DOCS_FILE %BUILD_DOCS_FILE%
 if not defined BUILD_DOCS_FILE set BUILD_DOCS_FILE=%PROJECT_DIR_SUPPORT_DOCS%\Doxyfile
 if defined BUILD_DOCS %TOOL_ALIGN% Doxyfile: !BUILD_DOCS_FILE:%WORKSPACE%\=!
 

@@ -50,24 +50,24 @@ if defined BUILD_CLEAN (
   if not exist "%PROJECT_DIR_PACKAGE%" (
     %TOOL_ALIGN% Cleaned: !PROJECT_DIR_PACKAGE:%WORKSPACE%\=!
   ) else (
-    call "%TOOL_CLEAN%" /r "%PROJECT_DIR_PACKAGE%"
+    %TOOL_CLEAN% /r "%PROJECT_DIR_PACKAGE%"
   )
   if /i "%BUILD_CLEAN%" == "All" (
     if not exist "%PROJECT_DIR_STAGE%" (
       %TOOL_ALIGN% Cleaned: !PROJECT_DIR_STAGE:%WORKSPACE%\=!
     ) else (
-      call "%TOOL_CLEAN%" /r "%PROJECT_DIR_STAGE%"
+      %TOOL_CLEAN% /r "%PROJECT_DIR_STAGE%"
     )
     if not exist "%PROJECT_DIR_LOG%" (
       %TOOL_ALIGN% Cleaned: !PROJECT_DIR_LOG:%WORKSPACE%\=!
     ) else (
-      call "%TOOL_CLEAN%" /r "%PROJECT_DIR_LOG%"
+      %TOOL_CLEAN% /r "%PROJECT_DIR_LOG%"
     )
   ) else (
     if not exist "%PROJECT_DIR_BUILD%" (
       %TOOL_ALIGN% Cleaned: !PROJECT_DIR_BUILD:%WORKSPACE%\=!
     ) else (
-      call "%TOOL_CLEAN%" /r "%PROJECT_DIR_BUILD%"
+      %TOOL_CLEAN% /r "%PROJECT_DIR_BUILD%"
     )
   )
   echo.
@@ -147,8 +147,10 @@ rem =========================================================================
   set ARCH=%~1
   %TOOL_ALIGN% Stage(%~1): !PROJECT_DIR_BUILD:%WORKSPACE%\=!\%~1
   echo.
-  %PYTHONPATH%\build\build.py --arch=%~1 %BUILD_PROJECT_ARGUMENTS% %PROJECT_BUILD_ARGUMENTS% 2>&1
-  rem build --arch=%~1 %BUILD_PROJECT_ARGUMENTS% %PROJECT_BUILD_ARGUMENTS% 2>&1
+  set PROJECT_SAFE_ARCH=%~1
+  %TOOL_SAFENAME% PROJECT_SAFE_ARCH
+  set PROJECT_ARCH_OPTIONS=-D_PROJECT_ARCH=L\"%~1\" -D_PROJECT_ARCH_A=\"%~1\" -D_PROJECT_SAFE_ARCH=L\"%PROJECT_SAFE_ARCH%\" -D_PROJECT_SAFE_ARCH_A=\"%PROJECT_SAFE_ARCH%\"
+  build --arch=%~1 %BUILD_PROJECT_ARGUMENTS% %PROJECT_BUILD_ARGUMENTS% 2>&1
   goto:eof
 
 rem =========================================================================

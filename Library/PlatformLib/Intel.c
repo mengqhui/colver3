@@ -1,12 +1,40 @@
 ///
-/// @file Library/CPUInformationLib/Intel.c
+/// @file Library/PlatformLib/Intel.c
 ///
-/// CPU information library Intel CPUs
+/// Platform library Intel CPUs
 ///
 
-#include "CPUInformation.h"
+#include "Platform.h"
+
+#include <Library/TimerLib.h>
 
 #if defined(MDE_CPU_IA32) || defined(MDE_CPU_X64)
+
+// CPU_SAMPLE_COUNT
+/// The number of samples for TSC calibration
+#define CPU_SAMPLE_COUNT 10
+// CPU_SAMPLE_MICROSECONDS
+/// The microseconds to wait being taking each sample for TSC calibration
+#define CPU_SAMPLE_MICROSECONDS 30
+
+// DetectCPUFrequency
+/// Detect CPU frequency by inspecting the TSC
+/// @return The approximate frequency of the CPU in Hz
+UINT64
+EFIAPI
+DetectCPUFrequency (
+  VOID
+) {
+  UINTN  Index;
+  UINT64 Samples = 0;
+  for (Index = 0; Index < CPU_SAMPLE_COUNT; ++Index) {
+    // Get a sample of ticks per delay
+    UINT64 Start = AsmReadTsc();
+    MicroSecondDelay(CPU_SAMPLE_MICROSECONDS);
+    Samples += (AsmReadTsc() - Start);
+  }
+  return DivU64x32(MultU64x32(Samples, 1000000), CPU_SAMPLE_COUNT * CPU_SAMPLE_MICROSECONDS);
+}
 
 // SwitchCPUFamilyToMobile
 /// Switch CPU family information to mobile version
@@ -68,257 +96,264 @@ SwitchCPUIntelFamilyToMobile (
 
 // DetermineCPUIntelFeatures
 /// Determine CPU features information
+/// @param Index The physical package index
 STATIC VOID
 EFIAPI
 DetermineCPUIntelFeatures (
-  VOID
+  IN UINTN Index
 ) {
   // Floating Point Unit On-Chip, the CPU contains an FPU
-  mCPUInformation.Features.FPUOnChip                 = (BOOLEAN)CPUBitmask(mCPUIDRegisters[3], 0, 0);
+  mSystemInformation.Packages[Index].Features.FPUOnChip                 = (BOOLEAN)CPUBitmask(mCPUIDRegisters[3], 0, 0);
   // Virtual 8086 mode enhancements, including CR4.VME for controlling the feature, CR4.PVI for
   // protected mode virtual interrupts, software interrupt indirection, expansion of the TSS
   // with the software indirection bitmap, and EFLAGS.VIF and EFLAGS.VIP flags
-  mCPUInformation.Features.VirtualModeEnhancements   = (BOOLEAN)CPUBitmask(mCPUIDRegisters[3], 1, 1);
+  mSystemInformation.Packages[Index].Features.VirtualModeEnhancements   = (BOOLEAN)CPUBitmask(mCPUIDRegisters[3], 1, 1);
   // Support for I/O breakpoints, including CR4.DE for controlling the feature, and optional trapping of accesses to DR4 and DR5
-  mCPUInformation.Features.DebugExtensions           = (BOOLEAN)CPUBitmask(mCPUIDRegisters[3], 2, 2);
+  mSystemInformation.Packages[Index].Features.DebugExtensions           = (BOOLEAN)CPUBitmask(mCPUIDRegisters[3], 2, 2);
   // Large pages of size 4 MByte are supported, including CR4.PSE for controlling the feature, the defined
   // dirty bit in PDE (Page Directory Entries), optional reserved bit trapping in CR3, PDEs, and PTEs
-  mCPUInformation.Features.PageSizeExtension         = (BOOLEAN)CPUBitmask(mCPUIDRegisters[3], 3, 3);
+  mSystemInformation.Packages[Index].Features.PageSizeExtension         = (BOOLEAN)CPUBitmask(mCPUIDRegisters[3], 3, 3);
   // The RDTSC instruction is supported, including CR4.TSD for controlling privilege
-  mCPUInformation.Features.TimeStampCounter          = (BOOLEAN)CPUBitmask(mCPUIDRegisters[3], 4, 4);
+  mSystemInformation.Packages[Index].Features.TimeStampCounter          = (BOOLEAN)CPUBitmask(mCPUIDRegisters[3], 4, 4);
   // The RDMSR and WRMSR instructions are supported
-  mCPUInformation.Features.ModelSpecificRegisters    = (BOOLEAN)CPUBitmask(mCPUIDRegisters[3], 5, 5);
+  mSystemInformation.Packages[Index].Features.ModelSpecificRegisters    = (BOOLEAN)CPUBitmask(mCPUIDRegisters[3], 5, 5);
   // Physical addresses greater than 32 bits are supported: extended page table entry formats, an extra level
   // in the page translation tables is defined, 2-MByte pages are supported instead of 4-Mbyte pages
-  mCPUInformation.Features.PhysicalAddressExtension  = (BOOLEAN)CPUBitmask(mCPUIDRegisters[3], 6, 6);
+  mSystemInformation.Packages[Index].Features.PhysicalAddressExtension  = (BOOLEAN)CPUBitmask(mCPUIDRegisters[3], 6, 6);
   // Exception 18 is defined for Machine Checks, including CR4.MCE for controlling the feature
-  mCPUInformation.Features.MachineCheckException     = (BOOLEAN)CPUBitmask(mCPUIDRegisters[3], 7, 7);
+  mSystemInformation.Packages[Index].Features.MachineCheckException     = (BOOLEAN)CPUBitmask(mCPUIDRegisters[3], 7, 7);
   // The compare-and-exchange 8 bytes (64 bits) instruction is supported (implicitly locked and atomic)
-  mCPUInformation.Features.CMPXCHG8BInstruction      = (BOOLEAN)CPUBitmask(mCPUIDRegisters[3], 8, 8);
+  mSystemInformation.Packages[Index].Features.CMPXCHG8BInstruction      = (BOOLEAN)CPUBitmask(mCPUIDRegisters[3], 8, 8);
   // The processor contains an Advanced Programmable Interrupt Controller (APIC), responding to
   // memory mapped commands in the physical address range FFFE0000H to FFFE0FFFH (by default)
-  mCPUInformation.Features.APICOnChip                = (BOOLEAN)CPUBitmask(mCPUIDRegisters[3], 9, 9);
+  mSystemInformation.Packages[Index].Features.APICOnChip                = (BOOLEAN)CPUBitmask(mCPUIDRegisters[3], 9, 9);
   // The SYSENTER and SYSEXIT and associated MSRs are supported
-  mCPUInformation.Features.SystemExtensions          = (BOOLEAN)CPUBitmask(mCPUIDRegisters[3], 11, 11);
+  mSystemInformation.Packages[Index].Features.SystemExtensions          = (BOOLEAN)CPUBitmask(mCPUIDRegisters[3], 11, 11);
   // MTRRs are supported, the MTRRcap MSR contains feature bits that describe what memory types
   // are supported, how many variable MTRRs are supported, and whether fixed MTRRs are supported
-  mCPUInformation.Features.MemoryTypeRangeRegisters  = (BOOLEAN)CPUBitmask(mCPUIDRegisters[3], 12, 12);
+  mSystemInformation.Packages[Index].Features.MemoryTypeRangeRegisters  = (BOOLEAN)CPUBitmask(mCPUIDRegisters[3], 12, 12);
   // The global bit is supported in paging-structure entries that map a page, indicating TLB entries that
   // are common to different processes and need not be flushed. The CR4.PGE bit controls this feature
-  mCPUInformation.Features.PageGlobal                = (BOOLEAN)CPUBitmask(mCPUIDRegisters[3], 13, 13);
+  mSystemInformation.Packages[Index].Features.PageGlobal                = (BOOLEAN)CPUBitmask(mCPUIDRegisters[3], 13, 13);
   // Machine Check Architecture of reporting machine errors is supported. The MCG_CAP MSR
   // contains feature bits describing how many banks of error reporting MSRs are supported
-  mCPUInformation.Features.MachineCheckArchitecture  = (BOOLEAN)CPUBitmask(mCPUIDRegisters[3], 14, 14);
+  mSystemInformation.Packages[Index].Features.MachineCheckArchitecture  = (BOOLEAN)CPUBitmask(mCPUIDRegisters[3], 14, 14);
   // The conditional move instruction CMOV is supported, if FPU is present then the FCOMI and FCMOV instructions are supported
-  mCPUInformation.Features.ConditionalMove           = (BOOLEAN)CPUBitmask(mCPUIDRegisters[3], 15, 15);
+  mSystemInformation.Packages[Index].Features.ConditionalMove           = (BOOLEAN)CPUBitmask(mCPUIDRegisters[3], 15, 15);
   // Page Attribute Table is supported, this feature augments the Memory Type Range Registers (MTRRs), allowing
   // an operating system to specify attributes of memory accessed through a linear address on a 4KB granularity
-  mCPUInformation.Features.PageAttributeTable        = (BOOLEAN)CPUBitmask(mCPUIDRegisters[3], 16, 16);
+  mSystemInformation.Packages[Index].Features.PageAttributeTable        = (BOOLEAN)CPUBitmask(mCPUIDRegisters[3], 16, 16);
   // 4-MByte pages addressing physical memory beyond 4 GBytes are supported with 32-bit paging. This feature
   // indicates that upper bits of the physical address of a 4-MByte page are encoded in bits 20:13 of the
   // page-directory entry. Such physical addresses are limited by MAXPHYADDR and may be up to 40 bits in size
-  mCPUInformation.Features.PageSizeExtension         = (BOOLEAN)CPUBitmask(mCPUIDRegisters[3], 17, 17);
+  mSystemInformation.Packages[Index].Features.PageSizeExtension         = (BOOLEAN)CPUBitmask(mCPUIDRegisters[3], 17, 17);
   // The processor supports the 96-bit processor identification number feature and the feature is enabled
-  mCPUInformation.Features.ProcessorSerialNumber     = (BOOLEAN)CPUBitmask(mCPUIDRegisters[3], 18, 18);
+  mSystemInformation.Packages[Index].Features.ProcessorSerialNumber     = (BOOLEAN)CPUBitmask(mCPUIDRegisters[3], 18, 18);
   // CLFLUSH Instruction is supported
-  mCPUInformation.Features.CLFLUSHInstruction        = (BOOLEAN)CPUBitmask(mCPUIDRegisters[3], 19, 19);
+  mSystemInformation.Packages[Index].Features.CLFLUSHInstruction        = (BOOLEAN)CPUBitmask(mCPUIDRegisters[3], 19, 19);
   // The processor supports the ability to write debug information into a memory resident buffer
-  mCPUInformation.Features.DebugStore                = (BOOLEAN)CPUBitmask(mCPUIDRegisters[3], 21, 21);
+  mSystemInformation.Packages[Index].Features.DebugStore                = (BOOLEAN)CPUBitmask(mCPUIDRegisters[3], 21, 21);
   // The processor implements internal MSRs that allow processor temperature to be monitored and
   // processor performance to be modulated in predefined duty cycles under software control
-  mCPUInformation.Features.ACPIThermalMonitor        = (BOOLEAN)CPUBitmask(mCPUIDRegisters[3], 22, 22);
+  mSystemInformation.Packages[Index].Features.ACPIThermalMonitor        = (BOOLEAN)CPUBitmask(mCPUIDRegisters[3], 22, 22);
   // The processor supports the Intel MMX technology
-  mCPUInformation.Features.MMXInstructions           = (BOOLEAN)CPUBitmask(mCPUIDRegisters[3], 23, 23);
+  mSystemInformation.Packages[Index].Features.MMXInstructions           = (BOOLEAN)CPUBitmask(mCPUIDRegisters[3], 23, 23);
   // The FXSAVE and FXRSTOR instructions are supported for fast save and restore of the
   // floating point context. Presence of this bit also indicates that CR4.OSFXSR is available
   // for an operating system to indicate that it supports the FXSAVE and FXRSTOR instructions
-  mCPUInformation.Features.FastInstructions          = (BOOLEAN)CPUBitmask(mCPUIDRegisters[3], 24, 24);
+  mSystemInformation.Packages[Index].Features.FastInstructions          = (BOOLEAN)CPUBitmask(mCPUIDRegisters[3], 24, 24);
   // The processor supports the SSE extensions
-  mCPUInformation.Features.SSEInstructions           = (BOOLEAN)CPUBitmask(mCPUIDRegisters[3], 25, 25);
+  mSystemInformation.Packages[Index].Features.SSEInstructions           = (BOOLEAN)CPUBitmask(mCPUIDRegisters[3], 25, 25);
   // The processor supports the SSE2 extensions
-  mCPUInformation.Features.SSE2Instructions          = (BOOLEAN)CPUBitmask(mCPUIDRegisters[3], 26, 26);
+  mSystemInformation.Packages[Index].Features.SSE2Instructions          = (BOOLEAN)CPUBitmask(mCPUIDRegisters[3], 26, 26);
   // The processor supports the management of conflicting memory types by performing
   // a snoop of its own cache structure for transactions issued to the bus
-  mCPUInformation.Features.SelfSnoop                 = (BOOLEAN)CPUBitmask(mCPUIDRegisters[3], 27, 27);
+  mSystemInformation.Packages[Index].Features.SelfSnoop                 = (BOOLEAN)CPUBitmask(mCPUIDRegisters[3], 27, 27);
   // The processor supports hardware multithreading
-  mCPUInformation.Features.HardwareMultiThread       = (BOOLEAN)CPUBitmask(mCPUIDRegisters[3], 28, 28);
+  mSystemInformation.Packages[Index].Features.HardwareMultiThread       = (BOOLEAN)CPUBitmask(mCPUIDRegisters[3], 28, 28);
   // The processor implements the thermal monitor automatic thermal control circuitry (TCC)
-  mCPUInformation.Features.ThermalMonitor            = (BOOLEAN)CPUBitmask(mCPUIDRegisters[3], 29, 29);
+  mSystemInformation.Packages[Index].Features.ThermalMonitor            = (BOOLEAN)CPUBitmask(mCPUIDRegisters[3], 29, 29);
   // The processor supports the use of the FERR#/PBE# pin when the processor is in the stop-clock state (STPCLK# is asserted)
   // to signal the processor that an interrupt is pending and that the processor should return to normal
   // operation to handle the interrupt. Bit 10 (PBE enable) in the IA32_MISC_ENABLE MSR enables this capability
-  mCPUInformation.Features.PendingBreakEnable        = (BOOLEAN)CPUBitmask(mCPUIDRegisters[3], 31, 31);
+  mSystemInformation.Packages[Index].Features.PendingBreakEnable        = (BOOLEAN)CPUBitmask(mCPUIDRegisters[3], 31, 31);
   // Streaming SIMD Extensions 3 (SSE3)
-  mCPUInformation.Features.SSE3Instructions          = (BOOLEAN)CPUBitmask(mCPUIDRegisters[2], 0, 0);
+  mSystemInformation.Packages[Index].Features.SSE3Instructions          = (BOOLEAN)CPUBitmask(mCPUIDRegisters[2], 0, 0);
   // Indicates the processor supports the PCLMULQDQ instruction
-  mCPUInformation.Features.PCLMULQDQInstruction      = (BOOLEAN)CPUBitmask(mCPUIDRegisters[2], 1, 1);
+  mSystemInformation.Packages[Index].Features.PCLMULQDQInstruction      = (BOOLEAN)CPUBitmask(mCPUIDRegisters[2], 1, 1);
   // Indicates the processor supports DS area using 64-bit layout
-  mCPUInformation.Features.DebugStoreArea64Bit       = (BOOLEAN)CPUBitmask(mCPUIDRegisters[2], 2, 2);
+  mSystemInformation.Packages[Index].Features.DebugStoreArea64Bit       = (BOOLEAN)CPUBitmask(mCPUIDRegisters[2], 2, 2);
   // Indicates the processor supports MONITOR/MWAIT
-  mCPUInformation.Features.MonitorWait               = (BOOLEAN)CPUBitmask(mCPUIDRegisters[2], 3, 3);
+  mSystemInformation.Packages[Index].Features.MonitorWait               = (BOOLEAN)CPUBitmask(mCPUIDRegisters[2], 3, 3);
   // Indicates the processor supports the extensions to the Debug Store feature to allow for branch message storage qualified by CPL
-  mCPUInformation.Features.DebugStoreCPL             = (BOOLEAN)CPUBitmask(mCPUIDRegisters[2], 4, 4);
+  mSystemInformation.Packages[Index].Features.DebugStoreCPL             = (BOOLEAN)CPUBitmask(mCPUIDRegisters[2], 4, 4);
   // Indicates that the processor supports this virtual machine extensions
-  mCPUInformation.Features.VMExtensions              = (BOOLEAN)CPUBitmask(mCPUIDRegisters[2], 5, 5);
+  mSystemInformation.Packages[Index].Features.VMExtensions              = (BOOLEAN)CPUBitmask(mCPUIDRegisters[2], 5, 5);
   // Indicates that the processor supports Safer Mode
-  mCPUInformation.Features.SaferModeExtensions       = (BOOLEAN)CPUBitmask(mCPUIDRegisters[2], 6, 6);
+  mSystemInformation.Packages[Index].Features.SaferModeExtensions       = (BOOLEAN)CPUBitmask(mCPUIDRegisters[2], 6, 6);
   // Whether CPU supports dynamic frequency
-  mCPUInformation.Features.Dynamic                   = (BOOLEAN)CPUBitmask(mCPUIDRegisters[2], 7, 7);
+  mSystemInformation.Packages[Index].Features.Dynamic                   = (BOOLEAN)CPUBitmask(mCPUIDRegisters[2], 7, 7);
   // Indicates whether the processor supports Thermal Monitor 2
-  mCPUInformation.Features.ThermalMonitor2           = (BOOLEAN)CPUBitmask(mCPUIDRegisters[2], 8, 8);
+  mSystemInformation.Packages[Index].Features.ThermalMonitor2           = (BOOLEAN)CPUBitmask(mCPUIDRegisters[2], 8, 8);
   // Indicates the presence of the Supplemental Streaming SIMD Extensions 3 (SSSE3)
-  mCPUInformation.Features.SSSE3Instructions         = (BOOLEAN)CPUBitmask(mCPUIDRegisters[2], 9, 9);
+  mSystemInformation.Packages[Index].Features.SSSE3Instructions         = (BOOLEAN)CPUBitmask(mCPUIDRegisters[2], 9, 9);
   // Indicates the L1 data cache mode can be set to either adaptive mode or shared mode
-  mCPUInformation.Features.L1ContextID               = (BOOLEAN)CPUBitmask(mCPUIDRegisters[2], 10, 10);
+  mSystemInformation.Packages[Index].Features.L1ContextID               = (BOOLEAN)CPUBitmask(mCPUIDRegisters[2], 10, 10);
   // The processor supports IA32_DEBUG_INTERFACE MSR for silicon debug
-  mCPUInformation.Features.DebugInterface            = (BOOLEAN)CPUBitmask(mCPUIDRegisters[2], 11, 11);
+  mSystemInformation.Packages[Index].Features.DebugInterface            = (BOOLEAN)CPUBitmask(mCPUIDRegisters[2], 11, 11);
   // Indicates the processor supports FMA extensions using YMM state
-  mCPUInformation.Features.FMAExtensions             = (BOOLEAN)CPUBitmask(mCPUIDRegisters[2], 12, 12);
+  mSystemInformation.Packages[Index].Features.FMAExtensions             = (BOOLEAN)CPUBitmask(mCPUIDRegisters[2], 12, 12);
   // The compare-and-exchange 16 bytes (128 bits) instruction is supported (implicitly locked and atomic)
-  mCPUInformation.Features.CMPXCHG16BInstruction     = (BOOLEAN)CPUBitmask(mCPUIDRegisters[2], 13, 13);
+  mSystemInformation.Packages[Index].Features.CMPXCHG16BInstruction     = (BOOLEAN)CPUBitmask(mCPUIDRegisters[2], 13, 13);
   // Indicates that the processor supports changing IA32_MISC_ENABLE[bit 23]
-  mCPUInformation.Features.xTPRUpdateControl         = (BOOLEAN)CPUBitmask(mCPUIDRegisters[2], 14, 14);
+  mSystemInformation.Packages[Index].Features.xTPRUpdateControl         = (BOOLEAN)CPUBitmask(mCPUIDRegisters[2], 14, 14);
   // Indicates the processor supports the performance and debug feature indication MSR IA32_PERF_CAPABILITIES
-  mCPUInformation.Features.PerfmonDebug              = (BOOLEAN)CPUBitmask(mCPUIDRegisters[2], 15, 15);
+  mSystemInformation.Packages[Index].Features.PerfmonDebug              = (BOOLEAN)CPUBitmask(mCPUIDRegisters[2], 15, 15);
   // Indicates that the processor supports PCIDs and that software may set CR4.PCIDE to 1
-  mCPUInformation.Features.ProcessContextIdentifiers = (BOOLEAN)CPUBitmask(mCPUIDRegisters[2], 17, 17);
+  mSystemInformation.Packages[Index].Features.ProcessContextIdentifiers = (BOOLEAN)CPUBitmask(mCPUIDRegisters[2], 17, 17);
   // Indicates the processor supports the ability to prefetch data from a memory mapped device
-  mCPUInformation.Features.Prefetch                  = (BOOLEAN)CPUBitmask(mCPUIDRegisters[2], 18, 18);
+  mSystemInformation.Packages[Index].Features.Prefetch                  = (BOOLEAN)CPUBitmask(mCPUIDRegisters[2], 18, 18);
   // Indicates that the processor supports SSE4.1
-  mCPUInformation.Features.SSE41Instructions         = (BOOLEAN)CPUBitmask(mCPUIDRegisters[2], 19, 19);
+  mSystemInformation.Packages[Index].Features.SSE41Instructions         = (BOOLEAN)CPUBitmask(mCPUIDRegisters[2], 19, 19);
   // Indicates that the processor supports SSE4.2
-  mCPUInformation.Features.SSE42Instructions         = (BOOLEAN)CPUBitmask(mCPUIDRegisters[2], 20, 20);
+  mSystemInformation.Packages[Index].Features.SSE42Instructions         = (BOOLEAN)CPUBitmask(mCPUIDRegisters[2], 20, 20);
   // Indicates that the processor supports x2APIC feature
-  mCPUInformation.Features.x2APIC                    = (BOOLEAN)CPUBitmask(mCPUIDRegisters[2], 21, 21);
+  mSystemInformation.Packages[Index].Features.x2APIC                    = (BOOLEAN)CPUBitmask(mCPUIDRegisters[2], 21, 21);
   // Indicates that the processor supports MOVBE instruction
-  mCPUInformation.Features.MOVEBEInstruction         = (BOOLEAN)CPUBitmask(mCPUIDRegisters[2], 22, 22);
+  mSystemInformation.Packages[Index].Features.MOVEBEInstruction         = (BOOLEAN)CPUBitmask(mCPUIDRegisters[2], 22, 22);
   // Indicates that the processor supports the POPCNT instruction
-  mCPUInformation.Features.POPCNTInstruction         = (BOOLEAN)CPUBitmask(mCPUIDRegisters[2], 23, 23);
+  mSystemInformation.Packages[Index].Features.POPCNTInstruction         = (BOOLEAN)CPUBitmask(mCPUIDRegisters[2], 23, 23);
   // Indicates that the processor’s local APIC timer supports one-shot operation using a TSC deadline value
-  mCPUInformation.Features.TimeStampCounterDeadline  = (BOOLEAN)CPUBitmask(mCPUIDRegisters[2], 24, 24);
+  mSystemInformation.Packages[Index].Features.TimeStampCounterDeadline  = (BOOLEAN)CPUBitmask(mCPUIDRegisters[2], 24, 24);
   // Indicates that the processor supports the AESNI instruction extensions
-  mCPUInformation.Features.AESNIInstructions         = (BOOLEAN)CPUBitmask(mCPUIDRegisters[2], 25, 25);
+  mSystemInformation.Packages[Index].Features.AESNIInstructions         = (BOOLEAN)CPUBitmask(mCPUIDRegisters[2], 25, 25);
   // Indicates that the processor supports the XSAVE/XRSTOR processor extended states feature, the XSETBV/XGETBV instructions, and XCR0
-  mCPUInformation.Features.ExtFastInstructions       = (BOOLEAN)CPUBitmask(mCPUIDRegisters[2], 26, 26);
+  mSystemInformation.Packages[Index].Features.ExtFastInstructions       = (BOOLEAN)CPUBitmask(mCPUIDRegisters[2], 26, 26);
   // Indicates that the OS has set CR4.OSXSAVE[bit 18] to enable XSETBV/XGETBV instructions to access XCR0
   // and to support processor extended state management using XSAVE/XRSTOR
-  mCPUInformation.Features.OSExtFastInstructions     = (BOOLEAN)CPUBitmask(mCPUIDRegisters[2], 27, 27);
+  mSystemInformation.Packages[Index].Features.OSExtFastInstructions     = (BOOLEAN)CPUBitmask(mCPUIDRegisters[2], 27, 27);
   // Indicates the processor supports the AVX instruction extensions
-  mCPUInformation.Features.AVXInstructions           = (BOOLEAN)CPUBitmask(mCPUIDRegisters[2], 28, 28);
+  mSystemInformation.Packages[Index].Features.AVXInstructions           = (BOOLEAN)CPUBitmask(mCPUIDRegisters[2], 28, 28);
   // Indicates that processor supports 16-bit floating-point conversion instructions
-  mCPUInformation.Features.FP16BitConversion         = (BOOLEAN)CPUBitmask(mCPUIDRegisters[2], 29, 29);
+  mSystemInformation.Packages[Index].Features.FP16BitConversion         = (BOOLEAN)CPUBitmask(mCPUIDRegisters[2], 29, 29);
   // Indicates that processor supports RDRAND instruction
-  mCPUInformation.Features.RDRANDInstruction         = (BOOLEAN)CPUBitmask(mCPUIDRegisters[2], 30, 30);
+  mSystemInformation.Packages[Index].Features.RDRANDInstruction         = (BOOLEAN)CPUBitmask(mCPUIDRegisters[2], 30, 30);
 }
 // DetermineCPUIntelExtendedFeatures
 /// Determine CPU extended features information
+/// @param Index The physical package index
 STATIC VOID
 EFIAPI
 DetermineCPUIntelExtendedFeatures (
-  VOID
+  IN UINT32 Index
 ) {
   // Indicates that processor supports RDFSBASE/RDGSBASE/WRFSBASE/WRGSBASE instructions
-  mCPUInformation.Features.FSGSBASEInstructions      = (BOOLEAN)CPUBitmask(mCPUIDRegisters[1], 0, 0);
+  mSystemInformation.Packages[Index].Features.FSGSBASEInstructions      = (BOOLEAN)CPUBitmask(mCPUIDRegisters[1], 0, 0);
   // Indicates that processor supports IA32_TSC_ADJUST machine specific register
-  mCPUInformation.Features.TimeStampCounterAdjust    = (BOOLEAN)CPUBitmask(mCPUIDRegisters[1], 1, 1);
+  mSystemInformation.Packages[Index].Features.TimeStampCounterAdjust    = (BOOLEAN)CPUBitmask(mCPUIDRegisters[1], 1, 1);
   // Indicates that processor supports supports Intel Software Guard Extensions
-  mCPUInformation.Features.SoftwareGuardExtensions   = (BOOLEAN)CPUBitmask(mCPUIDRegisters[1], 2, 2);
+  mSystemInformation.Packages[Index].Features.SoftwareGuardExtensions   = (BOOLEAN)CPUBitmask(mCPUIDRegisters[1], 2, 2);
   // Indicates that processor supports supports BMI1 instructions
-  mCPUInformation.Features.BitManip1Instructions     = (BOOLEAN)CPUBitmask(mCPUIDRegisters[1], 3, 3);
+  mSystemInformation.Packages[Index].Features.BitManip1Instructions     = (BOOLEAN)CPUBitmask(mCPUIDRegisters[1], 3, 3);
   // Indicates that processor supports supports HLE instructions
-  mCPUInformation.Features.HardwareLockElision       = (BOOLEAN)CPUBitmask(mCPUIDRegisters[1], 4, 4);
+  mSystemInformation.Packages[Index].Features.HardwareLockElision       = (BOOLEAN)CPUBitmask(mCPUIDRegisters[1], 4, 4);
   // Indicates that processor supports supports AVX2 instructions
-  mCPUInformation.Features.AVX2Instructions          = (BOOLEAN)CPUBitmask(mCPUIDRegisters[1], 5, 5);
+  mSystemInformation.Packages[Index].Features.AVX2Instructions          = (BOOLEAN)CPUBitmask(mCPUIDRegisters[1], 5, 5);
   // Indicates floating point unit data pointer updated only on floating point exceptions
-  mCPUInformation.Features.FPDPExceptionOnly         = (BOOLEAN)CPUBitmask(mCPUIDRegisters[1], 6, 6);
+  mSystemInformation.Packages[Index].Features.FPDPExceptionOnly         = (BOOLEAN)CPUBitmask(mCPUIDRegisters[1], 6, 6);
   // Indicates that processor supports Supervisor-Mode Execution Prevention
-  mCPUInformation.Features.SupervisorExecutePrevent  = (BOOLEAN)CPUBitmask(mCPUIDRegisters[1], 7, 7);
+  mSystemInformation.Packages[Index].Features.SupervisorExecutePrevent  = (BOOLEAN)CPUBitmask(mCPUIDRegisters[1], 7, 7);
   // Indicates that processor supports supports RTM extensions
-  mCPUInformation.Features.TransactSyncExtensions    = (BOOLEAN)CPUBitmask(mCPUIDRegisters[1], 8, 8);
+  mSystemInformation.Packages[Index].Features.TransactSyncExtensions    = (BOOLEAN)CPUBitmask(mCPUIDRegisters[1], 8, 8);
   // Indicates that processor supports Enhanced REP MOVSB/STOSB instructions
-  mCPUInformation.Features.ERMSBInstructions         = (BOOLEAN)CPUBitmask(mCPUIDRegisters[1], 9, 9);
+  mSystemInformation.Packages[Index].Features.ERMSBInstructions         = (BOOLEAN)CPUBitmask(mCPUIDRegisters[1], 9, 9);
   // Indicates that processor supports INVPCID instruction for system software that manages process-context identifiers
-  mCPUInformation.Features.INVPCIDInstruction        = (BOOLEAN)CPUBitmask(mCPUIDRegisters[1], 10, 10);
+  mSystemInformation.Packages[Index].Features.INVPCIDInstruction        = (BOOLEAN)CPUBitmask(mCPUIDRegisters[1], 10, 10);
   // Indicates that processor supports supports HLE instructions
-  mCPUInformation.Features.HardwareLockElision       = (BOOLEAN)CPUBitmask(mCPUIDRegisters[1], 11, 11);
+  mSystemInformation.Packages[Index].Features.HardwareLockElision       = (BOOLEAN)CPUBitmask(mCPUIDRegisters[1], 11, 11);
   // Indicates that processor supports Intel Resource Director Technology Monitoring capability
-  mCPUInformation.Features.ResourceDirectorMonitor   = (BOOLEAN)CPUBitmask(mCPUIDRegisters[1], 12, 12);
+  mSystemInformation.Packages[Index].Features.ResourceDirectorMonitor   = (BOOLEAN)CPUBitmask(mCPUIDRegisters[1], 12, 12);
   // Indicates that processor deprecates FPU CS and FPU DS
-  mCPUInformation.Features.FPUDeprecated             = (BOOLEAN)CPUBitmask(mCPUIDRegisters[1], 13, 13);
+  mSystemInformation.Packages[Index].Features.FPUDeprecated             = (BOOLEAN)CPUBitmask(mCPUIDRegisters[1], 13, 13);
   // Indicates that processor supports Intel Memory Protection Extensions
-  mCPUInformation.Features.MemoryProtectionExtensions= (BOOLEAN)CPUBitmask(mCPUIDRegisters[1], 14, 14);
+  mSystemInformation.Packages[Index].Features.MemoryProtectionExtensions= (BOOLEAN)CPUBitmask(mCPUIDRegisters[1], 14, 14);
   // Indicates that processor supports Intel Resource Director Technology Allocation
-  mCPUInformation.Features.ResourceDirectorAllocation= (BOOLEAN)CPUBitmask(mCPUIDRegisters[1], 15, 15);
+  mSystemInformation.Packages[Index].Features.ResourceDirectorAllocation= (BOOLEAN)CPUBitmask(mCPUIDRegisters[1], 15, 15);
   // Indicates that processor supports RDSEED instruction
-  mCPUInformation.Features.RDSEEDInstruction         = (BOOLEAN)CPUBitmask(mCPUIDRegisters[1], 18, 18);
+  mSystemInformation.Packages[Index].Features.RDSEEDInstruction         = (BOOLEAN)CPUBitmask(mCPUIDRegisters[1], 18, 18);
   // Indicates that processor supports arbitrary precision arithmetic extensions
-  mCPUInformation.Features.ArithmeticExtensions      = (BOOLEAN)CPUBitmask(mCPUIDRegisters[1], 19, 19);
+  mSystemInformation.Packages[Index].Features.ArithmeticExtensions      = (BOOLEAN)CPUBitmask(mCPUIDRegisters[1], 19, 19);
   // Indicates that processor supports Supervisor-Mode Access Prevention (and the CLAC/STAC instructions)
-  mCPUInformation.Features.SupervisorAccessPrevent   = (BOOLEAN)CPUBitmask(mCPUIDRegisters[1], 20, 20);
+  mSystemInformation.Packages[Index].Features.SupervisorAccessPrevent   = (BOOLEAN)CPUBitmask(mCPUIDRegisters[1], 20, 20);
   // Indicates that processor supports CLFLUSHOPT instruction
-  mCPUInformation.Features.CLFLUSHOPTInstruction     = (BOOLEAN)CPUBitmask(mCPUIDRegisters[1], 23, 23);
+  mSystemInformation.Packages[Index].Features.CLFLUSHOPTInstruction     = (BOOLEAN)CPUBitmask(mCPUIDRegisters[1], 23, 23);
   // Indicates that processor supports CLWB instruction
-  mCPUInformation.Features.CLWBInstruction           = (BOOLEAN)CPUBitmask(mCPUIDRegisters[1], 24, 24);
+  mSystemInformation.Packages[Index].Features.CLWBInstruction           = (BOOLEAN)CPUBitmask(mCPUIDRegisters[1], 24, 24);
   // Indicates that processor supports Intel Processor Trace
-  mCPUInformation.Features.ProcessorTrace            = (BOOLEAN)CPUBitmask(mCPUIDRegisters[1], 25, 25);
+  mSystemInformation.Packages[Index].Features.ProcessorTrace            = (BOOLEAN)CPUBitmask(mCPUIDRegisters[1], 25, 25);
   // Indicates that processor supports Intel Secure Hash Algorithm Extensions
-  mCPUInformation.Features.SHAExtensions             = (BOOLEAN)CPUBitmask(mCPUIDRegisters[1], 29, 29);
+  mSystemInformation.Packages[Index].Features.SHAExtensions             = (BOOLEAN)CPUBitmask(mCPUIDRegisters[1], 29, 29);
   // Indicates that processor supports PREFETCHWT1 instruction
-  mCPUInformation.Features.PREFETCHWT1Instruction    = (BOOLEAN)CPUBitmask(mCPUIDRegisters[2], 0, 0);
+  mSystemInformation.Packages[Index].Features.PREFETCHWT1Instruction    = (BOOLEAN)CPUBitmask(mCPUIDRegisters[2], 0, 0);
   // Indicates that processor supports user-mode instruction prevention
-  mCPUInformation.Features.UserModeIntructionPrevent = (BOOLEAN)CPUBitmask(mCPUIDRegisters[2], 2, 2);
+  mSystemInformation.Packages[Index].Features.UserModeIntructionPrevent = (BOOLEAN)CPUBitmask(mCPUIDRegisters[2], 2, 2);
   // Indicates that processor supports protection keys for user-mode pages
-  mCPUInformation.Features.UserModeProtectKeys       = (BOOLEAN)CPUBitmask(mCPUIDRegisters[2], 3, 3);
+  mSystemInformation.Packages[Index].Features.UserModeProtectKeys       = (BOOLEAN)CPUBitmask(mCPUIDRegisters[2], 3, 3);
   // Indicates that OS has set CR4.PKE to enable protection keys (and the RDPKRU/WRPKRU instructions)
-  mCPUInformation.Features.OSProtectKeys             = (BOOLEAN)CPUBitmask(mCPUIDRegisters[2], 4, 4); 
+  mSystemInformation.Packages[Index].Features.OSProtectKeys             = (BOOLEAN)CPUBitmask(mCPUIDRegisters[2], 4, 4); 
   // Indicates that processor supports RDPID instruction
-  mCPUInformation.Features.RDPIDInstruction          = (BOOLEAN)CPUBitmask(mCPUIDRegisters[2], 22, 22);
+  mSystemInformation.Packages[Index].Features.RDPIDInstruction          = (BOOLEAN)CPUBitmask(mCPUIDRegisters[2], 22, 22);
   // Indicates that processor supports Software Guard Launch Configuration
-  mCPUInformation.Features.SoftwareGuardLaunchConfig = (BOOLEAN)CPUBitmask(mCPUIDRegisters[2], 30, 30);
+  mSystemInformation.Packages[Index].Features.SoftwareGuardLaunchConfig = (BOOLEAN)CPUBitmask(mCPUIDRegisters[2], 30, 30);
 }
 // DetermineCPUIntelOtherFeatures
 /// Determine CPU features information
+/// @param Index The physical package index
 STATIC VOID
 EFIAPI
 DetermineCPUIntelOtherFeatures (
-  VOID
+  IN UINT32 Index
 ) {
   // Indicates LAHF/SAHF available in 64-bit mode
-  mCPUInformation.Features.AHFromFlags64Bit      = (BOOLEAN)CPUBitmask(mCPUIDRegisters[2], 0, 0);
+  mSystemInformation.Packages[Index].Features.AHFromFlags64Bit      = (BOOLEAN)CPUBitmask(mCPUIDRegisters[2], 0, 0);
   // Indicates the processor supports the LZCNT instruction
-  mCPUInformation.Features.LZCNTInstruction      = (BOOLEAN)CPUBitmask(mCPUIDRegisters[2], 5, 5);
+  mSystemInformation.Packages[Index].Features.LZCNTInstruction      = (BOOLEAN)CPUBitmask(mCPUIDRegisters[2], 5, 5);
   // Indicates the processor supports the PREFETCHW instruction
-  mCPUInformation.Features.PREFETCHWInstruction  = (BOOLEAN)CPUBitmask(mCPUIDRegisters[2], 8, 8);
+  mSystemInformation.Packages[Index].Features.PREFETCHWInstruction  = (BOOLEAN)CPUBitmask(mCPUIDRegisters[2], 8, 8);
   // Indicates SYSCALL/SYSRET available in 64-bit mode
-  mCPUInformation.Features.SystemExtensions64Bit = (BOOLEAN)CPUBitmask(mCPUIDRegisters[3], 11, 11);
+  mSystemInformation.Packages[Index].Features.SystemExtensions64Bit = (BOOLEAN)CPUBitmask(mCPUIDRegisters[3], 11, 11);
   // Indicates Execute Disable Bit available
-  mCPUInformation.Features.ExecuteDisableBit     = (BOOLEAN)CPUBitmask(mCPUIDRegisters[3], 20, 20);
+  mSystemInformation.Packages[Index].Features.ExecuteDisableBit     = (BOOLEAN)CPUBitmask(mCPUIDRegisters[3], 20, 20);
   // Indicates 1-GByte pages are available
-  mCPUInformation.Features.GBPageExtension       = (BOOLEAN)CPUBitmask(mCPUIDRegisters[3], 26, 26);
+  mSystemInformation.Packages[Index].Features.GBPageExtension       = (BOOLEAN)CPUBitmask(mCPUIDRegisters[3], 26, 26);
   // Indicates RDTSCP instruction and IA32_TSC_AUX machine specific register are available
-  mCPUInformation.Features.RDTSCPInstruction     = (BOOLEAN)CPUBitmask(mCPUIDRegisters[3], 27, 27);
+  mSystemInformation.Packages[Index].Features.RDTSCPInstruction     = (BOOLEAN)CPUBitmask(mCPUIDRegisters[3], 27, 27);
   // Indicates Intel64 or AMD64 Architecture available
-  mCPUInformation.Features.X64                   = (BOOLEAN)CPUBitmask(mCPUIDRegisters[3], 29, 29);
+  mSystemInformation.Packages[Index].Features.X64                   = (BOOLEAN)CPUBitmask(mCPUIDRegisters[3], 29, 29);
 }
 // DetermineCPUIntelModelAndFeatures
 /// Determine CPU model and features information
+/// @param Index The physical package index
 /// @return The CPU model information
 CPU_MODEL
 EFIAPI
 DetermineCPUIntelModelAndFeatures (
-  VOID
+  IN UINT32 Index
 ) {
   UINT32 Model = CPU_MODEL_UNKNOWN;
   // Check maximum CPUID index
   if (mCPUMaxIndex >= 0x1) {
     UINT32 SubIndex = 0;
+    // Clear IA32_BIOS_SIGN_ID model specific register
+    AsmWriteMsr64(0x8B, 0);
     // Determine logical and physical CPU counts
-    mCPUInformation.LogicalCount = mCPUInformation.Count = 1;
+    mSystemInformation.Packages[Index].LogicalCount = mSystemInformation.Packages[Index].CoreCount = 1;
     // Check if core topology reporting is supported
     if (mCPUMaxIndex >= 0xB) {
+      UINT32 LevelCount = 0;
       // Inspect core topology
       do {
-        UINT32 LevelCount, LevelType;
+        UINT32 LevelType;
         // Perform CPUID for core topology
         CPUIDEx(0xB, SubIndex);
         // Get the level type
@@ -326,20 +361,22 @@ DetermineCPUIntelModelAndFeatures (
         if ((LevelType == 0) || (LevelType > 2)) {
           break;
         }
-        // Get the logical count at this level
-        LevelCount = (UINT32)(UINTN)CPUBitmask(mCPUIDRegisters[0], 0, 4);
         // Determine what to do with the count based on level type
         switch (LevelType) {
 
           case 1:
             // SMT level
-            mCPUInformation.LogicalCount = LevelCount;
+            LevelCount = (UINT32)(UINTN)CPUBitmask(mCPUIDRegisters[1], 0, 15);
             break;
 
           case 2:
             // Core level
-            mCPUInformation.Count = (LevelCount / mCPUInformation.LogicalCount);
-            mCPUInformation.LogicalCount = LevelCount;
+            if (LevelCount <= 1) {
+              mSystemInformation.Packages[Index].LogicalCount = mSystemInformation.Packages[Index].CoreCount = (UINT32)(UINTN)CPUBitmask(mCPUIDRegisters[1], 0, 15);
+            } else {
+              mSystemInformation.Packages[Index].LogicalCount = (UINT32)(UINTN)CPUBitmask(mCPUIDRegisters[1], 0, 15);
+              mSystemInformation.Packages[Index].CoreCount = (mSystemInformation.Packages[Index].LogicalCount / LevelCount);
+            }
             break;
 
           default:
@@ -355,9 +392,9 @@ DetermineCPUIntelModelAndFeatures (
       CPUIDEx(0x4, SubIndex);
       if ((mCPUIDRegisters[0] & 0x1F) != 0) {
         // Get the physical CPU count
-        mCPUInformation.Count = (UINT32)(UINTN)CPUBitmask(mCPUIDRegisters[0], 26, 31) + 1;
+        mSystemInformation.Packages[Index].CoreCount = (UINT32)(UINTN)CPUBitmask(mCPUIDRegisters[0], 26, 31) + 1;
         // Get the logical CPU count
-        mCPUInformation.LogicalCount = (UINT32)(UINTN)CPUBitmask(mCPUIDRegisters[0], 14, 25) + 1;
+        mSystemInformation.Packages[Index].LogicalCount = ((UINT32)(UINTN)CPUBitmask(mCPUIDRegisters[0], 14, 25) + 1);
         ++SubIndex;
       }
     }
@@ -366,34 +403,35 @@ DetermineCPUIntelModelAndFeatures (
     // Get the CPU model signature
     Model = mCPUIDRegisters[0];
     // Determine features
-    DetermineCPUIntelFeatures();
+    DetermineCPUIntelFeatures(Index);
     // Check if hardware multi threading is supported if core or cache topology reporting is not or failed
-    if ((mCPUInformation.Features.HardwareMultiThread) && (SubIndex == 0)) {
+    if (mSystemInformation.Packages[Index].Features.HardwareMultiThread && (SubIndex == 0)) {
       // Get the logical CPU count the old way
-      mCPUInformation.LogicalCount = (UINT32)(UINTN)CPUBitmask(mCPUIDRegisters[1], 16, 23);
+      mSystemInformation.Packages[Index].LogicalCount = (UINT32)(UINTN)CPUBitmask(mCPUIDRegisters[1], 16, 23);
     }
     // Check physical CPU count
-    if (mCPUInformation.Count == 0) {
-      mCPUInformation.Count = 1;
+    if (mSystemInformation.Packages[Index].CoreCount == 0) {
+      mSystemInformation.Packages[Index].CoreCount = 1;
     }
     // Check logical CPU count
-    if (mCPUInformation.LogicalCount == 0) {
-      mCPUInformation.LogicalCount = 1;
+    if (mSystemInformation.Packages[Index].LogicalCount == 0) {
+      mSystemInformation.Packages[Index].LogicalCount = 1;
     }
-    if (mCPUInformation.LogicalCount < mCPUInformation.Count) {
-      mCPUInformation.LogicalCount = mCPUInformation.Count;
+    if (mSystemInformation.Packages[Index].LogicalCount < mSystemInformation.Packages[Index].CoreCount) {
+      mSystemInformation.Packages[Index].LogicalCount = mSystemInformation.Packages[Index].CoreCount;
     }
+    // Add these counts to the total system counts
+    mSystemInformation.LogicalCount += mSystemInformation.Packages[Index].LogicalCount;
+    mSystemInformation.CoreCount += mSystemInformation.Packages[Index].CoreCount;
     // Determine extended features
     if (mCPUMaxIndex >= 0x7) {
       CPUID(0x7);
-      DetermineCPUIntelExtendedFeatures();
+      DetermineCPUIntelExtendedFeatures(Index);
     }
     // Determine other features
-    CPUID(0x80000000);
-    mCPUMaxExtIndex = mCPUIDRegisters[0];
     if (mCPUMaxExtIndex >= 0x80000001) {
       CPUID(0x80000001);
-      DetermineCPUIntelOtherFeatures();
+      DetermineCPUIntelOtherFeatures(Index);
     }
     // Get CPU description
     if (mCPUMaxExtIndex >= 0x80000004) {
@@ -404,7 +442,7 @@ DetermineCPUIntelModelAndFeatures (
       // Zero the description string memory
       ZeroMem((VOID *)Description, CPU_DESCRIPTION_SIZE + 1);
       // Perform CPUID to get description
-      while (ExtIndex <= 0x800000004) {
+      while (ExtIndex <= 0x80000004) {
         AsmCpuid(ExtIndex++, Ptr, Ptr + 1, Ptr + 2, Ptr + 3);
         Ptr += 4;
       }
@@ -414,25 +452,26 @@ DetermineCPUIntelModelAndFeatures (
         ++Str;
       }
       // Copy description to CPU information
-      CopyMem((VOID *)mCPUInformation.Description, (CONST VOID *)Str, (CPU_DESCRIPTION_SIZE - (Str - Description)) + 1);
+      CopyMem((VOID *)mSystemInformation.Packages[Index].Description, (CONST VOID *)Str, (CPU_DESCRIPTION_SIZE - (Str - Description)) + 1);
     }
     // Read IA32_MISC_ENABLE model specific register
-    if (mCPUInformation.Features.ModelSpecificRegisters) {
-      UINT64 MSR = AsmReadMsr64(0x1A0);
+    if (mSystemInformation.Packages[Index].Features.ModelSpecificRegisters) {
+      UINT64 MSR;
+      MSR = AsmReadMsr64(0x1A0);
       // Determine if speedstep is enabled
-      if (mCPUInformation.Features.Dynamic) {
-        mCPUInformation.Features.Dynamic = (BOOLEAN)CPUBitmask(MSR, 16, 16);
+      if (mSystemInformation.Packages[Index].Features.Dynamic) {
+        mSystemInformation.Packages[Index].Features.Dynamic = (BOOLEAN)CPUBitmask(MSR, 16, 16);
       }
       // Determine if turbo is enabled
       if ((mCPUMaxIndex >= 0x6) && (CPUBitmask(MSR, 38, 38) == 0)) {
         CPUID(0x6);
-        mCPUInformation.Features.Turbo = (BOOLEAN)CPUBitmask(mCPUIDRegisters[0], 1, 1);
+        mSystemInformation.Packages[Index].Features.Turbo = (BOOLEAN)CPUBitmask(mCPUIDRegisters[0], 1, 1);
       }
       // Determine mobile from IA32_PLATFORM_ID model specific register
       if (CPUBitmask(AsmReadMsr32(0x17), 28, 28) != 0) {
-        mCPUInformation.Features.Mobile = TRUE;
+        mSystemInformation.Packages[Index].Features.Mobile = TRUE;
       }
-      if (mCPUInformation.Features.Mobile) {
+      if (mSystemInformation.Packages[Index].Features.Mobile) {
         Model = SwitchCPUIntelFamilyToMobile(Model);
       }
     }
@@ -441,14 +480,15 @@ DetermineCPUIntelModelAndFeatures (
 }
 // DetermineCPUIntelFrequency
 /// Determine CPU frequency information
+/// @param Index The physical package index
 VOID
 EFIAPI
 DetermineCPUIntelFrequency (
-  VOID
+  IN UINT32 Index
 ) {
   UINT64 MSR;
   // Determine CPU clock frequency from CPU family
-  switch (mCPUInformation.Family) {
+  switch (mSystemInformation.Packages[Index].Family) {
 
 #if defined(MDE_CPU_IA32) || defined(MDE_CPU_X64)
 
@@ -460,37 +500,37 @@ DetermineCPUIntelFrequency (
       switch (CPUBitmask(AsmReadMsr32(0x2C), 0, 2)) {
         case 1:
           // 001B 133 MHz
-          mCPUInformation.Frequency.Clock = 133333333;
+          mSystemInformation.Packages[Index].Frequency.Clock = 133333333;
           break;
 
         case 2:
           // 010B 200 MHz
-          mCPUInformation.Frequency.Clock = 200000000;
+          mSystemInformation.Packages[Index].Frequency.Clock = 200000000;
           break;
 
         case 3:
           // 011B 166 MHz
-          mCPUInformation.Frequency.Clock = 166666667;
+          mSystemInformation.Packages[Index].Frequency.Clock = 166666667;
           break;
 
         case 4:
           // 100B 333 MHz (Model 6)
-          mCPUInformation.Frequency.Clock = 333333333;
+          mSystemInformation.Packages[Index].Frequency.Clock = 333333333;
           break;
 
         default:
           
-          switch (CPUBitmask(mCPUInformation.Model, 4, 7)) {
+          switch (CPUBitmask(mSystemInformation.Packages[Index].Model, 4, 7)) {
             case 3:
             case 4:
               // 000B 266 MHz (Model 3 or 4)
-              mCPUInformation.Frequency.Clock = 266666667;
+              mSystemInformation.Packages[Index].Frequency.Clock = 266666667;
               break;
 
             case 2:
             default:
               // 000B 100 MHz (Model 2)
-              mCPUInformation.Frequency.Clock = 100000000;
+              mSystemInformation.Packages[Index].Frequency.Clock = 100000000;
               break;
           }
           break;
@@ -506,38 +546,38 @@ DetermineCPUIntelFrequency (
       switch (CPUBitmask(AsmReadMsr32(0xCD), 0, 2)) {
         case 0:
           // 000B: 267 MHz (FSB 1067)
-          mCPUInformation.Frequency.Clock = 266666667;
+          mSystemInformation.Packages[Index].Frequency.Clock = 266666667;
           break;
 
         case 1:
           // 001B: 133 MHz (FSB 533)
-          mCPUInformation.Frequency.Clock = 133333333;
+          mSystemInformation.Packages[Index].Frequency.Clock = 133333333;
           break;
 
         case 2:
           // 010B: 200 MHz (FSB 800)
-          mCPUInformation.Frequency.Clock = 200000000;
+          mSystemInformation.Packages[Index].Frequency.Clock = 200000000;
           break;
 
         case 3:
           // 011B: 167 MHz (FSB 667)
-          mCPUInformation.Frequency.Clock = 166666667;
+          mSystemInformation.Packages[Index].Frequency.Clock = 166666667;
           break;
 
         case 4:
           // 100B: 333 MHz (FSB 1333)
-          mCPUInformation.Frequency.Clock = 333333333;
+          mSystemInformation.Packages[Index].Frequency.Clock = 333333333;
           break;
 
         case 6:
           // 110B: 400 MHz (FSB 1600)
-          mCPUInformation.Frequency.Clock = 400000000;
+          mSystemInformation.Packages[Index].Frequency.Clock = 400000000;
           break;
 
         case 5:
         default:
           // 101B: 100 MHz (FSB 400)
-          mCPUInformation.Frequency.Clock = 100000000;
+          mSystemInformation.Packages[Index].Frequency.Clock = 100000000;
           break;
       }
       break;
@@ -547,23 +587,23 @@ DetermineCPUIntelFrequency (
       switch (CPUBitmask(AsmReadMsr32(0xCD), 0, 2)) {
         case 1:
           // 001B: 133 MHz (FSB 533)
-          mCPUInformation.Frequency.Clock = 133333333;
+          mSystemInformation.Packages[Index].Frequency.Clock = 133333333;
           break;
 
         case 3:
           // 011B: 167 MHz (FSB 667)
-          mCPUInformation.Frequency.Clock = 166666667;
+          mSystemInformation.Packages[Index].Frequency.Clock = 166666667;
           break;
 
         case 7:
           // 111B: 083 MHz (FSB 333)
-          mCPUInformation.Frequency.Clock = 83333333;
+          mSystemInformation.Packages[Index].Frequency.Clock = 83333333;
           break;
 
         case 5:
         default:
           // 101B: 100 MHz (FSB 400)
-          mCPUInformation.Frequency.Clock = 100000000;
+          mSystemInformation.Packages[Index].Frequency.Clock = 100000000;
           break;
       }
       break;
@@ -573,28 +613,28 @@ DetermineCPUIntelFrequency (
       switch (CPUBitmask(AsmReadMsr32(0xCD), 0, 2)) {
         case 0:
           // 000B: 083.3 MHz
-          mCPUInformation.Frequency.Clock = 83333333;
+          mSystemInformation.Packages[Index].Frequency.Clock = 83333333;
           break;
 
         case 2:
           // 010B: 133.3 MHz
-          mCPUInformation.Frequency.Clock = 133333333;
+          mSystemInformation.Packages[Index].Frequency.Clock = 133333333;
           break;
 
         case 3:
           // 011B: 116.7 MHz
-          mCPUInformation.Frequency.Clock = 116666667;
+          mSystemInformation.Packages[Index].Frequency.Clock = 116666667;
           break;
 
         case 4:
           // 100B: 080.0 MHz
-          mCPUInformation.Frequency.Clock = 80000000;
+          mSystemInformation.Packages[Index].Frequency.Clock = 80000000;
           break;
 
         case 1:
         default:
           // 001B: 100.0 MHz
-          mCPUInformation.Frequency.Clock = 100000000;
+          mSystemInformation.Packages[Index].Frequency.Clock = 100000000;
           break;
       }
       break;
@@ -604,48 +644,48 @@ DetermineCPUIntelFrequency (
       switch (CPUBitmask(AsmReadMsr32(0xCD), 0, 3)) {
         case 0:
           // 0000B: 083.3 MHz
-          mCPUInformation.Frequency.Clock = 83333333;
+          mSystemInformation.Packages[Index].Frequency.Clock = 83333333;
           break;
 
         case 2:
           // 0010B: 133.3 MHz
-          mCPUInformation.Frequency.Clock = 133333333;
+          mSystemInformation.Packages[Index].Frequency.Clock = 133333333;
           break;
 
         case 3:
           // 0011B: 116.7 MHz
-          mCPUInformation.Frequency.Clock = 116666667;
+          mSystemInformation.Packages[Index].Frequency.Clock = 116666667;
           break;
 
         case 4:
           // 0100B: 080.0 MHz
-          mCPUInformation.Frequency.Clock = 80000000;
+          mSystemInformation.Packages[Index].Frequency.Clock = 80000000;
           break;
 
         case 5:
           // 0101B: 093.3 MHz
-          mCPUInformation.Frequency.Clock = 93333333;
+          mSystemInformation.Packages[Index].Frequency.Clock = 93333333;
           break;
 
         case 6:
           // 0110B: 090.0 MHz
-          mCPUInformation.Frequency.Clock = 90000000;
+          mSystemInformation.Packages[Index].Frequency.Clock = 90000000;
           break;
 
         case 7:
           // 0111B: 088.9 MHz
-          mCPUInformation.Frequency.Clock = 88888889;
+          mSystemInformation.Packages[Index].Frequency.Clock = 88888889;
           break;
 
         case 8:
           // 1000B: 087.5 MHz
-          mCPUInformation.Frequency.Clock = 87500000;
+          mSystemInformation.Packages[Index].Frequency.Clock = 87500000;
           break;
 
         case 1:
         default:
           // 0000B: 100.0 Mhz
-          mCPUInformation.Frequency.Clock = 100000000;
+          mSystemInformation.Packages[Index].Frequency.Clock = 100000000;
           break;
       }
       break;
@@ -654,7 +694,7 @@ DetermineCPUIntelFrequency (
       // 4th Gen Atom clock frequency
       switch (CPUBitmask(AsmReadMsr32(0xCD), 0, 3)) {
         default:
-          mCPUInformation.Frequency.Clock = 100000000;
+          mSystemInformation.Packages[Index].Frequency.Clock = 100000000;
           break;
       }
       break;
@@ -663,7 +703,7 @@ DetermineCPUIntelFrequency (
     case CPU_FAMILY_CORE_i_MOBILE:
     case CPU_FAMILY_XEON_CORE_i:
       // Core i clock frequency - 133MHz
-      mCPUInformation.Frequency.Clock = 133333333;
+      mSystemInformation.Packages[Index].Frequency.Clock = 133333333;
       break;
 
     case CPU_FAMILY_PENTIUM_M:
@@ -686,12 +726,12 @@ DetermineCPUIntelFrequency (
     case CPU_FAMILY_XEON_6TH_CORE_i:
     case CPU_FAMILY_XEON_7TH_CORE_i:
       // >= 2nd Gen Core i families clock frequency - 100MHz
-      mCPUInformation.Frequency.Clock = 100000000;
+      mSystemInformation.Packages[Index].Frequency.Clock = 100000000;
       break;
 
     case CPU_FAMILY_XEON_PHI:
       // Xeon Phi clock frequency
-      mCPUInformation.Frequency.Clock = 100000000;
+      mSystemInformation.Packages[Index].Frequency.Clock = 100000000;
       break;
 
 #endif
@@ -700,13 +740,13 @@ DetermineCPUIntelFrequency (
 
     case CPU_FAMILY_ITANIUM:
       // Itanium clock frequency - 133MHz
-      mCPUInformation.Frequency.Clock = 133333333;
+      mSystemInformation.Packages[Index].Frequency.Clock = 133333333;
       break;
 
     case CPU_FAMILY_ITANIUM2:
-      // TODO: Itanium 2 clock frequency
-      // Default clock is 400MHz
-      mCPUInformation.Frequency.Clock = 400000000;
+      // Itanium 2 clock frequency
+      // Default clock is 400MHz but no idea how to determine frequency in IA32 mode
+      mSystemInformation.Packages[Index].Frequency.Clock = 400000000;
       break;
 
 #endif
@@ -723,16 +763,16 @@ DetermineCPUIntelFrequency (
       // P6 families
       switch (CPUBitmask(AsmReadMsr32(0x2A), 18, 19)) {
         case 1:
-          mCPUInformation.Frequency.Clock = 133333333;
+          mSystemInformation.Packages[Index].Frequency.Clock = 133333333;
           break;
 
         case 2:
-          mCPUInformation.Frequency.Clock = 100000000;
+          mSystemInformation.Packages[Index].Frequency.Clock = 100000000;
           break;
 
         case 0:
         default:
-          mCPUInformation.Frequency.Clock = 66666667;
+          mSystemInformation.Packages[Index].Frequency.Clock = 66666667;
           break;
       }
       break;
@@ -748,20 +788,21 @@ DetermineCPUIntelFrequency (
 #endif
 
     default:
-      // TODO: Determine clock frequency by TSC if possible
+      // Determine clock frequency by TSC if possible
+      mSystemInformation.Packages[Index].Frequency.Clock = DetectCPUFrequency();
       break;
 
   }
   // Determine CPU minimum, maximum, and turbo multipliers
-  switch (mCPUInformation.Family) {
+  switch (mSystemInformation.Packages[Index].Family) {
 
 #if defined(MDE_CPU_IA32)
 
     case CPU_FAMILY_PENTIUM_MMX:
-      mCPUInformation.Frequency.Step = 1;
-      mCPUInformation.Frequency.Minimum = mCPUInformation.Frequency.Maximum = DivU64x32(LShiftU64((UINT64)mCPUInformation.Frequency.Clock, 1), 66666667);
-      mCPUInformation.Frequency.Clock = 66666667;
-      mCPUInformation.Frequency.TurboCount = 0;
+      mSystemInformation.Packages[Index].Frequency.Step = 1;
+      mSystemInformation.Packages[Index].Frequency.Minimum = mSystemInformation.Packages[Index].Frequency.Maximum = (UINT8)(UINTN)DivU64x32(LShiftU64((UINT64)mSystemInformation.Packages[Index].Frequency.Clock, 1), 66666667);
+      mSystemInformation.Packages[Index].Frequency.Clock = 66666667;
+      mSystemInformation.Packages[Index].Frequency.TurboCount = 0;
       break;
 
     case CPU_FAMILY_PENTIUM:
@@ -769,65 +810,65 @@ DetermineCPUIntelFrequency (
     case CPU_FAMILY_PENTIUM_OVERDRIVE:
     case CPU_FAMILY_MOBILE_PENTIUM_MMX:
     case CPU_FAMILY_PENTIUM_MMX_OVERDRIVE:
-      mCPUInformation.Frequency.Step = 1;
-      mCPUInformation.Frequency.TurboCount = 0;
-      if ((mCPUInformation.Frequency.Clock >= 70000000) && (mCPUInformation.Frequency.Clock <= 80000000)) {
+      mSystemInformation.Packages[Index].Frequency.Step = 1;
+      mSystemInformation.Packages[Index].Frequency.TurboCount = 0;
+      if ((mSystemInformation.Packages[Index].Frequency.Clock >= 70000000) && (mSystemInformation.Packages[Index].Frequency.Clock <= 80000000)) {
         // 75MHz
-        mCPUInformation.Frequency.Clock = 50000000;
-        mCPUInformation.Frequency.Maximum = 3;
-      } else if ((mCPUInformation.Frequency.Clock > 80000000) && (mCPUInformation.Frequency.Clock <= 85000000)) {
+        mSystemInformation.Packages[Index].Frequency.Clock = 50000000;
+        mSystemInformation.Packages[Index].Frequency.Maximum = 3;
+      } else if ((mSystemInformation.Packages[Index].Frequency.Clock > 80000000) && (mSystemInformation.Packages[Index].Frequency.Clock <= 85000000)) {
         // 83MHz
-        mCPUInformation.Frequency.Clock = 66666667;
-        mCPUInformation.Frequency.Maximum = 3;
-      } else if ((mCPUInformation.Frequency.Clock > 85000000) && (mCPUInformation.Frequency.Clock <= 95000000)) {
+        mSystemInformation.Packages[Index].Frequency.Clock = 66666667;
+        mSystemInformation.Packages[Index].Frequency.Maximum = 3;
+      } else if ((mSystemInformation.Packages[Index].Frequency.Clock > 85000000) && (mSystemInformation.Packages[Index].Frequency.Clock <= 95000000)) {
         // 90MHz
-        mCPUInformation.Frequency.Clock = 60000000;
-        mCPUInformation.Frequency.Maximum = 3;
-      } else if ((mCPUInformation.Frequency.Clock > 95000000) && (mCPUInformation.Frequency.Clock <= 105000000)) {
+        mSystemInformation.Packages[Index].Frequency.Clock = 60000000;
+        mSystemInformation.Packages[Index].Frequency.Maximum = 3;
+      } else if ((mSystemInformation.Packages[Index].Frequency.Clock > 95000000) && (mSystemInformation.Packages[Index].Frequency.Clock <= 105000000)) {
         // 100MHz
-        mCPUInformation.Frequency.Clock = 66666667;
-        mCPUInformation.Frequency.Maximum = 3;
-      } else if ((mCPUInformation.Frequency.Clock > 115000000) && (mCPUInformation.Frequency.Clock <= 125000000)) {
+        mSystemInformation.Packages[Index].Frequency.Clock = 66666667;
+        mSystemInformation.Packages[Index].Frequency.Maximum = 3;
+      } else if ((mSystemInformation.Packages[Index].Frequency.Clock > 115000000) && (mSystemInformation.Packages[Index].Frequency.Clock <= 125000000)) {
         // 120MHz
-        mCPUInformation.Frequency.Clock = 60000000;
-        mCPUInformation.Frequency.Maximum = 4;
-      } else if ((mCPUInformation.Frequency.Clock > 128000000) && (mCPUInformation.Frequency.Clock <= 138000000)) {
+        mSystemInformation.Packages[Index].Frequency.Clock = 60000000;
+        mSystemInformation.Packages[Index].Frequency.Maximum = 4;
+      } else if ((mSystemInformation.Packages[Index].Frequency.Clock > 128000000) && (mSystemInformation.Packages[Index].Frequency.Clock <= 138000000)) {
         // 133MHz
-        mCPUInformation.Frequency.Clock = 66666667;
-        mCPUInformation.Frequency.Maximum = 4;
-      } else if ((mCPUInformation.Frequency.Clock > 145000000) && (mCPUInformation.Frequency.Clock <= 155000000)) {
+        mSystemInformation.Packages[Index].Frequency.Clock = 66666667;
+        mSystemInformation.Packages[Index].Frequency.Maximum = 4;
+      } else if ((mSystemInformation.Packages[Index].Frequency.Clock > 145000000) && (mSystemInformation.Packages[Index].Frequency.Clock <= 155000000)) {
         // 150MHz
-        mCPUInformation.Frequency.Clock = 60000000;
-        mCPUInformation.Frequency.Maximum = 3;
-      } else if ((mCPUInformation.Frequency.Clock > 161000000) && (mCPUInformation.Frequency.Clock <= 171000000)) {
+        mSystemInformation.Packages[Index].Frequency.Clock = 60000000;
+        mSystemInformation.Packages[Index].Frequency.Maximum = 3;
+      } else if ((mSystemInformation.Packages[Index].Frequency.Clock > 161000000) && (mSystemInformation.Packages[Index].Frequency.Clock <= 171000000)) {
         // 166MHz
-        mCPUInformation.Frequency.Clock = 66666667;
-        mCPUInformation.Frequency.Maximum = 5;
-      } else if ((mCPUInformation.Frequency.Clock > 175000000) && (mCPUInformation.Frequency.Clock <= 185000000)) {
+        mSystemInformation.Packages[Index].Frequency.Clock = 66666667;
+        mSystemInformation.Packages[Index].Frequency.Maximum = 5;
+      } else if ((mSystemInformation.Packages[Index].Frequency.Clock > 175000000) && (mSystemInformation.Packages[Index].Frequency.Clock <= 185000000)) {
         // 180MHz
-        mCPUInformation.Frequency.Clock = 60000000;
-        mCPUInformation.Frequency.Maximum = 6;
-      } else if ((mCPUInformation.Frequency.Clock > 195000000) && (mCPUInformation.Frequency.Clock <= 205000000)) {
+        mSystemInformation.Packages[Index].Frequency.Clock = 60000000;
+        mSystemInformation.Packages[Index].Frequency.Maximum = 6;
+      } else if ((mSystemInformation.Packages[Index].Frequency.Clock > 195000000) && (mSystemInformation.Packages[Index].Frequency.Clock <= 205000000)) {
         // 200MHz
-        mCPUInformation.Frequency.Clock = 66666667;
-        mCPUInformation.Frequency.Maximum = 6;
-      } else if ((mCPUInformation.Frequency.Clock > 228000000) && (mCPUInformation.Frequency.Clock <= 238000000)) {
+        mSystemInformation.Packages[Index].Frequency.Clock = 66666667;
+        mSystemInformation.Packages[Index].Frequency.Maximum = 6;
+      } else if ((mSystemInformation.Packages[Index].Frequency.Clock > 228000000) && (mSystemInformation.Packages[Index].Frequency.Clock <= 238000000)) {
         // 233MHz
-        mCPUInformation.Frequency.Clock = 66666667;
-        mCPUInformation.Frequency.Maximum = 7;
-      } else if ((mCPUInformation.Frequency.Clock > 261000000) && (mCPUInformation.Frequency.Clock <= 271000000)) {
+        mSystemInformation.Packages[Index].Frequency.Clock = 66666667;
+        mSystemInformation.Packages[Index].Frequency.Maximum = 7;
+      } else if ((mSystemInformation.Packages[Index].Frequency.Clock > 261000000) && (mSystemInformation.Packages[Index].Frequency.Clock <= 271000000)) {
         // 266MHz
-        mCPUInformation.Frequency.Clock = 66666667;
-        mCPUInformation.Frequency.Maximum = 8;
-      } else if ((mCPUInformation.Frequency.Clock > 295000000) && (mCPUInformation.Frequency.Clock <= 305000000)) {
+        mSystemInformation.Packages[Index].Frequency.Clock = 66666667;
+        mSystemInformation.Packages[Index].Frequency.Maximum = 8;
+      } else if ((mSystemInformation.Packages[Index].Frequency.Clock > 295000000) && (mSystemInformation.Packages[Index].Frequency.Clock <= 305000000)) {
         // 300MHz
-        mCPUInformation.Frequency.Clock = 66666667;
-        mCPUInformation.Frequency.Maximum = 9;
+        mSystemInformation.Packages[Index].Frequency.Clock = 66666667;
+        mSystemInformation.Packages[Index].Frequency.Maximum = 9;
       } else {
         // Set default multiplers
-        mCPUInformation.Frequency.Maximum = 2;
+        mSystemInformation.Packages[Index].Frequency.Maximum = 2;
       }
-      mCPUInformation.Frequency.Minimum = mCPUInformation.Frequency.Maximum;
+      mSystemInformation.Packages[Index].Frequency.Minimum = mSystemInformation.Packages[Index].Frequency.Maximum;
       break;
 
 #endif
@@ -845,28 +886,28 @@ DetermineCPUIntelFrequency (
     case CPU_FAMILY_ATOM:
     case CPU_FAMILY_XEON_PHI:
       // Determine Pentium M/Core/Core2/Atom multipliers
-      if (mCPUInformation.Features.ModelSpecificRegisters) {
+      if (mSystemInformation.Packages[Index].Features.ModelSpecificRegisters) {
         // Read the MSR_PERF_STATUS model specific register
         MSR = AsmReadMsr64(0x198);
-        mCPUInformation.Frequency.Step = (UINT8)CPUBitmask(MSR, 46, 46);
-        mCPUInformation.Frequency.Minimum = (6 << mCPUInformation.Frequency.Step);
+        mSystemInformation.Packages[Index].Frequency.Step = (UINT8)CPUBitmask(MSR, 46, 46);
+        mSystemInformation.Packages[Index].Frequency.Minimum = (6 << mSystemInformation.Packages[Index].Frequency.Step);
         // Check if XE operation is enabled
         if (CPUBitmask(MSR, 31, 31) != 0) {
-          mCPUInformation.Frequency.Maximum = (UINT8)CPUBitmask(MSR, 40, 44);
+          mSystemInformation.Packages[Index].Frequency.Maximum = (UINT8)CPUBitmask(MSR, 40, 44);
         } else {
           // Get maximum from MSR_PLATFORM_ID model specific register
-          mCPUInformation.Frequency.Maximum = (UINT8)CPUBitmask(AsmReadMsr64(0x17), 8, 13);
+          mSystemInformation.Packages[Index].Frequency.Maximum = (UINT8)CPUBitmask(AsmReadMsr64(0x17), 8, 13);
         }
         // Set turbo multiplier
-        if (mCPUInformation.Features.Turbo) {
-          mCPUInformation.Frequency.TurboCount = 1;
-          mCPUInformation.Frequency.Turbo[0] = mCPUInformation.Frequency.Maximum + (1 << mCPUInformation.Frequency.Step);
+        if (mSystemInformation.Packages[Index].Features.Turbo) {
+          mSystemInformation.Packages[Index].Frequency.TurboCount = 1;
+          mSystemInformation.Packages[Index].Frequency.Turbo[0] = mSystemInformation.Packages[Index].Frequency.Maximum + (1 << mSystemInformation.Packages[Index].Frequency.Step);
         } else {
-          mCPUInformation.Frequency.TurboCount = 0;
+          mSystemInformation.Packages[Index].Frequency.TurboCount = 0;
         }
         // Check if multipliers exist
-        if ((mCPUInformation.Frequency.Minimum != 0) &&
-            (mCPUInformation.Frequency.Maximum != 0)) {
+        if ((mSystemInformation.Packages[Index].Frequency.Minimum != 0) &&
+            (mSystemInformation.Packages[Index].Frequency.Maximum != 0)) {
           break;
         }
       } else
@@ -896,29 +937,29 @@ DetermineCPUIntelFrequency (
     case CPU_FAMILY_3RD_ATOM:
     case CPU_FAMILY_4TH_ATOM:
       // Core i families
-      if (mCPUInformation.Features.ModelSpecificRegisters) {
+      if (mSystemInformation.Packages[Index].Features.ModelSpecificRegisters) {
         // Determine CPU minimum and maximum multipliers from MSR_PLATFORM_INFO model specific register
         MSR = AsmReadMsr64(0xCE);
-        mCPUInformation.Frequency.Maximum = (UINT8)CPUBitmask(MSR, 8, 15);
-        mCPUInformation.Frequency.Minimum = (UINT8)CPUBitmask(MSR, 40, 47);
-        mCPUInformation.Frequency.Step = 0;
+        mSystemInformation.Packages[Index].Frequency.Maximum = (UINT8)CPUBitmask(MSR, 8, 15);
+        mSystemInformation.Packages[Index].Frequency.Minimum = (UINT8)CPUBitmask(MSR, 40, 47);
+        mSystemInformation.Packages[Index].Frequency.Step = 0;
         // Determine CPU turbo multipliers
-        mCPUInformation.Frequency.TurboCount = 0;
-        if (mCPUInformation.Features.Turbo) {
+        mSystemInformation.Packages[Index].Frequency.TurboCount = 0;
+        if (mSystemInformation.Packages[Index].Features.Turbo) {
           // Read MSR_TURBO_RATIO_LIMIT model specific register
           MSR = AsmReadMsr64(0x1AD);
-          while (mCPUInformation.Frequency.TurboCount < CPU_TURBO_COUNT) {
+          while (mSystemInformation.Packages[Index].Frequency.TurboCount < CPU_TURBO_COUNT) {
             if (MSR == 0ULL) {
               break;
             }
             // Get each turbo group ratio
-            mCPUInformation.Frequency.Turbo[(mCPUInformation.Frequency.TurboCount)++] = (UINT8)(MSR & 0xFF);
+            mSystemInformation.Packages[Index].Frequency.Turbo[(mSystemInformation.Packages[Index].Frequency.TurboCount)++] = (UINT8)(MSR & 0xFF);
             MSR = RShiftU64(MSR, 8);
           }
         }
         // Check if multipliers exist
-        if ((mCPUInformation.Frequency.Minimum != 0) &&
-            (mCPUInformation.Frequency.Maximum != 0)) {
+        if ((mSystemInformation.Packages[Index].Frequency.Minimum != 0) &&
+            (mSystemInformation.Packages[Index].Frequency.Maximum != 0)) {
           break;
         }
       } else
@@ -933,40 +974,40 @@ DetermineCPUIntelFrequency (
     case CPU_FAMILY_XEON_PENTIUM_III:
     case CPU_FAMILY_CELERON:
       // P6 families
-      if (mCPUInformation.Features.ModelSpecificRegisters) {
-        mCPUInformation.Frequency.TurboCount = 0;
+      if (mSystemInformation.Packages[Index].Features.ModelSpecificRegisters) {
+        mSystemInformation.Packages[Index].Frequency.TurboCount = 0;
         switch (CPUBitmask(AsmReadMsr32(0x2A), 22, 25)) {
           case 1:
-            mCPUInformation.Frequency.Minimum = mCPUInformation.Frequency.Maximum = 3;
-            mCPUInformation.Frequency.Step = 0;
+            mSystemInformation.Packages[Index].Frequency.Minimum = mSystemInformation.Packages[Index].Frequency.Maximum = 3;
+            mSystemInformation.Packages[Index].Frequency.Step = 0;
             break;
 
           case 2:
-            mCPUInformation.Frequency.Minimum = mCPUInformation.Frequency.Maximum = 4;
-            mCPUInformation.Frequency.Step = 0;
+            mSystemInformation.Packages[Index].Frequency.Minimum = mSystemInformation.Packages[Index].Frequency.Maximum = 4;
+            mSystemInformation.Packages[Index].Frequency.Step = 0;
             break;
 
           case 5:
-            mCPUInformation.Frequency.Minimum = mCPUInformation.Frequency.Maximum = 7;
-            mCPUInformation.Frequency.Step = 1;
+            mSystemInformation.Packages[Index].Frequency.Minimum = mSystemInformation.Packages[Index].Frequency.Maximum = 7;
+            mSystemInformation.Packages[Index].Frequency.Step = 1;
             break;
 
           case 6:
-            mCPUInformation.Frequency.Minimum = mCPUInformation.Frequency.Maximum = 9;
-            mCPUInformation.Frequency.Step = 1;
+            mSystemInformation.Packages[Index].Frequency.Minimum = mSystemInformation.Packages[Index].Frequency.Maximum = 9;
+            mSystemInformation.Packages[Index].Frequency.Step = 1;
             break;
 
           case 7:
-            mCPUInformation.Frequency.Minimum = mCPUInformation.Frequency.Maximum = 5;
-            mCPUInformation.Frequency.Step = 1;
+            mSystemInformation.Packages[Index].Frequency.Minimum = mSystemInformation.Packages[Index].Frequency.Maximum = 5;
+            mSystemInformation.Packages[Index].Frequency.Step = 1;
             break;
 
           case 0:
           case 3:
           case 4:
           default:
-            mCPUInformation.Frequency.Minimum = mCPUInformation.Frequency.Maximum = 2;
-            mCPUInformation.Frequency.Step = 0;
+            mSystemInformation.Packages[Index].Frequency.Minimum = mSystemInformation.Packages[Index].Frequency.Maximum = 2;
+            mSystemInformation.Packages[Index].Frequency.Step = 0;
             break;
         }
         break;
@@ -978,26 +1019,27 @@ DetermineCPUIntelFrequency (
 
     default:
       // Set default multiplers
-      mCPUInformation.Frequency.Maximum = 1;
-      mCPUInformation.Frequency.Minimum = 1;
-      mCPUInformation.Frequency.Step = 0;
-      mCPUInformation.Frequency.TurboCount = 0;
+      mSystemInformation.Packages[Index].Frequency.Maximum = 1;
+      mSystemInformation.Packages[Index].Frequency.Minimum = 1;
+      mSystemInformation.Packages[Index].Frequency.Step = 0;
+      mSystemInformation.Packages[Index].Frequency.TurboCount = 0;
       break;
   }
 }
 // DetermineCPUIntelFamily
 /// Determine CPU family information
+/// @param Index The physical package index
 /// @return The CPU family information
 CPU_FAMILY
 EFIAPI
 DetermineCPUIntelFamily (
-  VOID
+  IN UINT32 Index
 ) {
   UINTN ExtendedModel;
   UINTN Family;
 
   // Determine Intel CPU family from model signature
-  switch (mCPUInformation.Model) {
+  switch (mSystemInformation.Packages[Index].Model) {
 
 # if defined(MDE_CPU_IA32)
 
@@ -1021,7 +1063,7 @@ DetermineCPUIntelFamily (
 
     case CPU_MODEL_MOBILE_PENTIUM_II:
       // Mobile Pentium II family
-      mCPUInformation.Features.Mobile = TRUE;
+      mSystemInformation.Packages[Index].Features.Mobile = TRUE;
       return CPU_FAMILY_MOBILE_PENTIUM_II;
 
     case CPU_MODEL_PENTIUM_II_OVERDRIVE:
@@ -1072,7 +1114,7 @@ DetermineCPUIntelFamily (
     case CPU_MODEL_PENTIUM_D_C1:
     case CPU_MODEL_PENTIUM_D_D0:
       // Pentium D family
-      mCPUInformation.Features.Mobile = TRUE;
+      mSystemInformation.Packages[Index].Features.Mobile = TRUE;
       return CPU_FAMILY_PENTIUM_D;
 
     case CPU_MODEL_PENTIUM_M:
@@ -1081,7 +1123,7 @@ DetermineCPUIntelFamily (
     case CPU_MODEL_INTEL_EMBEDDED:
     case CPU_MODEL_INTEL_EMBEDDED_B1:
       // Pentium M family
-      mCPUInformation.Features.Mobile = TRUE;
+      mSystemInformation.Packages[Index].Features.Mobile = TRUE;
       return CPU_FAMILY_PENTIUM_M;
 
     case CPU_MODEL_CELERON:
@@ -1092,7 +1134,7 @@ DetermineCPUIntelFamily (
 
     case CPU_MODEL_CELERON_D:
       // Celeron D family
-      mCPUInformation.Features.Mobile = TRUE;
+      mSystemInformation.Packages[Index].Features.Mobile = TRUE;
       return CPU_FAMILY_CELERON_D;
 
     case CPU_MODEL_CORE:
@@ -1116,7 +1158,7 @@ DetermineCPUIntelFamily (
     case CPU_MODEL_CORE2_MOBILE_E1:
     case CPU_MODEL_CORE2_MOBILE_M1:
       // Core2 Mobile family
-      mCPUInformation.Features.Mobile = TRUE;
+      mSystemInformation.Packages[Index].Features.Mobile = TRUE;
       return CPU_FAMILY_CORE2_MOBILE;
 
     case CPU_MODEL_CORE_i:
@@ -1149,7 +1191,7 @@ DetermineCPUIntelFamily (
 
     case CPU_MODEL_CORE_i_MOBILE:
       // Core i Mobile family
-      mCPUInformation.Features.Mobile = TRUE;
+      mSystemInformation.Packages[Index].Features.Mobile = TRUE;
       return CPU_FAMILY_CORE_i_MOBILE;
 
     case CPU_MODEL_2ND_CORE_i_MOBILE:
@@ -1158,29 +1200,29 @@ DetermineCPUIntelFamily (
     case CPU_MODEL_2ND_CORE_i_MOBILE_K0:
     case CPU_MODEL_2ND_CORE_i_MOBILE_J1:
       // 2nd Gen Core i Mobile family
-      mCPUInformation.Features.Mobile = TRUE;
+      mSystemInformation.Packages[Index].Features.Mobile = TRUE;
       return CPU_FAMILY_2ND_CORE_i_MOBILE;
 
     case CPU_MODEL_3RD_CORE_i_MOBILE:
     case CPU_MODEL_3RD_CORE_i_MOBILE_D0:
     case CPU_MODEL_3RD_CORE_i_MOBILE_E1:
       // 3rd Gen Core i Mobile family
-      mCPUInformation.Features.Mobile = TRUE;
+      mSystemInformation.Packages[Index].Features.Mobile = TRUE;
       return CPU_FAMILY_3RD_CORE_i_MOBILE;
 
     case CPU_MODEL_4TH_CORE_i_MOBILE:
       // 4th Gen Core i Mobile family
-      mCPUInformation.Features.Mobile = TRUE;
+      mSystemInformation.Packages[Index].Features.Mobile = TRUE;
       return CPU_FAMILY_4TH_CORE_i_MOBILE;
 
     case CPU_MODEL_5TH_CORE_i_MOBILE:
       // 5th Gen Core i Mobile family
-      mCPUInformation.Features.Mobile = TRUE;
+      mSystemInformation.Packages[Index].Features.Mobile = TRUE;
       return CPU_FAMILY_5TH_CORE_i_MOBILE;
 
     case CPU_MODEL_6TH_CORE_i_MOBILE:
       // 6th Gen Core i Mobile family
-      mCPUInformation.Features.Mobile = TRUE;
+      mSystemInformation.Packages[Index].Features.Mobile = TRUE;
       return CPU_FAMILY_6TH_CORE_i_MOBILE;
 
     case CPU_MODEL_XEON:
@@ -1229,27 +1271,27 @@ DetermineCPUIntelFamily (
     case CPU_MODEL_ATOM_B1:
     case CPU_MODEL_ATOM_B2:
       // Atom family
-      mCPUInformation.Features.Mobile = TRUE;
+      mSystemInformation.Packages[Index].Features.Mobile = TRUE;
       return CPU_FAMILY_ATOM;
 
     case CPU_MODEL_2ND_ATOM:
     case CPU_MODEL_2ND_ATOM_C0:
       // 2nd Gen Atom family
-      mCPUInformation.Features.Mobile = TRUE;
+      mSystemInformation.Packages[Index].Features.Mobile = TRUE;
       return CPU_FAMILY_2ND_ATOM;
 
     case CPU_MODEL_3RD_ATOM:
     case CPU_MODEL_3RD_ATOM_C1:
       // 3rd Gen Atom family
-      mCPUInformation.Features.Mobile = TRUE;
+      mSystemInformation.Packages[Index].Features.Mobile = TRUE;
       return CPU_FAMILY_3RD_ATOM;
 
 # endif
 
     default:
       // Model signature was not found, so attempt to return family from extended model
-      Family = (UINT32)(UINTN)CPUBitmask(mCPUInformation.Model, 8, 11);
-      ExtendedModel = (UINT32)(UINTN)CPUBitmask(mCPUInformation.Model, 4, 7);
+      Family = (UINT32)(UINTN)CPUBitmask(mSystemInformation.Packages[Index].Model, 8, 11);
+      ExtendedModel = (UINT32)(UINTN)CPUBitmask(mSystemInformation.Packages[Index].Model, 4, 7);
 
 # if defined(MDE_CPU_IA32)
 
@@ -1261,7 +1303,7 @@ DetermineCPUIntelFamily (
           case 0x0:
           case 0x1:
           case 0x2:
-            if (CPUBitmask(mCPUInformation.Model, 12, 12) != 0) {
+            if (CPUBitmask(mSystemInformation.Packages[Index].Model, 12, 12) != 0) {
               // Pentium Overdrive family
               return CPU_FAMILY_PENTIUM_OVERDRIVE;
             }
@@ -1269,7 +1311,7 @@ DetermineCPUIntelFamily (
             return CPU_FAMILY_PENTIUM;
 
           case 0x4:
-            if (CPUBitmask(mCPUInformation.Model, 12, 12) != 0) {
+            if (CPUBitmask(mSystemInformation.Packages[Index].Model, 12, 12) != 0) {
               // Pentium MMX Overdrive family
               return CPU_FAMILY_PENTIUM_MMX_OVERDRIVE;
             }
@@ -1278,12 +1320,12 @@ DetermineCPUIntelFamily (
 
           case 0x7:
             // Mobile Pentium family
-            mCPUInformation.Features.Mobile = TRUE;
+            mSystemInformation.Packages[Index].Features.Mobile = TRUE;
             return CPU_FAMILY_MOBILE_PENTIUM;
 
           case 0x8:
             // Mobile Pentium MMX family
-            mCPUInformation.Features.Mobile = TRUE;
+            mSystemInformation.Packages[Index].Features.Mobile = TRUE;
             return CPU_FAMILY_MOBILE_PENTIUM_MMX;
 
           default:
@@ -1299,7 +1341,7 @@ DetermineCPUIntelFamily (
 
       if (Family == 0x6) {
         // P6/P2/P3/Core/Core2/Core i architecture families
-        ExtendedModel |= ((mCPUInformation.Model >> 12) & 0xF0);
+        ExtendedModel |= ((mSystemInformation.Packages[Index].Model >> 12) & 0xF0);
         switch (ExtendedModel) {
 
 #  if defined(MDE_CPU_IA32)
@@ -1311,7 +1353,7 @@ DetermineCPUIntelFamily (
 
           case 0x3:
           case 0x5:
-            if (CPUBitmask(mCPUInformation.Model, 12, 12) != 0) {
+            if (CPUBitmask(mSystemInformation.Packages[Index].Model, 12, 12) != 0) {
               // Pentium II Overdrive family
               return CPU_FAMILY_PENTIUM_II_OVERDRIVE;
             }
@@ -1320,7 +1362,7 @@ DetermineCPUIntelFamily (
 
           case 0x6:
             // Mobile Pentium II family
-            mCPUInformation.Features.Mobile = TRUE;
+            mSystemInformation.Packages[Index].Features.Mobile = TRUE;
             return CPU_FAMILY_MOBILE_PENTIUM_II;
 
           case 0x7:
@@ -1341,7 +1383,7 @@ DetermineCPUIntelFamily (
           case 0xD:
           case 0x15:
             // Pentium M family
-            mCPUInformation.Features.Mobile = TRUE;
+            mSystemInformation.Packages[Index].Features.Mobile = TRUE;
             return CPU_FAMILY_PENTIUM_M;
 
 #   if !defined(MDE_CPU_IA32)
@@ -1354,7 +1396,7 @@ DetermineCPUIntelFamily (
 
           case 0x16:
             // Celeron D family
-            mCPUInformation.Features.Mobile = TRUE;
+            mSystemInformation.Packages[Index].Features.Mobile = TRUE;
             return CPU_FAMILY_CELERON_D;
 
           case 0xE:
@@ -1373,12 +1415,12 @@ DetermineCPUIntelFamily (
 
           case 0x1F:
             // Core i Mobile family
-            mCPUInformation.Features.Mobile = TRUE;
+            mSystemInformation.Packages[Index].Features.Mobile = TRUE;
             return CPU_FAMILY_CORE_i_MOBILE;
 
           case 0x25:
             // 2nd Gen Core i Mobile family
-            mCPUInformation.Features.Mobile = TRUE;
+            mSystemInformation.Packages[Index].Features.Mobile = TRUE;
             return CPU_FAMILY_2ND_CORE_i_MOBILE;
 
           case 0x2A:
@@ -1392,7 +1434,7 @@ DetermineCPUIntelFamily (
           case 0x3C:
           case 0x3D:
             // 3rd Gen Core i Mobile family
-            mCPUInformation.Features.Mobile = TRUE;
+            mSystemInformation.Packages[Index].Features.Mobile = TRUE;
             return CPU_FAMILY_3RD_CORE_i_MOBILE;
 
           case 0x3E:
@@ -1401,12 +1443,12 @@ DetermineCPUIntelFamily (
 
           case 0x45:
             // 4th Gen Core i Mobile family
-            mCPUInformation.Features.Mobile = TRUE;
+            mSystemInformation.Packages[Index].Features.Mobile = TRUE;
             return CPU_FAMILY_4TH_CORE_i_MOBILE;
 
           case 0x46:
             // 5th Gen Core i Mobile family
-            mCPUInformation.Features.Mobile = TRUE;
+            mSystemInformation.Packages[Index].Features.Mobile = TRUE;
             return CPU_FAMILY_5TH_CORE_i_MOBILE;
 
           case 0x47:
@@ -1415,7 +1457,7 @@ DetermineCPUIntelFamily (
 
           case 0x4E:
             // 6th Gen Core i Mobile family
-            mCPUInformation.Features.Mobile = TRUE;
+            mSystemInformation.Packages[Index].Features.Mobile = TRUE;
             return CPU_FAMILY_6TH_CORE_i_MOBILE;
 
           case 0x5E:
@@ -1424,7 +1466,7 @@ DetermineCPUIntelFamily (
 
           case 0x8E:
             // 7th Gen Core i Mobile family
-            mCPUInformation.Features.Mobile = TRUE;
+            mSystemInformation.Packages[Index].Features.Mobile = TRUE;
             return CPU_FAMILY_7TH_CORE_i_MOBILE;
 
           case 0x9E:
@@ -1459,7 +1501,7 @@ DetermineCPUIntelFamily (
           case 0x35:
           case 0x36:
             // Atom family
-            mCPUInformation.Features.Mobile = TRUE;
+            mSystemInformation.Packages[Index].Features.Mobile = TRUE;
             return CPU_FAMILY_ATOM;
 
           case 0x37:
@@ -1468,18 +1510,18 @@ DetermineCPUIntelFamily (
           case 0x5A:
           case 0x5D:
             // 2nd Gen Atom family
-            mCPUInformation.Features.Mobile = TRUE;
+            mSystemInformation.Packages[Index].Features.Mobile = TRUE;
             return CPU_FAMILY_2ND_ATOM;
 
           case 0x4C:
             // 3rd Gen Atom family
-            mCPUInformation.Features.Mobile = TRUE;
+            mSystemInformation.Packages[Index].Features.Mobile = TRUE;
             return CPU_FAMILY_3RD_ATOM;
 
           case 0x5C:
           case 0x5F:
             // 4th Gen Atom family
-            mCPUInformation.Features.Mobile = TRUE;
+            mSystemInformation.Packages[Index].Features.Mobile = TRUE;
             return CPU_FAMILY_4TH_ATOM;
 
 #  endif
@@ -1506,8 +1548,8 @@ DetermineCPUIntelFamily (
 
       if ((Family == 0xF) || (Family == 0)) {
         // Check extended family
-        Family += (UINT32)(UINTN)CPUBitmask(mCPUInformation.Model, 20, 27);
-        ExtendedModel |= ((mCPUInformation.Model >> 12) & 0xF0);
+        Family += (UINT32)(UINTN)CPUBitmask(mSystemInformation.Packages[Index].Model, 20, 27);
+        ExtendedModel |= ((mSystemInformation.Packages[Index].Model >> 12) & 0xF0);
 
 #  if defined(MDE_CPU_IA32) || defined(MDE_CPU_X64)
 

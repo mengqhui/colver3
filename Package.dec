@@ -22,9 +22,14 @@
   Include
 
 [LibraryClasses]
-  CPUInformationLib|$(PROJECT_PACKAGE)/Include/Library/CPUInformationLib.h
+  InformationLib|$(PROJECT_PACKAGE)/Include/Library/InformationLib.h
+  ConfigLib|$(PROJECT_PACKAGE)/Include/Library/ConfigLib.h
+  FontLib|$(PROJECT_PACKAGE)/Include/Library/FontLib.h
   GUILib|$(PROJECT_PACKAGE)/Include/Library/GUILib.h
+  LocalApicLib|$(PROJECT_PACKAGE)/Include/Library/LocalApicLib.h
   MpInitLib|$(PROJECT_PACKAGE)/Include/Library/MpInitLib.h
+  SmbiosLib|$(PROJECT_PACKAGE)/Library/Library/SmbiosLib.inf
+  StringLib|$(PROJECT_PACKAGE)/Include/Library/StringLib.h
 
 [Guids]
   

@@ -24,6 +24,7 @@
 #include <Register/LocalApic.h>
 #include <Register/Microcode.h>
 
+#include <Library/LogLib.h>
 #include <Library/MpInitLib.h>
 #include <Library/BaseLib.h>
 #include <Library/BaseMemoryLib.h>
@@ -581,15 +582,6 @@ BackupAndPrepareWakeupBuffer(
 VOID
 RestoreWakeupBuffer(
   IN CPU_MP_DATA              *CpuMpData
-  );
-
-/**
-  Enable Debug Agent to support source debugging on AP function.
-
-**/
-VOID
-EnableDebugAgent (
-  VOID
   );
 
 #endif

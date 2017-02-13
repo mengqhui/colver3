@@ -14,9 +14,9 @@
 
 #include "MpLib.h"
 
+#include <Library/LogLib.h>
 #include <Library/UefiLib.h>
 #include <Library/UefiBootServicesTableLib.h>
-#include <Library/DebugAgentLib.h>
 
 #include <Protocol/Timer.h>
 
@@ -31,21 +31,6 @@ volatile BOOLEAN mStopCheckAllApsStatus = TRUE;
 VOID             *mReservedApLoopFunc = NULL;
 UINTN            mReservedTopOfApStack;
 volatile UINT32  mNumberToFinish = 0;
-
-/**
-  Enable Debug Agent to support source debugging on AP function.
-
-**/
-VOID
-EnableDebugAgent (
-  VOID
-  )
-{
-  //
-  // Initialize Debug Agent to support source level debug in DXE phase
-  //
-  InitializeDebugAgent (DEBUG_AGENT_INIT_DXE_AP, NULL, NULL);
-}
 
 /**
   Get the pointer to CPU MP Data structure.
@@ -307,7 +292,6 @@ MpInitChangeApLoopCallback (
   while (mNumberToFinish > 0) {
     CpuPause ();
   }
-  DEBUG ((DEBUG_INFO, "%a() done!\n", __FUNCTION__));
 }
 
 /**

@@ -1,0 +1,46 @@
+## @file Library/FileLib/FileLib.inf
+#
+#  This program and the accompanying materials
+#  are licensed and made available under the terms and conditions of the BSD License
+#  which accompanies this distribution. The full text of the license may be found at
+#  http://opensource.org/licenses/bsd-license.php.
+#  THE PROGRAM IS DISTRIBUTED UNDER THE BSD LICENSE ON AN "AS IS" BASIS,
+#  WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
+#
+#
+##
+
+[Defines]
+  INF_VERSION                    = 0x00010016
+  BASE_NAME                      = StringLib
+  FILE_GUID                      = 50738973-9958-466A-B7E5-31FC74FEB9F9
+  MODULE_TYPE                    = BASE
+  VERSION_STRING                 = $(PROJECT_VERSION_BASE)
+  SUPPORTED_ARCHITECTURES        = X64|IA32|ARM|AARCH64
+  CONSTRUCTOR                    = StringLibInitialize
+  DESTRUCTOR                     = StringLibFinish
+  LIBRARY_CLASS                  = StringLib
+
+[Sources]
+  StringLib.c
+  Base64.c
+
+[Packages]
+  Package.dec
+  MdePkg/MdePkg.dec
+
+[LibraryClasses]
+  MemoryAllocationLib
+  UefiLib
+
+[Guids]
+  
+
+[Protocols]
+  gEfiUnicodeCollation2ProtocolGuid
+
+[Pcd]
+  
+
+[FeaturePcd]
+  

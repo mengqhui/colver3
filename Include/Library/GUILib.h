@@ -8,7 +8,8 @@
 #ifndef __GUI_LIBRARY_HEADER__
 #define __GUI_LIBRARY_HEADER__
 
-#include <Library/CPUInformationLib.h>
+#include <Library/ConfigLib.h>
+#include <Library/PlatformLib.h>
 
 // GUIRun
 /// Execute the GUI
@@ -17,6 +18,5 @@ EFIAPI
 GUIRun (
   VOID
 );
-//
 
 #endif // __GUI_LIBRARY_HEADER__

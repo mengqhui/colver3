@@ -9,6 +9,8 @@ rem ===========================================================================
 
 set PROJECT_NAME=
 
+set PROJECT_ROOT_PATH=\\efi
+
 set PROJECT_VERSION_FILE=%PROJECT_DIR_SUPPORT%\Version
 set PROJECT_VERSION_MAJOR_DEFAULT=3
 set PROJECT_VERSION_MINOR_DEFAULT=0
@@ -148,10 +150,10 @@ rem ===========================================================================
 
 :parseVersion
 
-call "%TOOL_UNQUOTE%" PROJECT_NAME %PROJECT_NAME%
-call "%TOOL_UNQUOTE%" PROJECT_USER_VERSION %PROJECT_USER_VERSION%
-call "%TOOL_UNQUOTE%" PROJECT_VERSION_FILE %PROJECT_VERSION_FILE%
-call "%TOOL_UNQUOTE%" PROJECT_VERSION_TAG %PROJECT_VERSION_TAG%
+%TOOL_UNQUOTE% PROJECT_NAME %PROJECT_NAME%
+%TOOL_UNQUOTE% PROJECT_USER_VERSION %PROJECT_USER_VERSION%
+%TOOL_UNQUOTE% PROJECT_VERSION_FILE %PROJECT_VERSION_FILE%
+%TOOL_UNQUOTE% PROJECT_VERSION_TAG %PROJECT_VERSION_TAG%
 call:checkNumber PROJECT_VERSION_MAJOR PROJECT_VERSION_MINOR PROJECT_VERSION_UPDATE PROJECT_FIRMWARE_MAJOR PROJECT_FIRMWARE_MINOR PROJECT_FIRMWARE_UPDATE
 if not defined PROJECT_USER_VERSION for /f "usebackq delims=" %%i in (` type "%PROJECT_VERSION_FILE%" `) do set PROJECT_USER_VERSION=%%i
 
@@ -236,7 +238,7 @@ rem ===========================================================================
 
 if not defined PROJECT_NAME set PROJECT_NAME=%PROJECT_PACKAGE:Pkg=%
 set PROJECT_SAFE_NAME=%PROJECT_NAME%
-call:toSafeName PROJECT_SAFE_NAME
+%TOOL_SAFENAME% PROJECT_SAFE_NAME
 %TOOL_ALIGN% Project: %PROJECT_NAME% (%PROJECT_SAFE_NAME%)
 
 rem ===========================================================================
@@ -289,7 +291,7 @@ set PROJECT_VERSION_HEADER=%PROJECT_DIR_BUILD%\Include\ProjectVersion.h
 
 if defined BUILD_CLEAN goto:eof
 
-call "%TOOL_MKDIR%" /f "%PROJECT_VERSION_HEADER%"
+%TOOL_MKDIR% /f "%PROJECT_VERSION_HEADER%"
 if errorlevel 1 goto:eof
 %TOOL_ALIGN% Generating: !PROJECT_VERSION_HEADER:%WORKSPACE%\=%!
 
@@ -298,6 +300,8 @@ echo #define _PROJECT_NAME L"%PROJECT_NAME%">>"%PROJECT_VERSION_HEADER%"
 echo #define _PROJECT_NAME_A "%PROJECT_NAME%">>"%PROJECT_VERSION_HEADER%"
 echo #define _PROJECT_SAFE_NAME L"%PROJECT_SAFE_NAME%">>"%PROJECT_VERSION_HEADER%"
 echo #define _PROJECT_SAFE_NAME_A "%PROJECT_SAFE_NAME%">>"%PROJECT_VERSION_HEADER%"
+echo #define _PROJECT_ROOT_PATH L"%PROJECT_ROOT_PATH%">>"%PROJECT_VERSION_HEADER%"
+echo #define _PROJECT_ROOT_PATH_A "%PROJECT_ROOT_PATH%">>"%PROJECT_VERSION_HEADER%"
 echo #define _PROJECT_VERSION L"%PROJECT_VERSION%">>"%PROJECT_VERSION_HEADER%"
 echo #define _PROJECT_VERSION_A "%PROJECT_VERSION%">>"%PROJECT_VERSION_HEADER%"
 echo #define _PROJECT_VERSIONCODE PACK_VERSIONCODE_FULL(%PROJECT_VERSION_MAJOR%, %PROJECT_VERSION_MINOR%, %PROJECT_VERSION_UPDATE%)>>"%PROJECT_VERSION_HEADER%"
@@ -308,44 +312,6 @@ echo #define _PROJECT_FIRMWARE_VERSION_A "%PROJECT_FIRMWARE_MAJOR%.%PROJECT_FIRM
 echo #define _PROJECT_FIRMWARE_VERSIONCODE PACK_VERSIONCODE_FULL(%PROJECT_FIRMWARE_MAJOR%, %PROJECT_FIRMWARE_MINOR%, %PROJECT_FIRMWARE_UPDATE%)>>"%PROJECT_VERSION_HEADER%"
 
 goto:eof
-
-rem ===========================================================================
-rem Convert to safe name
-rem ===========================================================================
-
-:toSafeName
-
-  set TU_INPUT=!%~1!
-  set TU_INPUT=%TU_INPUT:a=A%
-  set TU_INPUT=%TU_INPUT:b=B%
-  set TU_INPUT=%TU_INPUT:c=C%
-  set TU_INPUT=%TU_INPUT:d=D%
-  set TU_INPUT=%TU_INPUT:e=E%
-  set TU_INPUT=%TU_INPUT:f=F%
-  set TU_INPUT=%TU_INPUT:g=G%
-  set TU_INPUT=%TU_INPUT:h=H%
-  set TU_INPUT=%TU_INPUT:i=I%
-  set TU_INPUT=%TU_INPUT:j=J%
-  set TU_INPUT=%TU_INPUT:k=K%
-  set TU_INPUT=%TU_INPUT:l=L%
-  set TU_INPUT=%TU_INPUT:m=M%
-  set TU_INPUT=%TU_INPUT:n=N%
-  set TU_INPUT=%TU_INPUT:o=O%
-  set TU_INPUT=%TU_INPUT:p=P%
-  set TU_INPUT=%TU_INPUT:q=Q%
-  set TU_INPUT=%TU_INPUT:r=R%
-  set TU_INPUT=%TU_INPUT:s=S%
-  set TU_INPUT=%TU_INPUT:t=T%
-  set TU_INPUT=%TU_INPUT:u=U%
-  set TU_INPUT=%TU_INPUT:v=V%
-  set TU_INPUT=%TU_INPUT:w=W%
-  set TU_INPUT=%TU_INPUT:x=X%
-  set TU_INPUT=%TU_INPUT:y=Y%
-  set TU_INPUT=%TU_INPUT:z=Z%
-  set TU_INPUT=%TU_INPUT:-=_%
-  set TU_INPUT=%TU_INPUT: =_%
-  set %~1=%TU_INPUT%
-  goto:eof
 
 rem ===========================================================================
 rem Make sure variable is a number

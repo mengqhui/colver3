@@ -210,8 +210,7 @@ MicrocodeDetect (
     CurrentRevision = GetCurrentMicrocodeSignature ();
     if (CurrentRevision != LatestRevision) {
       AcquireSpinLock(&CpuMpData->MpLock);
-      DEBUG ((EFI_D_ERROR, "Updated microcode signature [0x%08x] does not match \
-                loaded microcode signature [0x%08x]\n", CurrentRevision, LatestRevision));
+      LOG(L"Updated microcode signature [0x%08x] does not match loaded microcode signature [0x%08x]\n", CurrentRevision, LatestRevision);
       ReleaseSpinLock(&CpuMpData->MpLock);
     }
   }

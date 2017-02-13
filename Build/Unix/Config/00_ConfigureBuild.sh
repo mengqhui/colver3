@@ -12,12 +12,13 @@ BUILD_CONFIG_DIR=
 BUILD_CONFIG_FILE=
 BUILD_TOOL_CHAIN_DEFAULT=ELFGCC
 BUILD_TARGET_DEFAULT=DEBUG
-BUILD_ARCH_DEFAULT=X64
+BUILD_ARCH_DEFAULT=X64 IA32
 
 BUILD_DRYRUN=
 BUILD_CLEAN=
 BUILD_TOOL_CHAIN=
 BUILD_ARCH=
+BUILD_TARGET=
 BUILD_SOURCE=
 
 PROJECT_BUILD_ARGUMENTS=
@@ -165,12 +166,6 @@ if [ -z ${BUILD_CONFIG_FILE:+x} ]; then
     BUILD_CONFIG_FILE=${WORKSPACE}\Conf\target.txt
   fi
 fi
-
-###############################################################################
-# TODO: Read the default build options from the configuration file
-###############################################################################
-
-
 
 ###############################################################################
 # Set default build options if options have no value

@@ -1,0 +1,44 @@
+## @file Library/ConfigLib/ConfigLib.inf
+#
+#  This program and the accompanying materials
+#  are licensed and made available under the terms and conditions of the BSD License
+#  which accompanies this distribution. The full text of the license may be found at
+#  http://opensource.org/licenses/bsd-license.php.
+#  THE PROGRAM IS DISTRIBUTED UNDER THE BSD LICENSE ON AN "AS IS" BASIS,
+#  WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
+#
+#
+##
+
+[Defines]
+  INF_VERSION                    = 0x00010016
+  BASE_NAME                      = ParseLib
+  FILE_GUID                      = 8DDD5AA3-5F8C-4A17-BF19-D25B59BF5ACE
+  MODULE_TYPE                    = BASE
+  VERSION_STRING                 = $(PROJECT_VERSION_BASE)
+  SUPPORTED_ARCHITECTURES        = X64|IA32|ARM|AARCH64
+  CONSTRUCTOR                    = ParseLibInitialize
+  DESTRUCTOR                     = ParseLibFinish
+  LIBRARY_CLASS                  = ParseLib
+
+[Sources]
+  ParseLib.c
+
+[Packages]
+  Package.dec
+  MdePkg/MdePkg.dec
+
+[LibraryClasses]
+  StringLib
+
+[Guids]
+  
+
+[Protocols]
+  
+
+[Pcd]
+  
+
+[FeaturePcd]
+  

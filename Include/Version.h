@@ -28,6 +28,24 @@
 // PROJECT_SAFE_NAME_A
 /// The project name string in ASCII, safe for filesystems
 #define PROJECT_SAFE_NAME_A _PROJECT_SAFE_NAME_A
+// PROJECT_ARCH
+/// The project architecture string
+#define PROJECT_ARCH _PROJECT_ARCH
+// PROJECT_ARCH_A
+/// The project architecture string in ASCII
+#define PROJECT_ARCH_A _PROJECT_ARCH_A
+// PROJECT_SAFE_ARCH
+/// The project architecture string, safe for filesystems
+#define PROJECT_SAFE_ARCH _PROJECT_SAFE_ARCH
+// PROJECT_SAFE_ARCH_A
+/// The project architecture string in ASCII, safe for filesystems
+#define PROJECT_SAFE_ARCH_A _PROJECT_SAFE_ARCH_A
+// PROJECT_ROOT_PATH
+/// The project root path string, safe for filesystems
+#define PROJECT_ROOT_PATH _PROJECT_ROOT_PATH
+// PROJECT_ROOT_PATH_A
+/// The project root path string in ASCII, safe for filesystems
+#define PROJECT_ROOT_PATH_A _PROJECT_ROOT_PATH_A
 // PROJECT_VERSION
 /// The project version string
 #define PROJECT_VERSION _PROJECT_VERSION
@@ -109,12 +127,6 @@ typedef UINT32 SIGNATURE;
 /// @param version The version code to unpack
 /// @return The update version
 #define UNPACK_VERSIONCODE_UPDATE(version) ((VERSIONCODE)(version) & 0xfff)
-
-// ARRAY_COUNT
-/// Get the count of elements in an array
-/// @param arr The array to get the count of elements
-/// @return The count of elements in the array
-#define ARRAY_COUNT(arr) ((arr == NULL) ? 0 : ((sizeof(arr) <= sizeof(arr[0])) ? 1 : (sizeof(arr) / sizeof(arr[0]))))
 
 // ADDRESS_OF
 /// Get the address of a structure member

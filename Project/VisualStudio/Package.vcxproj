@@ -224,12 +224,129 @@
     <ProjectBuildDocs> --docs-only</ProjectBuildDocs>
   </PropertyGroup>
   <PropertyGroup>
-    <IncludePath>$(SolutionDir)..\..\Include;$(SolutionDir)..\..\..\MdePkg\Include;$(SolutionDir)..\..\..\MdeModulePkg\Include;$(SolutionDir)..\..\..\IntelFrameworkPkg\Include;$(SolutionDir)..\..\..\IntelFrameworkModulePkg\Include;$(SolutionDir)..\..\..\MdePkg\Include\X64;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)..\..\Include;$(SolutionDir)..\..\..\MdePkg\Include;$(SolutionDir)..\..\..\MdeModulePkg\Include;$(SolutionDir)..\..\..\IntelFrameworkPkg\Include;$(SolutionDir)..\..\..\IntelFrameworkModulePkg\Include;$(SolutionDir)..\..\..\UefiCpuPkg\Include;$(SolutionDir)..\..\..\MdePkg\Include\X64;$(SolutionDir)..\..\..\AppPkg\Applications\Python\Python-2.7.2\Modules\expat;$(IncludePath)</IncludePath>
     <NMakeIncludeSearchPath>$(VC_IncludePath)</NMakeIncludeSearchPath>
     <NMakeBuildCommandLine>"$(SolutionDir)..\..\Build\Windows\BuildProject.bat" --no-log$(ProjectBuildISO)$(ProjectBuildDocs)$(ProjectBuildLite)$(ProjectPlatformToolset)$(ProjectBuildTarget)$(ProjectBuildArch)</NMakeBuildCommandLine>
     <NMakeCleanCommandLine>"$(SolutionDir)..\..\Build\Windows\BuildProject.bat" --no-log$(ProjectBuildISO)$(ProjectBuildDocs)$(ProjectBuildLite)$(ProjectPlatformToolset)$(ProjectBuildTarget)$(ProjectBuildArch) clean</NMakeCleanCommandLine>
     <NMakeReBuildCommandLine>"$(SolutionDir)..\..\Build\Windows\BuildProject.bat" --no-log$(ProjectBuildISO)$(ProjectBuildDocs)$(ProjectBuildLite)$(ProjectPlatformToolset)$(ProjectBuildTarget)$(ProjectBuildArch) clean
 "$(SolutionDir)..\..\Build\Windows\BuildProject.bat" --no-log$(ProjectBuildISO)$(ProjectBuildDocs)$(ProjectBuildLite)$(ProjectPlatformToolset)$(ProjectBuildTarget)$(ProjectBuildArch)</NMakeReBuildCommandLine>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug Lite|ARM'">
+    <NMakePreprocessorDefinitions>_PROJECT_NAME=L"";_PROJECT_NAME_A="";_PROJECT_SAFE_NAME=L"";_PROJECT_SAFE_NAME_A="";_PROJECT_ARCH=L"";_PROJECT_ARCH_A="";_PROJECT_SAFE_ARCH=L"";_PROJECT_SAFE_ARCH_A="";_PROJECT_ROOT_PATH=L"";_PROJECT_ROOT_PATH_A="";_PROJECT_VERSION=L"";_PROJECT_VERSION_A="";_PROJECT_VERSIONCODE=0;_PROJECT_DATETIME=L"";_PROJECT_DATETIME_A="";_PROJECT_FIRMWARE_VERSION=L"";_PROJECT_FIRMWARE_VERSION_A="";_PROJECT_FIRMWARE_VERSIONCODE=0;$(NMakePreprocessorDefinitions)</NMakePreprocessorDefinitions>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release ISO All|ARM'">
+    <NMakePreprocessorDefinitions>_PROJECT_NAME=L"";_PROJECT_NAME_A="";_PROJECT_SAFE_NAME=L"";_PROJECT_SAFE_NAME_A="";_PROJECT_ARCH=L"";_PROJECT_ARCH_A="";_PROJECT_SAFE_ARCH=L"";_PROJECT_SAFE_ARCH_A="";_PROJECT_ROOT_PATH=L"";_PROJECT_ROOT_PATH_A="";_PROJECT_VERSION=L"";_PROJECT_VERSION_A="";_PROJECT_VERSIONCODE=0;_PROJECT_DATETIME=L"";_PROJECT_DATETIME_A="";_PROJECT_FIRMWARE_VERSION=L"";_PROJECT_FIRMWARE_VERSION_A="";_PROJECT_FIRMWARE_VERSIONCODE=0;$(NMakePreprocessorDefinitions)</NMakePreprocessorDefinitions>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug Lite All|ARM'">
+    <NMakePreprocessorDefinitions>_PROJECT_NAME=L"";_PROJECT_NAME_A="";_PROJECT_SAFE_NAME=L"";_PROJECT_SAFE_NAME_A="";_PROJECT_ARCH=L"";_PROJECT_ARCH_A="";_PROJECT_SAFE_ARCH=L"";_PROJECT_SAFE_ARCH_A="";_PROJECT_ROOT_PATH=L"";_PROJECT_ROOT_PATH_A="";_PROJECT_VERSION=L"";_PROJECT_VERSION_A="";_PROJECT_VERSIONCODE=0;_PROJECT_DATETIME=L"";_PROJECT_DATETIME_A="";_PROJECT_FIRMWARE_VERSION=L"";_PROJECT_FIRMWARE_VERSION_A="";_PROJECT_FIRMWARE_VERSIONCODE=0;$(NMakePreprocessorDefinitions)</NMakePreprocessorDefinitions>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug ISO All|ARM'">
+    <NMakePreprocessorDefinitions>_PROJECT_NAME=L"";_PROJECT_NAME_A="";_PROJECT_SAFE_NAME=L"";_PROJECT_SAFE_NAME_A="";_PROJECT_ARCH=L"";_PROJECT_ARCH_A="";_PROJECT_SAFE_ARCH=L"";_PROJECT_SAFE_ARCH_A="";_PROJECT_ROOT_PATH=L"";_PROJECT_ROOT_PATH_A="";_PROJECT_VERSION=L"";_PROJECT_VERSION_A="";_PROJECT_VERSIONCODE=0;_PROJECT_DATETIME=L"";_PROJECT_DATETIME_A="";_PROJECT_FIRMWARE_VERSION=L"";_PROJECT_FIRMWARE_VERSION_A="";_PROJECT_FIRMWARE_VERSIONCODE=0;$(NMakePreprocessorDefinitions)</NMakePreprocessorDefinitions>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release ISO|ARM'">
+    <NMakePreprocessorDefinitions>_PROJECT_NAME=L"";_PROJECT_NAME_A="";_PROJECT_SAFE_NAME=L"";_PROJECT_SAFE_NAME_A="";_PROJECT_ARCH=L"";_PROJECT_ARCH_A="";_PROJECT_SAFE_ARCH=L"";_PROJECT_SAFE_ARCH_A="";_PROJECT_ROOT_PATH=L"";_PROJECT_ROOT_PATH_A="";_PROJECT_VERSION=L"";_PROJECT_VERSION_A="";_PROJECT_VERSIONCODE=0;_PROJECT_DATETIME=L"";_PROJECT_DATETIME_A="";_PROJECT_FIRMWARE_VERSION=L"";_PROJECT_FIRMWARE_VERSION_A="";_PROJECT_FIRMWARE_VERSIONCODE=0;$(NMakePreprocessorDefinitions)</NMakePreprocessorDefinitions>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release All|ARM'">
+    <NMakePreprocessorDefinitions>_PROJECT_NAME=L"";_PROJECT_NAME_A="";_PROJECT_SAFE_NAME=L"";_PROJECT_SAFE_NAME_A="";_PROJECT_ARCH=L"";_PROJECT_ARCH_A="";_PROJECT_SAFE_ARCH=L"";_PROJECT_SAFE_ARCH_A="";_PROJECT_ROOT_PATH=L"";_PROJECT_ROOT_PATH_A="";_PROJECT_VERSION=L"";_PROJECT_VERSION_A="";_PROJECT_VERSIONCODE=0;_PROJECT_DATETIME=L"";_PROJECT_DATETIME_A="";_PROJECT_FIRMWARE_VERSION=L"";_PROJECT_FIRMWARE_VERSION_A="";_PROJECT_FIRMWARE_VERSIONCODE=0;$(NMakePreprocessorDefinitions)</NMakePreprocessorDefinitions>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release Lite All|ARM'">
+    <NMakePreprocessorDefinitions>_PROJECT_NAME=L"";_PROJECT_NAME_A="";_PROJECT_SAFE_NAME=L"";_PROJECT_SAFE_NAME_A="";_PROJECT_ARCH=L"";_PROJECT_ARCH_A="";_PROJECT_SAFE_ARCH=L"";_PROJECT_SAFE_ARCH_A="";_PROJECT_ROOT_PATH=L"";_PROJECT_ROOT_PATH_A="";_PROJECT_VERSION=L"";_PROJECT_VERSION_A="";_PROJECT_VERSIONCODE=0;_PROJECT_DATETIME=L"";_PROJECT_DATETIME_A="";_PROJECT_FIRMWARE_VERSION=L"";_PROJECT_FIRMWARE_VERSION_A="";_PROJECT_FIRMWARE_VERSIONCODE=0;$(NMakePreprocessorDefinitions)</NMakePreprocessorDefinitions>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release Lite|ARM'">
+    <NMakePreprocessorDefinitions>_PROJECT_NAME=L"";_PROJECT_NAME_A="";_PROJECT_SAFE_NAME=L"";_PROJECT_SAFE_NAME_A="";_PROJECT_ARCH=L"";_PROJECT_ARCH_A="";_PROJECT_SAFE_ARCH=L"";_PROJECT_SAFE_ARCH_A="";_PROJECT_ROOT_PATH=L"";_PROJECT_ROOT_PATH_A="";_PROJECT_VERSION=L"";_PROJECT_VERSION_A="";_PROJECT_VERSIONCODE=0;_PROJECT_DATETIME=L"";_PROJECT_DATETIME_A="";_PROJECT_FIRMWARE_VERSION=L"";_PROJECT_FIRMWARE_VERSION_A="";_PROJECT_FIRMWARE_VERSIONCODE=0;$(NMakePreprocessorDefinitions)</NMakePreprocessorDefinitions>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug All|ARM'">
+    <NMakePreprocessorDefinitions>_PROJECT_NAME=L"";_PROJECT_NAME_A="";_PROJECT_SAFE_NAME=L"";_PROJECT_SAFE_NAME_A="";_PROJECT_ARCH=L"";_PROJECT_ARCH_A="";_PROJECT_SAFE_ARCH=L"";_PROJECT_SAFE_ARCH_A="";_PROJECT_ROOT_PATH=L"";_PROJECT_ROOT_PATH_A="";_PROJECT_VERSION=L"";_PROJECT_VERSION_A="";_PROJECT_VERSIONCODE=0;_PROJECT_DATETIME=L"";_PROJECT_DATETIME_A="";_PROJECT_FIRMWARE_VERSION=L"";_PROJECT_FIRMWARE_VERSION_A="";_PROJECT_FIRMWARE_VERSIONCODE=0;$(NMakePreprocessorDefinitions)</NMakePreprocessorDefinitions>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug ISO|ARM'">
+    <NMakePreprocessorDefinitions>_PROJECT_NAME=L"";_PROJECT_NAME_A="";_PROJECT_SAFE_NAME=L"";_PROJECT_SAFE_NAME_A="";_PROJECT_ARCH=L"";_PROJECT_ARCH_A="";_PROJECT_SAFE_ARCH=L"";_PROJECT_SAFE_ARCH_A="";_PROJECT_ROOT_PATH=L"";_PROJECT_ROOT_PATH_A="";_PROJECT_VERSION=L"";_PROJECT_VERSION_A="";_PROJECT_VERSIONCODE=0;_PROJECT_DATETIME=L"";_PROJECT_DATETIME_A="";_PROJECT_FIRMWARE_VERSION=L"";_PROJECT_FIRMWARE_VERSION_A="";_PROJECT_FIRMWARE_VERSIONCODE=0;$(NMakePreprocessorDefinitions)</NMakePreprocessorDefinitions>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">
+    <NMakePreprocessorDefinitions>_PROJECT_NAME=L"";_PROJECT_NAME_A="";_PROJECT_SAFE_NAME=L"";_PROJECT_SAFE_NAME_A="";_PROJECT_ARCH=L"";_PROJECT_ARCH_A="";_PROJECT_SAFE_ARCH=L"";_PROJECT_SAFE_ARCH_A="";_PROJECT_ROOT_PATH=L"";_PROJECT_ROOT_PATH_A="";_PROJECT_VERSION=L"";_PROJECT_VERSION_A="";_PROJECT_VERSIONCODE=0;_PROJECT_DATETIME=L"";_PROJECT_DATETIME_A="";_PROJECT_FIRMWARE_VERSION=L"";_PROJECT_FIRMWARE_VERSION_A="";_PROJECT_FIRMWARE_VERSIONCODE=0;$(NMakePreprocessorDefinitions)</NMakePreprocessorDefinitions>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM'">
+    <NMakePreprocessorDefinitions>_PROJECT_NAME=L"";_PROJECT_NAME_A="";_PROJECT_SAFE_NAME=L"";_PROJECT_SAFE_NAME_A="";_PROJECT_ARCH=L"";_PROJECT_ARCH_A="";_PROJECT_SAFE_ARCH=L"";_PROJECT_SAFE_ARCH_A="";_PROJECT_ROOT_PATH=L"";_PROJECT_ROOT_PATH_A="";_PROJECT_VERSION=L"";_PROJECT_VERSION_A="";_PROJECT_VERSIONCODE=0;_PROJECT_DATETIME=L"";_PROJECT_DATETIME_A="";_PROJECT_FIRMWARE_VERSION=L"";_PROJECT_FIRMWARE_VERSION_A="";_PROJECT_FIRMWARE_VERSIONCODE=0;$(NMakePreprocessorDefinitions)</NMakePreprocessorDefinitions>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Documentation|ARM'">
+    <NMakePreprocessorDefinitions>_PROJECT_NAME=L"";_PROJECT_NAME_A="";_PROJECT_SAFE_NAME=L"";_PROJECT_SAFE_NAME_A="";_PROJECT_ARCH=L"";_PROJECT_ARCH_A="";_PROJECT_SAFE_ARCH=L"";_PROJECT_SAFE_ARCH_A="";_PROJECT_ROOT_PATH=L"";_PROJECT_ROOT_PATH_A="";_PROJECT_VERSION=L"";_PROJECT_VERSION_A="";_PROJECT_VERSIONCODE=0;_PROJECT_DATETIME=L"";_PROJECT_DATETIME_A="";_PROJECT_FIRMWARE_VERSION=L"";_PROJECT_FIRMWARE_VERSION_A="";_PROJECT_FIRMWARE_VERSIONCODE=0;$(NMakePreprocessorDefinitions)</NMakePreprocessorDefinitions>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug Lite|Win32'">
+    <NMakePreprocessorDefinitions>_PROJECT_NAME=L"";_PROJECT_NAME_A="";_PROJECT_SAFE_NAME=L"";_PROJECT_SAFE_NAME_A="";_PROJECT_ARCH=L"";_PROJECT_ARCH_A="";_PROJECT_SAFE_ARCH=L"";_PROJECT_SAFE_ARCH_A="";_PROJECT_ROOT_PATH=L"";_PROJECT_ROOT_PATH_A="";_PROJECT_VERSION=L"";_PROJECT_VERSION_A="";_PROJECT_VERSIONCODE=0;_PROJECT_DATETIME=L"";_PROJECT_DATETIME_A="";_PROJECT_FIRMWARE_VERSION=L"";_PROJECT_FIRMWARE_VERSION_A="";_PROJECT_FIRMWARE_VERSIONCODE=0;$(NMakePreprocessorDefinitions)</NMakePreprocessorDefinitions>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release ISO All|Win32'">
+    <NMakePreprocessorDefinitions>_PROJECT_NAME=L"";_PROJECT_NAME_A="";_PROJECT_SAFE_NAME=L"";_PROJECT_SAFE_NAME_A="";_PROJECT_ARCH=L"";_PROJECT_ARCH_A="";_PROJECT_SAFE_ARCH=L"";_PROJECT_SAFE_ARCH_A="";_PROJECT_ROOT_PATH=L"";_PROJECT_ROOT_PATH_A="";_PROJECT_VERSION=L"";_PROJECT_VERSION_A="";_PROJECT_VERSIONCODE=0;_PROJECT_DATETIME=L"";_PROJECT_DATETIME_A="";_PROJECT_FIRMWARE_VERSION=L"";_PROJECT_FIRMWARE_VERSION_A="";_PROJECT_FIRMWARE_VERSIONCODE=0;$(NMakePreprocessorDefinitions)</NMakePreprocessorDefinitions>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug Lite All|Win32'">
+    <NMakePreprocessorDefinitions>_PROJECT_NAME=L"";_PROJECT_NAME_A="";_PROJECT_SAFE_NAME=L"";_PROJECT_SAFE_NAME_A="";_PROJECT_ARCH=L"";_PROJECT_ARCH_A="";_PROJECT_SAFE_ARCH=L"";_PROJECT_SAFE_ARCH_A="";_PROJECT_ROOT_PATH=L"";_PROJECT_ROOT_PATH_A="";_PROJECT_VERSION=L"";_PROJECT_VERSION_A="";_PROJECT_VERSIONCODE=0;_PROJECT_DATETIME=L"";_PROJECT_DATETIME_A="";_PROJECT_FIRMWARE_VERSION=L"";_PROJECT_FIRMWARE_VERSION_A="";_PROJECT_FIRMWARE_VERSIONCODE=0;$(NMakePreprocessorDefinitions)</NMakePreprocessorDefinitions>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug ISO All|Win32'">
+    <NMakePreprocessorDefinitions>_PROJECT_NAME=L"";_PROJECT_NAME_A="";_PROJECT_SAFE_NAME=L"";_PROJECT_SAFE_NAME_A="";_PROJECT_ARCH=L"";_PROJECT_ARCH_A="";_PROJECT_SAFE_ARCH=L"";_PROJECT_SAFE_ARCH_A="";_PROJECT_ROOT_PATH=L"";_PROJECT_ROOT_PATH_A="";_PROJECT_VERSION=L"";_PROJECT_VERSION_A="";_PROJECT_VERSIONCODE=0;_PROJECT_DATETIME=L"";_PROJECT_DATETIME_A="";_PROJECT_FIRMWARE_VERSION=L"";_PROJECT_FIRMWARE_VERSION_A="";_PROJECT_FIRMWARE_VERSIONCODE=0;$(NMakePreprocessorDefinitions)</NMakePreprocessorDefinitions>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release ISO|Win32'">
+    <NMakePreprocessorDefinitions>_PROJECT_NAME=L"";_PROJECT_NAME_A="";_PROJECT_SAFE_NAME=L"";_PROJECT_SAFE_NAME_A="";_PROJECT_ARCH=L"";_PROJECT_ARCH_A="";_PROJECT_SAFE_ARCH=L"";_PROJECT_SAFE_ARCH_A="";_PROJECT_ROOT_PATH=L"";_PROJECT_ROOT_PATH_A="";_PROJECT_VERSION=L"";_PROJECT_VERSION_A="";_PROJECT_VERSIONCODE=0;_PROJECT_DATETIME=L"";_PROJECT_DATETIME_A="";_PROJECT_FIRMWARE_VERSION=L"";_PROJECT_FIRMWARE_VERSION_A="";_PROJECT_FIRMWARE_VERSIONCODE=0;$(NMakePreprocessorDefinitions)</NMakePreprocessorDefinitions>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release All|Win32'">
+    <NMakePreprocessorDefinitions>_PROJECT_NAME=L"";_PROJECT_NAME_A="";_PROJECT_SAFE_NAME=L"";_PROJECT_SAFE_NAME_A="";_PROJECT_ARCH=L"";_PROJECT_ARCH_A="";_PROJECT_SAFE_ARCH=L"";_PROJECT_SAFE_ARCH_A="";_PROJECT_ROOT_PATH=L"";_PROJECT_ROOT_PATH_A="";_PROJECT_VERSION=L"";_PROJECT_VERSION_A="";_PROJECT_VERSIONCODE=0;_PROJECT_DATETIME=L"";_PROJECT_DATETIME_A="";_PROJECT_FIRMWARE_VERSION=L"";_PROJECT_FIRMWARE_VERSION_A="";_PROJECT_FIRMWARE_VERSIONCODE=0;$(NMakePreprocessorDefinitions)</NMakePreprocessorDefinitions>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release Lite All|Win32'">
+    <NMakePreprocessorDefinitions>_PROJECT_NAME=L"";_PROJECT_NAME_A="";_PROJECT_SAFE_NAME=L"";_PROJECT_SAFE_NAME_A="";_PROJECT_ARCH=L"";_PROJECT_ARCH_A="";_PROJECT_SAFE_ARCH=L"";_PROJECT_SAFE_ARCH_A="";_PROJECT_ROOT_PATH=L"";_PROJECT_ROOT_PATH_A="";_PROJECT_VERSION=L"";_PROJECT_VERSION_A="";_PROJECT_VERSIONCODE=0;_PROJECT_DATETIME=L"";_PROJECT_DATETIME_A="";_PROJECT_FIRMWARE_VERSION=L"";_PROJECT_FIRMWARE_VERSION_A="";_PROJECT_FIRMWARE_VERSIONCODE=0;$(NMakePreprocessorDefinitions)</NMakePreprocessorDefinitions>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release Lite|Win32'">
+    <NMakePreprocessorDefinitions>_PROJECT_NAME=L"";_PROJECT_NAME_A="";_PROJECT_SAFE_NAME=L"";_PROJECT_SAFE_NAME_A="";_PROJECT_ARCH=L"";_PROJECT_ARCH_A="";_PROJECT_SAFE_ARCH=L"";_PROJECT_SAFE_ARCH_A="";_PROJECT_ROOT_PATH=L"";_PROJECT_ROOT_PATH_A="";_PROJECT_VERSION=L"";_PROJECT_VERSION_A="";_PROJECT_VERSIONCODE=0;_PROJECT_DATETIME=L"";_PROJECT_DATETIME_A="";_PROJECT_FIRMWARE_VERSION=L"";_PROJECT_FIRMWARE_VERSION_A="";_PROJECT_FIRMWARE_VERSIONCODE=0;$(NMakePreprocessorDefinitions)</NMakePreprocessorDefinitions>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug All|Win32'">
+    <NMakePreprocessorDefinitions>_PROJECT_NAME=L"";_PROJECT_NAME_A="";_PROJECT_SAFE_NAME=L"";_PROJECT_SAFE_NAME_A="";_PROJECT_ARCH=L"";_PROJECT_ARCH_A="";_PROJECT_SAFE_ARCH=L"";_PROJECT_SAFE_ARCH_A="";_PROJECT_ROOT_PATH=L"";_PROJECT_ROOT_PATH_A="";_PROJECT_VERSION=L"";_PROJECT_VERSION_A="";_PROJECT_VERSIONCODE=0;_PROJECT_DATETIME=L"";_PROJECT_DATETIME_A="";_PROJECT_FIRMWARE_VERSION=L"";_PROJECT_FIRMWARE_VERSION_A="";_PROJECT_FIRMWARE_VERSIONCODE=0;$(NMakePreprocessorDefinitions)</NMakePreprocessorDefinitions>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug ISO|Win32'">
+    <NMakePreprocessorDefinitions>_PROJECT_NAME=L"";_PROJECT_NAME_A="";_PROJECT_SAFE_NAME=L"";_PROJECT_SAFE_NAME_A="";_PROJECT_ARCH=L"";_PROJECT_ARCH_A="";_PROJECT_SAFE_ARCH=L"";_PROJECT_SAFE_ARCH_A="";_PROJECT_ROOT_PATH=L"";_PROJECT_ROOT_PATH_A="";_PROJECT_VERSION=L"";_PROJECT_VERSION_A="";_PROJECT_VERSIONCODE=0;_PROJECT_DATETIME=L"";_PROJECT_DATETIME_A="";_PROJECT_FIRMWARE_VERSION=L"";_PROJECT_FIRMWARE_VERSION_A="";_PROJECT_FIRMWARE_VERSIONCODE=0;$(NMakePreprocessorDefinitions)</NMakePreprocessorDefinitions>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <NMakePreprocessorDefinitions>_PROJECT_NAME=L"";_PROJECT_NAME_A="";_PROJECT_SAFE_NAME=L"";_PROJECT_SAFE_NAME_A="";_PROJECT_ARCH=L"";_PROJECT_ARCH_A="";_PROJECT_SAFE_ARCH=L"";_PROJECT_SAFE_ARCH_A="";_PROJECT_ROOT_PATH=L"";_PROJECT_ROOT_PATH_A="";_PROJECT_VERSION=L"";_PROJECT_VERSION_A="";_PROJECT_VERSIONCODE=0;_PROJECT_DATETIME=L"";_PROJECT_DATETIME_A="";_PROJECT_FIRMWARE_VERSION=L"";_PROJECT_FIRMWARE_VERSION_A="";_PROJECT_FIRMWARE_VERSIONCODE=0;$(NMakePreprocessorDefinitions)</NMakePreprocessorDefinitions>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <NMakePreprocessorDefinitions>_PROJECT_NAME=L"";_PROJECT_NAME_A="";_PROJECT_SAFE_NAME=L"";_PROJECT_SAFE_NAME_A="";_PROJECT_ARCH=L"";_PROJECT_ARCH_A="";_PROJECT_SAFE_ARCH=L"";_PROJECT_SAFE_ARCH_A="";_PROJECT_ROOT_PATH=L"";_PROJECT_ROOT_PATH_A="";_PROJECT_VERSION=L"";_PROJECT_VERSION_A="";_PROJECT_VERSIONCODE=0;_PROJECT_DATETIME=L"";_PROJECT_DATETIME_A="";_PROJECT_FIRMWARE_VERSION=L"";_PROJECT_FIRMWARE_VERSION_A="";_PROJECT_FIRMWARE_VERSIONCODE=0;$(NMakePreprocessorDefinitions)</NMakePreprocessorDefinitions>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Documentation|Win32'">
+    <NMakePreprocessorDefinitions>_PROJECT_NAME=L"";_PROJECT_NAME_A="";_PROJECT_SAFE_NAME=L"";_PROJECT_SAFE_NAME_A="";_PROJECT_ARCH=L"";_PROJECT_ARCH_A="";_PROJECT_SAFE_ARCH=L"";_PROJECT_SAFE_ARCH_A="";_PROJECT_ROOT_PATH=L"";_PROJECT_ROOT_PATH_A="";_PROJECT_VERSION=L"";_PROJECT_VERSION_A="";_PROJECT_VERSIONCODE=0;_PROJECT_DATETIME=L"";_PROJECT_DATETIME_A="";_PROJECT_FIRMWARE_VERSION=L"";_PROJECT_FIRMWARE_VERSION_A="";_PROJECT_FIRMWARE_VERSIONCODE=0;$(NMakePreprocessorDefinitions)</NMakePreprocessorDefinitions>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug Lite|X64'">
+    <NMakePreprocessorDefinitions>_PROJECT_NAME=L"";_PROJECT_NAME_A="";_PROJECT_SAFE_NAME=L"";_PROJECT_SAFE_NAME_A="";_PROJECT_ARCH=L"";_PROJECT_ARCH_A="";_PROJECT_SAFE_ARCH=L"";_PROJECT_SAFE_ARCH_A="";_PROJECT_ROOT_PATH=L"";_PROJECT_ROOT_PATH_A="";_PROJECT_VERSION=L"";_PROJECT_VERSION_A="";_PROJECT_VERSIONCODE=0;_PROJECT_DATETIME=L"";_PROJECT_DATETIME_A="";_PROJECT_FIRMWARE_VERSION=L"";_PROJECT_FIRMWARE_VERSION_A="";_PROJECT_FIRMWARE_VERSIONCODE=0;$(NMakePreprocessorDefinitions)</NMakePreprocessorDefinitions>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release ISO All|X64'">
+    <NMakePreprocessorDefinitions>_PROJECT_NAME=L"";_PROJECT_NAME_A="";_PROJECT_SAFE_NAME=L"";_PROJECT_SAFE_NAME_A="";_PROJECT_ARCH=L"";_PROJECT_ARCH_A="";_PROJECT_SAFE_ARCH=L"";_PROJECT_SAFE_ARCH_A="";_PROJECT_ROOT_PATH=L"";_PROJECT_ROOT_PATH_A="";_PROJECT_VERSION=L"";_PROJECT_VERSION_A="";_PROJECT_VERSIONCODE=0;_PROJECT_DATETIME=L"";_PROJECT_DATETIME_A="";_PROJECT_FIRMWARE_VERSION=L"";_PROJECT_FIRMWARE_VERSION_A="";_PROJECT_FIRMWARE_VERSIONCODE=0;$(NMakePreprocessorDefinitions)</NMakePreprocessorDefinitions>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug Lite All|X64'">
+    <NMakePreprocessorDefinitions>_PROJECT_NAME=L"";_PROJECT_NAME_A="";_PROJECT_SAFE_NAME=L"";_PROJECT_SAFE_NAME_A="";_PROJECT_ARCH=L"";_PROJECT_ARCH_A="";_PROJECT_SAFE_ARCH=L"";_PROJECT_SAFE_ARCH_A="";_PROJECT_ROOT_PATH=L"";_PROJECT_ROOT_PATH_A="";_PROJECT_VERSION=L"";_PROJECT_VERSION_A="";_PROJECT_VERSIONCODE=0;_PROJECT_DATETIME=L"";_PROJECT_DATETIME_A="";_PROJECT_FIRMWARE_VERSION=L"";_PROJECT_FIRMWARE_VERSION_A="";_PROJECT_FIRMWARE_VERSIONCODE=0;$(NMakePreprocessorDefinitions)</NMakePreprocessorDefinitions>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug ISO All|X64'">
+    <NMakePreprocessorDefinitions>_PROJECT_NAME=L"";_PROJECT_NAME_A="";_PROJECT_SAFE_NAME=L"";_PROJECT_SAFE_NAME_A="";_PROJECT_ARCH=L"";_PROJECT_ARCH_A="";_PROJECT_SAFE_ARCH=L"";_PROJECT_SAFE_ARCH_A="";_PROJECT_ROOT_PATH=L"";_PROJECT_ROOT_PATH_A="";_PROJECT_VERSION=L"";_PROJECT_VERSION_A="";_PROJECT_VERSIONCODE=0;_PROJECT_DATETIME=L"";_PROJECT_DATETIME_A="";_PROJECT_FIRMWARE_VERSION=L"";_PROJECT_FIRMWARE_VERSION_A="";_PROJECT_FIRMWARE_VERSIONCODE=0;$(NMakePreprocessorDefinitions)</NMakePreprocessorDefinitions>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release ISO|X64'">
+    <NMakePreprocessorDefinitions>_PROJECT_NAME=L"";_PROJECT_NAME_A="";_PROJECT_SAFE_NAME=L"";_PROJECT_SAFE_NAME_A="";_PROJECT_ARCH=L"";_PROJECT_ARCH_A="";_PROJECT_SAFE_ARCH=L"";_PROJECT_SAFE_ARCH_A="";_PROJECT_ROOT_PATH=L"";_PROJECT_ROOT_PATH_A="";_PROJECT_VERSION=L"";_PROJECT_VERSION_A="";_PROJECT_VERSIONCODE=0;_PROJECT_DATETIME=L"";_PROJECT_DATETIME_A="";_PROJECT_FIRMWARE_VERSION=L"";_PROJECT_FIRMWARE_VERSION_A="";_PROJECT_FIRMWARE_VERSIONCODE=0;$(NMakePreprocessorDefinitions)</NMakePreprocessorDefinitions>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release All|X64'">
+    <NMakePreprocessorDefinitions>_PROJECT_NAME=L"";_PROJECT_NAME_A="";_PROJECT_SAFE_NAME=L"";_PROJECT_SAFE_NAME_A="";_PROJECT_ARCH=L"";_PROJECT_ARCH_A="";_PROJECT_SAFE_ARCH=L"";_PROJECT_SAFE_ARCH_A="";_PROJECT_ROOT_PATH=L"";_PROJECT_ROOT_PATH_A="";_PROJECT_VERSION=L"";_PROJECT_VERSION_A="";_PROJECT_VERSIONCODE=0;_PROJECT_DATETIME=L"";_PROJECT_DATETIME_A="";_PROJECT_FIRMWARE_VERSION=L"";_PROJECT_FIRMWARE_VERSION_A="";_PROJECT_FIRMWARE_VERSIONCODE=0;$(NMakePreprocessorDefinitions)</NMakePreprocessorDefinitions>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release Lite All|X64'">
+    <NMakePreprocessorDefinitions>_PROJECT_NAME=L"";_PROJECT_NAME_A="";_PROJECT_SAFE_NAME=L"";_PROJECT_SAFE_NAME_A="";_PROJECT_ARCH=L"";_PROJECT_ARCH_A="";_PROJECT_SAFE_ARCH=L"";_PROJECT_SAFE_ARCH_A="";_PROJECT_ROOT_PATH=L"";_PROJECT_ROOT_PATH_A="";_PROJECT_VERSION=L"";_PROJECT_VERSION_A="";_PROJECT_VERSIONCODE=0;_PROJECT_DATETIME=L"";_PROJECT_DATETIME_A="";_PROJECT_FIRMWARE_VERSION=L"";_PROJECT_FIRMWARE_VERSION_A="";_PROJECT_FIRMWARE_VERSIONCODE=0;$(NMakePreprocessorDefinitions)</NMakePreprocessorDefinitions>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release Lite|X64'">
+    <NMakePreprocessorDefinitions>_PROJECT_NAME=L"";_PROJECT_NAME_A="";_PROJECT_SAFE_NAME=L"";_PROJECT_SAFE_NAME_A="";_PROJECT_ARCH=L"";_PROJECT_ARCH_A="";_PROJECT_SAFE_ARCH=L"";_PROJECT_SAFE_ARCH_A="";_PROJECT_ROOT_PATH=L"";_PROJECT_ROOT_PATH_A="";_PROJECT_VERSION=L"";_PROJECT_VERSION_A="";_PROJECT_VERSIONCODE=0;_PROJECT_DATETIME=L"";_PROJECT_DATETIME_A="";_PROJECT_FIRMWARE_VERSION=L"";_PROJECT_FIRMWARE_VERSION_A="";_PROJECT_FIRMWARE_VERSIONCODE=0;$(NMakePreprocessorDefinitions)</NMakePreprocessorDefinitions>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug All|X64'">
+    <NMakePreprocessorDefinitions>_PROJECT_NAME=L"";_PROJECT_NAME_A="";_PROJECT_SAFE_NAME=L"";_PROJECT_SAFE_NAME_A="";_PROJECT_ARCH=L"";_PROJECT_ARCH_A="";_PROJECT_SAFE_ARCH=L"";_PROJECT_SAFE_ARCH_A="";_PROJECT_ROOT_PATH=L"";_PROJECT_ROOT_PATH_A="";_PROJECT_VERSION=L"";_PROJECT_VERSION_A="";_PROJECT_VERSIONCODE=0;_PROJECT_DATETIME=L"";_PROJECT_DATETIME_A="";_PROJECT_FIRMWARE_VERSION=L"";_PROJECT_FIRMWARE_VERSION_A="";_PROJECT_FIRMWARE_VERSIONCODE=0;$(NMakePreprocessorDefinitions)</NMakePreprocessorDefinitions>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug ISO|X64'">
+    <NMakePreprocessorDefinitions>_PROJECT_NAME=L"";_PROJECT_NAME_A="";_PROJECT_SAFE_NAME=L"";_PROJECT_SAFE_NAME_A="";_PROJECT_ARCH=L"";_PROJECT_ARCH_A="";_PROJECT_SAFE_ARCH=L"";_PROJECT_SAFE_ARCH_A="";_PROJECT_ROOT_PATH=L"";_PROJECT_ROOT_PATH_A="";_PROJECT_VERSION=L"";_PROJECT_VERSION_A="";_PROJECT_VERSIONCODE=0;_PROJECT_DATETIME=L"";_PROJECT_DATETIME_A="";_PROJECT_FIRMWARE_VERSION=L"";_PROJECT_FIRMWARE_VERSION_A="";_PROJECT_FIRMWARE_VERSIONCODE=0;$(NMakePreprocessorDefinitions)</NMakePreprocessorDefinitions>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|X64'">
+    <NMakePreprocessorDefinitions>_PROJECT_NAME=L"";_PROJECT_NAME_A="";_PROJECT_SAFE_NAME=L"";_PROJECT_SAFE_NAME_A="";_PROJECT_ARCH=L"";_PROJECT_ARCH_A="";_PROJECT_SAFE_ARCH=L"";_PROJECT_SAFE_ARCH_A="";_PROJECT_ROOT_PATH=L"";_PROJECT_ROOT_PATH_A="";_PROJECT_VERSION=L"";_PROJECT_VERSION_A="";_PROJECT_VERSIONCODE=0;_PROJECT_DATETIME=L"";_PROJECT_DATETIME_A="";_PROJECT_FIRMWARE_VERSION=L"";_PROJECT_FIRMWARE_VERSION_A="";_PROJECT_FIRMWARE_VERSIONCODE=0;$(NMakePreprocessorDefinitions)</NMakePreprocessorDefinitions>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|X64'">
+    <NMakePreprocessorDefinitions>_PROJECT_NAME=L"";_PROJECT_NAME_A="";_PROJECT_SAFE_NAME=L"";_PROJECT_SAFE_NAME_A="";_PROJECT_ARCH=L"";_PROJECT_ARCH_A="";_PROJECT_SAFE_ARCH=L"";_PROJECT_SAFE_ARCH_A="";_PROJECT_ROOT_PATH=L"";_PROJECT_ROOT_PATH_A="";_PROJECT_VERSION=L"";_PROJECT_VERSION_A="";_PROJECT_VERSIONCODE=0;_PROJECT_DATETIME=L"";_PROJECT_DATETIME_A="";_PROJECT_FIRMWARE_VERSION=L"";_PROJECT_FIRMWARE_VERSION_A="";_PROJECT_FIRMWARE_VERSIONCODE=0;$(NMakePreprocessorDefinitions)</NMakePreprocessorDefinitions>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Documentation|X64'">
+    <NMakePreprocessorDefinitions>_PROJECT_NAME=L"";_PROJECT_NAME_A="";_PROJECT_SAFE_NAME=L"";_PROJECT_SAFE_NAME_A="";_PROJECT_ARCH=L"";_PROJECT_ARCH_A="";_PROJECT_SAFE_ARCH=L"";_PROJECT_SAFE_ARCH_A="";_PROJECT_ROOT_PATH=L"";_PROJECT_ROOT_PATH_A="";_PROJECT_VERSION=L"";_PROJECT_VERSION_A="";_PROJECT_VERSIONCODE=0;_PROJECT_DATETIME=L"";_PROJECT_DATETIME_A="";_PROJECT_FIRMWARE_VERSION=L"";_PROJECT_FIRMWARE_VERSION_A="";_PROJECT_FIRMWARE_VERSIONCODE=0;$(NMakePreprocessorDefinitions)</NMakePreprocessorDefinitions>
   </PropertyGroup>
   <ItemDefinitionGroup>
     <BuildLog>
@@ -238,13 +355,32 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\..\Application\GUI\GUI.c" />
-    <ClCompile Include="..\..\Library\CPUInformationLib\AMD.c" />
-    <ClCompile Include="..\..\Library\CPUInformationLib\CPUInformationLib.c" />
-    <ClCompile Include="..\..\Library\CPUInformationLib\Intel.c" />
+    <ClCompile Include="..\..\Library\BaseXApicX2ApicLib\BaseXApicX2ApicLib.c" />
+    <ClCompile Include="..\..\Library\ConfigLib\ConfigLib.c" />
+    <ClCompile Include="..\..\Library\FileLib\FileLib.c" />
+    <ClCompile Include="..\..\Library\FontLib\FontLib.c" />
     <ClCompile Include="..\..\Library\GUILib\GUILib.c" />
+    <ClCompile Include="..\..\Library\LogLib\LogLib.c" />
+    <ClCompile Include="..\..\Library\MpInitLib\BaseXApicX2ApicLib.c" />
+    <ClCompile Include="..\..\Library\MpInitLib\IpfTimerLib.c" />
     <ClCompile Include="..\..\Library\MpInitLib\MpInitLib.c" />
     <ClCompile Include="..\..\Library\MpInitLib\Microcode.c" />
     <ClCompile Include="..\..\Library\MpInitLib\MpLib.c" />
+    <ClCompile Include="..\..\Library\MpInitLib\X86TimerLib.c" />
+    <ClCompile Include="..\..\Library\ParseLib\ParseLib.c" />
+    <ClCompile Include="..\..\Library\PlatformLib\AMD.c" />
+    <ClCompile Include="..\..\Library\PlatformLib\CPU.c" />
+    <ClCompile Include="..\..\Library\PlatformLib\Devices.c" />
+    <ClCompile Include="..\..\Library\PlatformLib\Intel.c" />
+    <ClCompile Include="..\..\Library\PlatformLib\Memory.c" />
+    <ClCompile Include="..\..\Library\PlatformLib\PlatformLib.c" />
+    <ClCompile Include="..\..\Library\SecPeiDxeTimerLibUefiCpu\IpfTimerLib.c" />
+    <ClCompile Include="..\..\Library\SecPeiDxeTimerLibUefiCpu\X86TimerLib.c" />
+    <ClCompile Include="..\..\Library\SmBiosLib\SmBiosLib.c" />
+    <ClCompile Include="..\..\Library\StringLib\Base64.c" />
+    <ClCompile Include="..\..\Library\StringLib\StringLib.c" />
+    <ClCompile Include="..\..\Library\XmlLib\XmlLib.c" />
+    <ClCompile Include="..\..\Library\XmlLib\XmlStates.c" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\Application\GUI\GUI.inf" />
@@ -265,6 +401,7 @@
     <None Include="..\..\Build\Windows\Config\20_ConfigureProject.bat" />
     <None Include="..\..\Build\Windows\Config\30_ConfigurePackage.bat" />
     <None Include="..\..\Build\Windows\Config\40_ConfigureDocumentation.bat" />
+    <None Include="..\..\Build\Windows\Post\20_BuildProject.bat" />
     <None Include="..\..\Build\Windows\Post\30_BuildPackage.bat" />
     <None Include="..\..\Build\Windows\Post\40_GenerateDocumentation.bat" />
     <None Include="..\..\Build\Windows\Support\Align.vbs" />
@@ -272,30 +409,59 @@
     <None Include="..\..\Build\Windows\Support\DateTime.vbs" />
     <None Include="..\..\Build\Windows\Support\InternalBuild.bat" />
     <None Include="..\..\Build\Windows\Support\MkDir.bat" />
+    <None Include="..\..\Build\Windows\Support\SafeName.bat" />
     <None Include="..\..\Build\Windows\Support\Tee.vbs" />
     <None Include="..\..\Build\Windows\Support\Unquote.bat" />
-    <None Include="..\..\Library\CPUInformationLib\CPUInformationLib.inf" />
+    <None Include="..\..\Library\BaseXApicX2ApicLib\BaseXApicX2ApicLib.inf" />
+    <None Include="..\..\Library\BaseXApicX2ApicLib\BaseXApicX2ApicLib.uni" />
+    <None Include="..\..\Library\ConfigLib\ConfigLib.inf" />
+    <None Include="..\..\Library\FileLib\FileLib.inf" />
+    <None Include="..\..\Library\FontLib\FontLib.inf" />
     <None Include="..\..\Library\GUILib\GUILib.inf" />
+    <None Include="..\..\Library\LogLib\LogLib.inf" />
     <None Include="..\..\Library\MpInitLib\Ia32\MpEqu.inc" />
     <None Include="..\..\Library\MpInitLib\Ia32\MpFuncs.nasm" />
     <None Include="..\..\Library\MpInitLib\MpInitLib.inf" />
     <None Include="..\..\Library\MpInitLib\MpInitLib.uni" />
     <None Include="..\..\Library\MpInitLib\X64\MpEqu.inc" />
     <None Include="..\..\Library\MpInitLib\X64\MpFuncs.nasm" />
+    <None Include="..\..\Library\ParseLib\ParseLib.inf" />
+    <None Include="..\..\Library\PlatformLib\PlatformLib.inf" />
+    <None Include="..\..\Library\SecPeiDxeTimerLibUefiCpu\SecPeiDxeTimerLibUefiCpu.inf" />
+    <None Include="..\..\Library\SecPeiDxeTimerLibUefiCpu\SecPeiDxeTimerLibUefiCpu.uni" />
+    <None Include="..\..\Library\SmBiosLib\SmBiosLib.inf" />
+    <None Include="..\..\Library\StringLib\StringLib.inf" />
+    <None Include="..\..\Library\XmlLib\XmlLib.inf" />
     <None Include="..\..\Package.dec" />
     <None Include="..\..\Package.dsc" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\Include\Library\CPUInformationLib.h" />
-    <ClInclude Include="..\..\Include\Library\CPUModelsAMD.h" />
-    <ClInclude Include="..\..\Include\Library\CPUModelsIntel.h" />
+    <ClInclude Include="..\..\Include\Library\ConfigLib.h" />
+    <ClInclude Include="..\..\Include\Library\CPU\AMD.h" />
+    <ClInclude Include="..\..\Include\Library\CPU\Intel.h" />
+    <ClInclude Include="..\..\Include\Library\FileLib.h" />
+    <ClInclude Include="..\..\Include\Library\FontLib.h" />
     <ClInclude Include="..\..\Include\Library\GUILib.h" />
+    <ClInclude Include="..\..\Include\Library\PlatformLib.h" />
+    <ClInclude Include="..\..\Include\Library\LocalApicLib.h" />
+    <ClInclude Include="..\..\Include\Library\LogLib.h" />
     <ClInclude Include="..\..\Include\Library\MpInitLib.h" />
+    <ClInclude Include="..\..\Include\Library\ParseLib.h" />
+    <ClInclude Include="..\..\Include\Library\SmBiosLib.h" />
+    <ClInclude Include="..\..\Include\Library\StringLib.h" />
+    <ClInclude Include="..\..\Include\Library\XmlLib.h" />
     <ClInclude Include="..\..\Include\Version.h" />
-    <ClInclude Include="..\..\Library\CPUInformationLib\CPUInformation.h" />
     <ClInclude Include="..\..\Library\MpInitLib\MpLib.h" />
+    <ClInclude Include="..\..\Library\PlatformLib\Platform.h" />
+    <ClInclude Include="..\..\Library\StringLib\Unicode.h" />
+    <ClInclude Include="..\..\Library\XmlLib\XmlStates.h" />
   </ItemGroup>
   <ItemGroup>
+    <Xml Include="..\..\Application\GUI\Config.IA32.xml" />
+    <Xml Include="..\..\Application\GUI\Config.X64.xml" />
+    <Xml Include="..\..\Application\GUI\Config.xml">
+      <SubType>Designer</SubType>
+    </Xml>
     <Xml Include="..\..\Build\Support\Doxygen\Layout.xml" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

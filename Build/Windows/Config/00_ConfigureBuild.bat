@@ -11,12 +11,13 @@ set BUILD_CONFIG_DIR=
 set BUILD_CONFIG_FILE=
 set BUILD_TOOL_CHAIN_DEFAULT=VS2013x86
 set BUILD_TARGET_DEFAULT=DEBUG
-set BUILD_ARCH_DEFAULT=X64
+set BUILD_ARCH_DEFAULT=X64 IA32
 
 set BUILD_DRYRUN=
 set BUILD_CLEAN=
 set BUILD_TOOL_CHAIN=
 set BUILD_ARCH=
+set BUILD_TARGET=
 set BUILD_SOURCE=
 
 set PROJECT_BUILD_ARGUMENTS=
@@ -159,7 +160,7 @@ rem ===========================================================================
 
 :setDefaultBuildOptions
 
-call "%TOOL_UNQUOTE%" BUILD_CONFIG_DIR %BUILD_CONFIG_DIR%
+%TOOL_UNQUOTE% BUILD_CONFIG_DIR %BUILD_CONFIG_DIR%
 if defined BUILD_CONFIG_DIR set PROJECT_BUILD_ARGUMENTS=%PROJECT_BUILD_ARGUMENTS% --conf="%BUILD_CONFIG_DIR%"
 if not defined BUILD_CONFIG_FILE (
   if defined BUILD_CONFIG_DIR (
@@ -168,14 +169,6 @@ if not defined BUILD_CONFIG_FILE (
     set BUILD_CONFIG_FILE=%WORKSPACE%\Conf\target.txt
   )
 )
-
-rem ===========================================================================
-rem Read the default build options from the configuration file
-rem ===========================================================================
-
-if not defined BUILD_TOOL_CHAIN for /f "usebackq tokens=3" %%i in (` type "%BUILD_CONFIG_FILE%" ^| "%TOOL_FIND%" "TOOL_CHAIN_TAG" ^| "%TOOL_FIND%" /V "#" `) do set BUILD_TOOL_CHAIN=%%i
-if not defined BUILD_TARGET for /f "usebackq tokens=3" %%i in (` type "%BUILD_CONFIG_FILE%" ^| "%TOOL_FIND%" "TARGET" ^| "%TOOL_FIND%" /V "#" ^| "%TOOL_FIND%" /V "TARGET_ARCH" `) do set BUILD_TARGET=%%i
-if not defined BUILD_ARCH for /f "tokens=3" %%i in ('type "%BUILD_CONFIG_FILE%" ^| "%TOOL_FIND%" "TARGET_ARCH" ^| "%TOOL_FIND%" /V "#" ^| "%TOOL_FIND%" /V "TOOL_CHAIN_CONF"') do set BUILD_ARCH=%%i
 
 rem ===========================================================================
 rem Set default build options if options have no value
@@ -188,7 +181,7 @@ if not defined BUILD_SOURCE set BUILD_SOURCE=%PROJECT_DIR_SOURCE%\Package.dsc
 
 if not defined PROJECT_DIR_SUPPORT set PROJECT_DIR_SUPPORT=%PROJECT_DIR_SOURCE%\Build\Support
 if not defined PROJECT_DIR_STAGE set PROJECT_DIR_STAGE=%PROJECT_DIR_SOURCE%\Build\Stage
-call "%TOOL_UNQUOTE%" PROJECT_DIR_BUILD %PROJECT_DIR_BUILD%
+%TOOL_UNQUOTE% PROJECT_DIR_BUILD %PROJECT_DIR_BUILD%
 if not defined PROJECT_DIR_BUILD set PROJECT_DIR_BUILD=%PROJECT_DIR_STAGE%\%BUILD_TARGET%_%BUILD_TOOL_CHAIN%
 
 rem ===========================================================================

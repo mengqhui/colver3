@@ -54,9 +54,6 @@
     <Filter Include="Build\Unix\Support">
       <UniqueIdentifier>{89307a02-a71e-49db-b796-96f07f50c45b}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Library\CPUInformationLib">
-      <UniqueIdentifier>{30a34f9f-cb43-41d2-ae82-b66b8a5bd34b}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Library\MpInitLib">
       <UniqueIdentifier>{9446af92-f27d-4f8f-ad13-2603d885c922}</UniqueIdentifier>
     </Filter>
@@ -66,6 +63,42 @@
     <Filter Include="Library\MpInitLib\X64">
       <UniqueIdentifier>{bd4cde66-cb75-43a2-8ff7-99f08bad3e95}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Library\BaseXApicX2ApicLib">
+      <UniqueIdentifier>{7b0eebcb-2dfd-471e-b93b-9e10475fb2e1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Library\SecPeiDxeTimerLibUefiCpu">
+      <UniqueIdentifier>{68a2a0ed-8922-4f23-8118-583a7fc2f18e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Include\Library\CPU">
+      <UniqueIdentifier>{1a258f8e-e98f-447a-8cfc-35f65048d5c2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Library\LogLib">
+      <UniqueIdentifier>{c1142cad-4929-4846-b807-8c7f608eeb05}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Library\FileLib">
+      <UniqueIdentifier>{7eb2ab8e-0e2a-4f2a-9efe-170a390d938a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Library\StringLib">
+      <UniqueIdentifier>{1cfc901a-c83a-4195-99b0-3b36ba153105}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Library\FontLib">
+      <UniqueIdentifier>{ce8acae3-ba17-4056-9ade-af4c0113f137}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Library\ConfigLib">
+      <UniqueIdentifier>{1cab2752-8cd5-47eb-9c5e-85429e45ca88}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Library\XmlLib">
+      <UniqueIdentifier>{0a7d8f01-d333-4cf7-a1f4-e9dbbead3757}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Library\ParseLib">
+      <UniqueIdentifier>{675f92c2-6e6a-45ae-ab23-02df4fbe0093}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Library\SmBiosLib">
+      <UniqueIdentifier>{fdc318ae-3b42-41f4-bfb3-6fd9a4389fb0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Library\PlatformLib">
+      <UniqueIdentifier>{353c4265-32c7-4f48-8a7d-0d7bdcf23b5c}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\Application\GUI\GUI.c">
@@ -73,9 +106,6 @@
     </ClCompile>
     <ClCompile Include="..\..\Library\GUILib\GUILib.c">
       <Filter>Library\GUILib</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\Library\CPUInformationLib\CPUInformationLib.c">
-      <Filter>Library\CPUInformationLib</Filter>
     </ClCompile>
     <ClCompile Include="..\..\Library\MpInitLib\Microcode.c">
       <Filter>Library\MpInitLib</Filter>
@@ -86,11 +116,71 @@
     <ClCompile Include="..\..\Library\MpInitLib\MpInitLib.c">
       <Filter>Library\MpInitLib</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\Library\CPUInformationLib\AMD.c">
-      <Filter>Library\CPUInformationLib</Filter>
+    <ClCompile Include="..\..\Library\BaseXApicX2ApicLib\BaseXApicX2ApicLib.c">
+      <Filter>Library\BaseXApicX2ApicLib</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\Library\CPUInformationLib\Intel.c">
-      <Filter>Library\CPUInformationLib</Filter>
+    <ClCompile Include="..\..\Library\SecPeiDxeTimerLibUefiCpu\IpfTimerLib.c">
+      <Filter>Library\SecPeiDxeTimerLibUefiCpu</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Library\SecPeiDxeTimerLibUefiCpu\X86TimerLib.c">
+      <Filter>Library\SecPeiDxeTimerLibUefiCpu</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Library\LogLib\LogLib.c">
+      <Filter>Library\LogLib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Library\FileLib\FileLib.c">
+      <Filter>Library\FileLib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Library\StringLib\StringLib.c">
+      <Filter>Library\StringLib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Library\FontLib\FontLib.c">
+      <Filter>Library\FontLib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Library\ConfigLib\ConfigLib.c">
+      <Filter>Library\ConfigLib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Library\XmlLib\XmlLib.c">
+      <Filter>Library\XmlLib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Library\ParseLib\ParseLib.c">
+      <Filter>Library\ParseLib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Library\XmlLib\XmlStates.c">
+      <Filter>Library\XmlLib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Library\StringLib\Base64.c">
+      <Filter>Library\StringLib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Library\SmBiosLib\SmBiosLib.c">
+      <Filter>Library\SmBiosLib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Library\PlatformLib\AMD.c">
+      <Filter>Library\PlatformLib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Library\PlatformLib\Devices.c">
+      <Filter>Library\PlatformLib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Library\PlatformLib\Intel.c">
+      <Filter>Library\PlatformLib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Library\PlatformLib\Memory.c">
+      <Filter>Library\PlatformLib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Library\PlatformLib\PlatformLib.c">
+      <Filter>Library\PlatformLib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Library\PlatformLib\CPU.c">
+      <Filter>Library\PlatformLib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Library\MpInitLib\BaseXApicX2ApicLib.c">
+      <Filter>Library\MpInitLib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Library\MpInitLib\IpfTimerLib.c">
+      <Filter>Library\MpInitLib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Library\MpInitLib\X86TimerLib.c">
+      <Filter>Library\MpInitLib</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -180,9 +270,6 @@
     <None Include="..\..\Build\Unix\Config\00_ConfigureBuild.sh">
       <Filter>Build\Unix\Config</Filter>
     </None>
-    <None Include="..\..\Library\CPUInformationLib\CPUInformationLib.inf">
-      <Filter>Library\CPUInformationLib</Filter>
-    </None>
     <None Include="..\..\Library\MpInitLib\MpInitLib.inf">
       <Filter>Library\MpInitLib</Filter>
     </None>
@@ -201,6 +288,51 @@
     <None Include="..\..\Library\MpInitLib\Ia32\MpFuncs.nasm">
       <Filter>Library\MpInitLib\IA32</Filter>
     </None>
+    <None Include="..\..\Build\Windows\Post\20_BuildProject.bat">
+      <Filter>Build\Windows\Post</Filter>
+    </None>
+    <None Include="..\..\Library\BaseXApicX2ApicLib\BaseXApicX2ApicLib.inf">
+      <Filter>Library\BaseXApicX2ApicLib</Filter>
+    </None>
+    <None Include="..\..\Library\BaseXApicX2ApicLib\BaseXApicX2ApicLib.uni">
+      <Filter>Library\BaseXApicX2ApicLib</Filter>
+    </None>
+    <None Include="..\..\Library\SecPeiDxeTimerLibUefiCpu\SecPeiDxeTimerLibUefiCpu.inf">
+      <Filter>Library\SecPeiDxeTimerLibUefiCpu</Filter>
+    </None>
+    <None Include="..\..\Library\SecPeiDxeTimerLibUefiCpu\SecPeiDxeTimerLibUefiCpu.uni">
+      <Filter>Library\SecPeiDxeTimerLibUefiCpu</Filter>
+    </None>
+    <None Include="..\..\Library\LogLib\LogLib.inf">
+      <Filter>Library\LogLib</Filter>
+    </None>
+    <None Include="..\..\Library\FileLib\FileLib.inf">
+      <Filter>Library\FileLib</Filter>
+    </None>
+    <None Include="..\..\Library\StringLib\StringLib.inf">
+      <Filter>Library\StringLib</Filter>
+    </None>
+    <None Include="..\..\Library\FontLib\FontLib.inf">
+      <Filter>Library\FontLib</Filter>
+    </None>
+    <None Include="..\..\Library\ConfigLib\ConfigLib.inf">
+      <Filter>Library\ConfigLib</Filter>
+    </None>
+    <None Include="..\..\Library\XmlLib\XmlLib.inf">
+      <Filter>Library\XmlLib</Filter>
+    </None>
+    <None Include="..\..\Library\ParseLib\ParseLib.inf">
+      <Filter>Library\ParseLib</Filter>
+    </None>
+    <None Include="..\..\Library\SmBiosLib\SmBiosLib.inf">
+      <Filter>Library\SmBiosLib</Filter>
+    </None>
+    <None Include="..\..\Library\PlatformLib\PlatformLib.inf">
+      <Filter>Library\PlatformLib</Filter>
+    </None>
+    <None Include="..\..\Build\Windows\Support\SafeName.bat">
+      <Filter>Build\Windows\Support</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\Include\Version.h">
@@ -209,28 +341,70 @@
     <ClInclude Include="..\..\Include\Library\GUILib.h">
       <Filter>Include\Library</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Include\Library\CPUInformationLib.h">
-      <Filter>Include\Library</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\Library\MpInitLib\MpLib.h">
       <Filter>Library\MpInitLib</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Include\Library\MpInitLib.h">
       <Filter>Include\Library</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Library\CPUInformationLib\CPUInformation.h">
-      <Filter>Library\CPUInformationLib</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Include\Library\CPUModelsAMD.h">
+    <ClInclude Include="..\..\Include\Library\LocalApicLib.h">
       <Filter>Include\Library</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Include\Library\CPUModelsIntel.h">
+    <ClInclude Include="..\..\Include\Library\CPU\AMD.h">
+      <Filter>Include\Library\CPU</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\Library\CPU\Intel.h">
+      <Filter>Include\Library\CPU</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\Library\LogLib.h">
+      <Filter>Include\Library</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\Library\FileLib.h">
+      <Filter>Include\Library</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\Library\StringLib.h">
+      <Filter>Include\Library</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\Library\ConfigLib.h">
+      <Filter>Include\Library</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\Library\FontLib.h">
+      <Filter>Include\Library</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\Library\XmlLib.h">
+      <Filter>Include\Library</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\Library\ParseLib.h">
+      <Filter>Include\Library</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Library\XmlLib\XmlStates.h">
+      <Filter>Library\XmlLib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Library\StringLib\Unicode.h">
+      <Filter>Library\StringLib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\Library\SmBiosLib.h">
+      <Filter>Include\Library</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Library\PlatformLib\Platform.h">
+      <Filter>Library\PlatformLib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\Library\PlatformLib.h">
       <Filter>Include\Library</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Xml Include="..\..\Build\Support\Doxygen\Layout.xml">
       <Filter>Build\Support\Doxygen</Filter>
+    </Xml>
+    <Xml Include="..\..\Application\GUI\Config.IA32.xml">
+      <Filter>Application\GUI</Filter>
+    </Xml>
+    <Xml Include="..\..\Application\GUI\Config.X64.xml">
+      <Filter>Application\GUI</Filter>
+    </Xml>
+    <Xml Include="..\..\Application\GUI\Config.xml">
+      <Filter>Application\GUI</Filter>
     </Xml>
   </ItemGroup>
 </Project>

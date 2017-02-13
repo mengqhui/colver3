@@ -23,10 +23,12 @@ rem Setup the build tools
 rem ===========================================================================
 
 set TOOL_BUILD=%BUILD_DIR_SUPPORT%\InternalBuild.bat
-set TOOL_CLEAN=%BUILD_DIR_SUPPORT%\Clean.bat
-set TOOL_MKDIR=%BUILD_DIR_SUPPORT%\MkDir.bat
-set TOOL_UNQUOTE=%BUILD_DIR_SUPPORT%\Unquote.bat
+set TOOL_CLEAN=call "%BUILD_DIR_SUPPORT%\Clean.bat"
+set TOOL_MKDIR=call "%BUILD_DIR_SUPPORT%\MkDir.bat"
+set TOOL_UNQUOTE=call "%BUILD_DIR_SUPPORT%\Unquote.bat"
+set TOOL_SAFENAME=call "%BUILD_DIR_SUPPORT%\SafeName.bat"
 
+set TOOL_MKISO=%BUILD_DIR_SUPPORT%\mkisofs.exe
 set TOOL_CSCRIPT=%SYSTEMROOT%\System32\cscript.exe
 set TOOL_FIND=%SYSTEMROOT%\System32\find.exe
 set TOOL_WHERE=%SYSTEMROOT%\System32\where.exe
@@ -173,7 +175,7 @@ rem ===========================================================================
 :startBuild
 
   if defined BUILD_LOG (
-    call "%TOOL_MKDIR%" "%PROJECT_DIR_LOG%"
+    %TOOL_MKDIR% "%PROJECT_DIR_LOG%"
     if errorlevel 1 goto failScript
   )
 

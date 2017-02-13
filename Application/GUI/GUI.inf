@@ -12,7 +12,7 @@
 
 [Defines]
   INF_VERSION                    = 0x00010016
-  BASE_NAME                      = $(PROJECT_SAFE_NAME)$(ARCH)
+  BASE_NAME                      = GUI
   FILE_GUID                      = A474E038-7652-4E4D-8B96-6141F6ECFCF5
   MODULE_TYPE                    = UEFI_APPLICATION
   VERSION_STRING                 = $(PROJECT_VERSION_BASE)

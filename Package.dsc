@@ -21,6 +21,10 @@
   BUILD_TARGETS                  = DEBUG|RELEASE
   SKUID_IDENTIFIER               = DEFAULT
 
+!if $(TARGET) == "DEBUG"
+  PROJECT_DEBUG_OPTIONS=-DPROJECT_DEBUG
+!endif
+
 [Components]
   $(PROJECT_PACKAGE)/Application/GUI/GUI.inf
 
@@ -30,22 +34,29 @@
   # GUI libraries
   #
   GUILib|$(PROJECT_PACKAGE)/Library/GUILib/GUILib.inf
+  LogLib|$(PROJECT_PACKAGE)/Library/LogLib/LogLib.inf
+  ParseLib|$(PROJECT_PACKAGE)/Library/ParseLib/ParseLib.inf
+  XmlLib|$(PROJECT_PACKAGE)/Library/XmlLib/XmlLib.inf
+  ConfigLib|$(PROJECT_PACKAGE)/Library/ConfigLib/ConfigLib.inf
+  FontLib|$(PROJECT_PACKAGE)/Library/FontLib/FontLib.inf
 
   #
   # Device libraries
   #
   DevicePathLib|MdePkg/Library/UefiDevicePathLib/UefiDevicePathLib.inf
+  FileHandleLib|MdePkg/Library/UefiFileHandleLib/UefiFileHandleLib.inf
+  FileLib|$(PROJECT_PACKAGE)/Library/FileLib/FileLib.inf
+  SmbusLib|MdePkg/Library/DxeSmbusLib/DxeSmbusLib.inf
 
   #
   # CPU libraries
   #
   CpuLib|MdePkg/Library/BaseCpuLib/BaseCpuLib.inf
-  CPUInformationLib|$(PROJECT_PACKAGE)/Library/CPUInformationLib/CPUInformationLib.inf
-  DebugAgentLib|MdeModulePkg/Library/DebugAgentLibNull/DebugAgentLibNull.inf
-  LocalApicLib|UefiCpuPkg/Library/BaseXApicX2ApicLib/BaseXApicX2ApicLib.inf
-  MpInitLib|$(PROJECT_PACKAGE)/Library/MpInitLib/MpInitLib.inf
+  PlatformLib|$(PROJECT_PACKAGE)/Library/PlatformLib/PlatformLib.inf
+  # LocalApicLib|$(PROJECT_PACKAGE)/Library/BaseXApicX2ApicLib/BaseXApicX2ApicLib.inf
+  TimerLib|$(PROJECT_PACKAGE)/Library/MpInitLib/MpInitLib.inf
   MtrrLib|UefiCpuPkg/Library/MtrrLib/MtrrLib.inf
-  UefiCpuLib|UefiCpuPkg/Library/BaseUefiCpuLib/BaseUefiCpuLib.inf
+  SmBiosLib|$(PROJECT_PACKAGE)/Library/SmBiosLib/SmBiosLib.inf
 
   #
   # Misc libraries
@@ -56,15 +67,17 @@
   HobLib|MdePkg/Library/DxeHobLib/DxeHobLib.inf
   IoLib|MdePkg/Library/BaseIoLibIntrinsic/BaseIoLibIntrinsic.inf
   MemoryAllocationLib|MdePkg/Library/UefiMemoryAllocationLib/UefiMemoryAllocationLib.inf
-  PcdLib|MdePkg/Library/BasePcdLibNull/BasePcdLibNull.inf
+  PcdLib|MdePkg/Library/DxePcdLib/DxePcdLib.inf
   PrintLib|MdePkg/Library/BasePrintLib/BasePrintLib.inf
+  StringLib|$(PROJECT_PACKAGE)/Library/StringLib/StringLib.inf
   SynchronizationLib|MdePkg/Library/BaseSynchronizationLib/BaseSynchronizationLib.inf
-  TimerLib|MdePkg/Library/BaseTimerLibNullTemplate/BaseTimerLibNullTemplate.inf
+  # TimerLib|$(PROJECT_PACKAGE)/Library/SecPeiDxeTimerLibUefiCpu/SecPeiDxeTimerLibUefiCpu.inf
 
   #
   # UEFI Application libraries
   #
   UefiLib|MdePkg/Library/UefiLib/UefiLib.inf
+  UefiCpuLib|UefiCpuPkg/Library/BaseUefiCpuLib/BaseUefiCpuLib.inf
   UefiBootServicesTableLib|MdePkg/Library/UefiBootServicesTableLib/UefiBootServicesTableLib.inf
   UefiRuntimeServicesTableLib|MdePkg/Library/UefiRuntimeServicesTableLib/UefiRuntimeServicesTableLib.inf
   UefiApplicationEntryPoint|MdePkg/Library/UefiApplicationEntryPoint/UefiApplicationEntryPoint.inf
@@ -72,13 +85,9 @@
   #
   # Debug libraries
   #
-!if $(TARGET) == "DEBUG"
-  DebugLib|MdePkg/Library/UefiDebugLibStdErr/UefiDebugLibStdErr.inf
-!else
   DebugLib|MdePkg/Library/BaseDebugLibNull/BaseDebugLibNull.inf
-!endif
 
 [BuildOptions]
-  XCODE:*_*_*_CC_FLAGS = -Os -D DISABLE_NEW_DEPRECATED_INTERFACES $(PROJECT_BUILD_OPTIONS)
-  GCC:*_*_*_CC_FLAGS = -Os -D DISABLE_NEW_DEPRECATED_INTERFACES $(PROJECT_BUILD_OPTIONS)
-  MSFT:*_*_*_CC_FLAGS = /Os /W4 /WX -D DISABLE_NEW_DEPRECATED_INTERFACES $(PROJECT_BUILD_OPTIONS)
+  XCODE:*_*_*_CC_FLAGS = -Os -DDISABLE_NEW_DEPRECATED_INTERFACES $(PROJECT_BUILD_OPTIONS) $(PROJECT_DEBUG_OPTIONS) $(PROJECT_ARCH_OPTIONS)
+  GCC:*_*_*_CC_FLAGS = -Os -DDISABLE_NEW_DEPRECATED_INTERFACES $(PROJECT_BUILD_OPTIONS) $(PROJECT_DEBUG_OPTIONS) $(PROJECT_ARCH_OPTIONS)
+  MSFT:*_*_*_CC_FLAGS = /Os /W4 /WX -DDISABLE_NEW_DEPRECATED_INTERFACES $(PROJECT_BUILD_OPTIONS) $(PROJECT_DEBUG_OPTIONS) $(PROJECT_ARCH_OPTIONS)

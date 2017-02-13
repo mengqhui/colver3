@@ -440,7 +440,7 @@ CollectProcessorCount (
   }
 
   if (CpuMpData->X2ApicEnable) {
-    DEBUG ((DEBUG_INFO, "Force x2APIC mode!\n"));
+    LOG(L"Force x2APIC mode!\n");
     //
     // Wakeup all APs to enable x2APIC mode
     //
@@ -456,13 +456,13 @@ CollectProcessorCount (
     //
     SetApicMode (LOCAL_APIC_MODE_X2APIC);
   }
-  DEBUG ((DEBUG_INFO, "APIC MODE is %d\n", GetApicMode ()));
+  LOG(L"APIC MODE is %d\n", GetApicMode ());
   //
   // Sort BSP/Aps by CPU APIC ID in ascending order
   //
   SortApicId (CpuMpData);
 
-  DEBUG ((DEBUG_INFO, "MpInitLib: Find %d processors in system.\n", CpuMpData->CpuCount));
+  LOG(L"MpInitLib: Find %d processors in system.\n", CpuMpData->CpuCount);
 
   return CpuMpData->CpuCount;
 }
@@ -590,10 +590,6 @@ ApWakeupFunction (
         Parameter = (VOID *) CpuMpData->CpuData[ProcessorNumber].ApFunctionArgument;
         if (Procedure != NULL) {
           SetApState (&CpuMpData->CpuData[ProcessorNumber], CpuStateBusy);
-          //
-          // Enable source debugging on AP function
-          //         
-          EnableDebugAgent ();
           //
           // Invoke AP function here
           //
@@ -1009,9 +1005,7 @@ TimedWaitForApFinish (
   }
 
   if (CpuMpData->FinishedCount >= FinishedApLimit) {
-    DEBUG ((
-      DEBUG_VERBOSE,
-      "%a: reached FinishedApLimit=%u in %Lu microseconds\n",
+    LOG(L"%a: reached FinishedApLimit=%u in %Lu microseconds\n",
       __FUNCTION__,
       FinishedApLimit,
       DivU64x64Remainder (
@@ -1019,7 +1013,7 @@ TimedWaitForApFinish (
         GetPerformanceCounterProperties (NULL, NULL),
         NULL
         )
-      ));
+      );
   }
 }
 
@@ -1338,7 +1332,7 @@ MpInitLibInitialize (
   // Finally set AP loop mode
   //
   CpuMpData->ApLoopMode = ApLoopMode;
-  DEBUG ((DEBUG_INFO, "AP Loop Mode is %d\n", CpuMpData->ApLoopMode));
+  LOG(L"AP Loop Mode is %d\n", CpuMpData->ApLoopMode);
   //
   // Set up APs wakeup signal buffer
   //
@@ -1354,7 +1348,10 @@ MpInitLibInitialize (
   // Store BSP's MTRR setting
   //
   MtrrGetAllMtrrs (&CpuMpData->MtrrTable);
-
+  //
+  // Initialize APIC timer
+  //
+  InitializeApicTimer (0, MAX_UINT32, TRUE, 5);
   if (OldCpuMpData == NULL) {
     if (MaxLogicalProcessorNumber > 1) {
       //

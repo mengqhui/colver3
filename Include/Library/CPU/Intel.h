@@ -1,7 +1,7 @@
 //
-/// @file Library/CPUInformationLib/CPUModelsIntel.h
+/// @file Library/CPU/Intel.h
 ///
-/// CPU information library Intel CPU models
+/// Platform information library Intel CPU models
 ///
 
 #pragma once
