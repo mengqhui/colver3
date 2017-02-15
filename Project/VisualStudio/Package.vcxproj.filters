@@ -54,21 +54,6 @@
     <Filter Include="Build\Unix\Support">
       <UniqueIdentifier>{89307a02-a71e-49db-b796-96f07f50c45b}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Library\MpInitLib">
-      <UniqueIdentifier>{9446af92-f27d-4f8f-ad13-2603d885c922}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Library\MpInitLib\IA32">
-      <UniqueIdentifier>{bda2db70-eb14-4e55-84ba-1589013bc1ef}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Library\MpInitLib\X64">
-      <UniqueIdentifier>{bd4cde66-cb75-43a2-8ff7-99f08bad3e95}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Library\BaseXApicX2ApicLib">
-      <UniqueIdentifier>{7b0eebcb-2dfd-471e-b93b-9e10475fb2e1}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Library\SecPeiDxeTimerLibUefiCpu">
-      <UniqueIdentifier>{68a2a0ed-8922-4f23-8118-583a7fc2f18e}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Include\Library\CPU">
       <UniqueIdentifier>{1a258f8e-e98f-447a-8cfc-35f65048d5c2}</UniqueIdentifier>
     </Filter>
@@ -99,6 +84,9 @@
     <Filter Include="Library\PlatformLib">
       <UniqueIdentifier>{353c4265-32c7-4f48-8a7d-0d7bdcf23b5c}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Library\TimerLib">
+      <UniqueIdentifier>{9446af92-f27d-4f8f-ad13-2603d885c922}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\Application\GUI\GUI.c">
@@ -106,24 +94,6 @@
     </ClCompile>
     <ClCompile Include="..\..\Library\GUILib\GUILib.c">
       <Filter>Library\GUILib</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\Library\MpInitLib\Microcode.c">
-      <Filter>Library\MpInitLib</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\Library\MpInitLib\MpLib.c">
-      <Filter>Library\MpInitLib</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\Library\MpInitLib\MpInitLib.c">
-      <Filter>Library\MpInitLib</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\Library\BaseXApicX2ApicLib\BaseXApicX2ApicLib.c">
-      <Filter>Library\BaseXApicX2ApicLib</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\Library\SecPeiDxeTimerLibUefiCpu\IpfTimerLib.c">
-      <Filter>Library\SecPeiDxeTimerLibUefiCpu</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\Library\SecPeiDxeTimerLibUefiCpu\X86TimerLib.c">
-      <Filter>Library\SecPeiDxeTimerLibUefiCpu</Filter>
     </ClCompile>
     <ClCompile Include="..\..\Library\LogLib\LogLib.c">
       <Filter>Library\LogLib</Filter>
@@ -173,14 +143,11 @@
     <ClCompile Include="..\..\Library\PlatformLib\CPU.c">
       <Filter>Library\PlatformLib</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\Library\MpInitLib\BaseXApicX2ApicLib.c">
-      <Filter>Library\MpInitLib</Filter>
+    <ClCompile Include="..\..\Library\TimerLib\IpfTimerLib.c">
+      <Filter>Library\TimerLib</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\Library\MpInitLib\IpfTimerLib.c">
-      <Filter>Library\MpInitLib</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\Library\MpInitLib\X86TimerLib.c">
-      <Filter>Library\MpInitLib</Filter>
+    <ClCompile Include="..\..\Library\TimerLib\X86TimerLib.c">
+      <Filter>Library\TimerLib</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -270,38 +237,8 @@
     <None Include="..\..\Build\Unix\Config\00_ConfigureBuild.sh">
       <Filter>Build\Unix\Config</Filter>
     </None>
-    <None Include="..\..\Library\MpInitLib\MpInitLib.inf">
-      <Filter>Library\MpInitLib</Filter>
-    </None>
-    <None Include="..\..\Library\MpInitLib\MpInitLib.uni">
-      <Filter>Library\MpInitLib</Filter>
-    </None>
-    <None Include="..\..\Library\MpInitLib\X64\MpEqu.inc">
-      <Filter>Library\MpInitLib\X64</Filter>
-    </None>
-    <None Include="..\..\Library\MpInitLib\X64\MpFuncs.nasm">
-      <Filter>Library\MpInitLib\X64</Filter>
-    </None>
-    <None Include="..\..\Library\MpInitLib\Ia32\MpEqu.inc">
-      <Filter>Library\MpInitLib\IA32</Filter>
-    </None>
-    <None Include="..\..\Library\MpInitLib\Ia32\MpFuncs.nasm">
-      <Filter>Library\MpInitLib\IA32</Filter>
-    </None>
     <None Include="..\..\Build\Windows\Post\20_BuildProject.bat">
       <Filter>Build\Windows\Post</Filter>
-    </None>
-    <None Include="..\..\Library\BaseXApicX2ApicLib\BaseXApicX2ApicLib.inf">
-      <Filter>Library\BaseXApicX2ApicLib</Filter>
-    </None>
-    <None Include="..\..\Library\BaseXApicX2ApicLib\BaseXApicX2ApicLib.uni">
-      <Filter>Library\BaseXApicX2ApicLib</Filter>
-    </None>
-    <None Include="..\..\Library\SecPeiDxeTimerLibUefiCpu\SecPeiDxeTimerLibUefiCpu.inf">
-      <Filter>Library\SecPeiDxeTimerLibUefiCpu</Filter>
-    </None>
-    <None Include="..\..\Library\SecPeiDxeTimerLibUefiCpu\SecPeiDxeTimerLibUefiCpu.uni">
-      <Filter>Library\SecPeiDxeTimerLibUefiCpu</Filter>
     </None>
     <None Include="..\..\Library\LogLib\LogLib.inf">
       <Filter>Library\LogLib</Filter>
@@ -333,6 +270,9 @@
     <None Include="..\..\Build\Windows\Support\SafeName.bat">
       <Filter>Build\Windows\Support</Filter>
     </None>
+    <None Include="..\..\Library\TimerLib\TimerLib.inf">
+      <Filter>Library\TimerLib</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\Include\Version.h">
@@ -340,9 +280,6 @@
     </ClInclude>
     <ClInclude Include="..\..\Include\Library\GUILib.h">
       <Filter>Include\Library</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Library\MpInitLib\MpLib.h">
-      <Filter>Library\MpInitLib</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Include\Library\MpInitLib.h">
       <Filter>Include\Library</Filter>

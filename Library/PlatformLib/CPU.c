@@ -11,7 +11,17 @@
 
 // CPU_FEATURE_PRINT
 /// Print a CPU package feature and value
-#define CPU_FEATURE_PRINT(Feature) LOG3(33, L"      " L ## #Feature L":", L"%u\n", mSystemInformation.Packages[Index].Features.Feature)
+#define CPU_FEATURE_PRINT(Feature) LOG3(33, L"      " L ## #Feature L":", L"%a\n", ConfigSGetBooleanWithDefault(L"\\CPU\\Package\\%u\\Feature\\" L ## #Feature, FALSE, Index) ? "true" : "false")
+
+// mCPUIDRegisters
+/// Registers for CPUID results
+UINT32 mCPUIDRegisters[4] = { 0 };
+// mCPUMaxIndex
+/// CPU maximum CPUID index
+UINT32 mCPUMaxIndex = 0;
+// mCPUMaxExtIndex
+/// CPU maximum extended CPUID index
+UINT32 mCPUMaxExtIndex = 0x80000000;
 
 // GetPackageFrequency
 /// Get CPU package frequency
@@ -21,12 +31,9 @@ EFIAPI
 GetPackageFrequency (
   UINTN Index
 ) {
-  if (Index >= mSystemInformation.PackageCount) {
-    return 0;
-  }
-  return RShiftU64(MultU64x32(mSystemInformation.Packages[Index].Frequency.Clock,
-                              (UINT32)(mSystemInformation.Packages[Index].Frequency.Maximum)),
-                              (UINTN)mSystemInformation.Packages[Index].Frequency.Step);
+  return RShiftU64(MultU64x64(ConfigSGetUnsignedWithDefault(L"\\CPU\\Package\\%u\\Clock", 0, Index),
+                              ConfigSGetUnsignedWithDefault(L"\\CPU\\Package\\%u\\Maximum", 1, Index)),
+                              ConfigSGetUnsignedWithDefault(L"\\CPU\\Package\\%u\\Step", 0, Index));
 }
 // PrintCPUInformation
 /// Print CPU package information
@@ -35,31 +42,34 @@ EFIAPI
 PrintCPUInformation (
   VOID
 ) {
-  UINT32           Index;
+  UINTN Index;
+  UINTN PackageCount;
+  UINTN TurboCount;
   // Print package information
-  Log2(L"Packages:", L"%u\n", mSystemInformation.PackageCount);
-  Log2(L"  Total threads:", L"%u\n", mSystemInformation.LogicalCount);
-  Log2(L"  Total cores:", L"%u\n", mSystemInformation.CoreCount);
+  Log2(L"Total threads:", L"%u\n", ConfigGetUnsignedWithDefault(L"\\CPU\\Threads", 1));
+  Log2(L"Total cores:", L"%u\n", ConfigGetUnsignedWithDefault(L"\\CPU\\Cores", 1));
+  PackageCount = ConfigGetUnsignedWithDefault(L"\\CPU\\Count", 1);
+  Log2(L"Packages:", L"%u\n", PackageCount);
   // Print information about each package
-  for (Index = 0; Index < mSystemInformation.PackageCount; ++Index) {
-    UINT32 Width = (UINT32)Log(L"  Package(%u)", Index);
-    Log3(LOG_PREFIX_WIDTH - Width, L":", L"%a\n", mSystemInformation.Packages[Index].Description);
-    Log2(L"    Model:", L"%X\n", mSystemInformation.Packages[Index].Model);
-    Log2(L"    Threads:", L"%u\n", mSystemInformation.Packages[Index].LogicalCount);
-    Log2(L"    Cores:", L"%u\n", mSystemInformation.Packages[Index].CoreCount);
+  for (Index = 0; Index < PackageCount; ++Index) {
+    Log3(LOG_PREFIX_WIDTH - Log(L"  Package(%u)", Index), L":", L"%s\n", ConfigSGetStringWithDefault(L"\\CPU\\Package\\%u\\Description", L"Unknown CPU", Index));
+    Log2(L"    Model:", L"%X\n", ConfigSGetUnsignedWithDefault(L"\\CPU\\Package\\%u\\Model", 0, Index));
+    Log2(L"    Threads:", L"%u\n", ConfigSGetUnsignedWithDefault(L"\\CPU\\Package\\%u\\Threads", 1, Index));
+    Log2(L"    Cores:", L"%u\n", ConfigSGetUnsignedWithDefault(L"\\CPU\\Package\\%u\\Threads", 1, Index));
     Log2(L"    Frequency:", L"%uMHz\n", DivU64x32(GetPackageFrequency(Index), 1000000));
-    Log2(L"    Clock:", L"%ukHz\n", DivU64x32(mSystemInformation.Packages[Index].Frequency.Clock, 1000));
-    Log2(L"    Minimum:", L"%u\n", mSystemInformation.Packages[Index].Frequency.Minimum);
-    Log2(L"    Maximum:", L"%u\n", mSystemInformation.Packages[Index].Frequency.Maximum);
-    if (mSystemInformation.Packages[Index].Features.Turbo && (mSystemInformation.Packages[Index].Frequency.TurboCount > 0)) {
-      UINT8 i = 1;
-      Log2(L"    Turbo:", L"%u", mSystemInformation.Packages[Index].Frequency.Turbo[mSystemInformation.Packages[Index].Frequency.TurboCount - i]);
-      while (i++ < mSystemInformation.Packages[Index].Frequency.TurboCount) {
-        Log(L"/%u", mSystemInformation.Packages[Index].Frequency.Turbo[mSystemInformation.Packages[Index].Frequency.TurboCount - i]);
+    Log2(L"    Clock:", L"%ukHz\n", DivU64x32(ConfigSGetUnsignedWithDefault(L"\\CPU\\Package\\%u\\Clock", 1, Index), 1000));
+    Log2(L"    Minimum:", L"%u\n", ConfigSGetUnsignedWithDefault(L"\\CPU\\Package\\%u\\Minimum", 1, Index));
+    Log2(L"    Maximum:", L"%u\n", ConfigSGetUnsignedWithDefault(L"\\CPU\\Package\\%u\\Maximum", 1, Index));
+    TurboCount = ConfigSGetUnsignedWithDefault(L"\\CPU\\Package\\%u\\Turbo\\Count", 0, Index);
+    if (TurboCount > 0) {
+      UINTN TurboIndex = 0;
+      Log2(L"    Turbo:", L"%u", ConfigSGetUnsignedWithDefault(L"\\CPU\\Package\\%u\\Turbo\\%u", 1, Index, TurboIndex));
+      while (++TurboIndex < TurboCount) {
+        Log(L"/%u", ConfigSGetUnsignedWithDefault(L"\\CPU\\Package\\%u\\Turbo\\%u", 1, Index, TurboIndex));
       }
       Log(L"\n");
     } else {
-      Log2(L"    Turbo:", L"No\n");
+      Log2(L"    Turbo:", L"false\n");
     }
     // Print package features
     LOG(L"    Features:\n");
@@ -181,7 +191,7 @@ EFIAPI
 GetCPUVendor (
   VOID
 ) {
-  return mSystemInformation.Packages[0].Vendor;
+  return (CPU_VENDOR)ConfigGetUnsignedWithDefault(L"\\CPU\\Package\\0\\Vendor", CPU_VENDOR_UNKNOWN);
 }
 // GetCPUFamily
 /// Get CPU family information
@@ -191,7 +201,7 @@ EFIAPI
 GetCPUFamily (
   VOID
 ) {
-  return mSystemInformation.Packages[0].Family;
+  return (CPU_FAMILY)ConfigGetUnsignedWithDefault(L"\\CPU\\Package\\0\\Family", CPU_FAMILY_UNKNOWN);
 }
 // GetCPUModel
 /// Get CPU model information
@@ -201,7 +211,7 @@ EFIAPI
 GetCPUModel (
   VOID
 ) {
-  return mSystemInformation.Packages[0].Model;
+  return (CPU_MODEL)ConfigGetUnsignedWithDefault(L"\\CPU\\Package\\0\\Model", CPU_MODEL_UNKNOWN);
 }
 // GetCPUFrequency
 /// Get CPU frequency
@@ -220,7 +230,7 @@ EFIAPI
 IsCPUMobile (
   VOID
 ) {
-  return mSystemInformation.Packages[0].Features.Mobile;
+  return ConfigGetBooleanWithDefault(L"\\CPU\\Package\\0\\Feature\\Mobile", FALSE);
 }
 // IsCPUBigEndian
 /// Check if CPU is little-endian byte order
@@ -238,74 +248,26 @@ EFIAPI
 IsCPULittleEndian (
   VOID
 ) {
-#if defined(MDE_CPU_IA32) || defined(MDE_CPU_X64)
   return TRUE;
-#elif
-# error Need to set endianness detection code for this CPU architecture
-#endif
 }
 
-#if defined(MDE_CPU_IA32) || defined(MDE_CPU_X64) || defined(MDE_CPU_IPF)
-
-// DetermineCPUIntelModelAndFeatures
-/// Determine CPU model and features information
+// UpdateIntelPackageInformation
+/// Update Intel package information
 /// @param Index The physical package index
-/// @return The CPU model information
-CPU_MODEL
+EFI_STATUS
 EFIAPI
-DetermineCPUIntelModelAndFeatures (
-  IN UINT32 Index
-);
-// DetermineCPUIntelFamily
-/// Determine CPU family information
-/// @param Index The physical package index
-/// @return The CPU family information
-CPU_FAMILY
-EFIAPI
-DetermineCPUIntelFamily (
-  IN UINT32 Index
-);
-// DetermineCPUIntelFrequency
-/// Determine CPU frequency information
-/// @param Index The physical package index
-VOID
-EFIAPI
-DetermineCPUIntelFrequency (
-  IN UINT32 Index
+UpdateIntelPackageInformation (
+  IN UINTN Index
 );
 
-#endif
-
-#if defined(MDE_CPU_IA32) || defined(MDE_CPU_X64)
-
-// DetermineCPUAMDModelAndFeatures
-/// Determine CPU model and features information
+// UpdateAMDPackageInformation
+/// Update AMD package information
 /// @param Index The physical package index
-/// @return The CPU model information
-CPU_MODEL
+EFI_STATUS
 EFIAPI
-DetermineCPUAMDModelAndFeatures (
-  IN UINT32 Index
+UpdateAMDPackageInformation (
+  IN UINTN Index
 );
-// DetermineCPUAMDFamily
-/// Determine CPU family information
-/// @param Index The physical package index
-/// @return The CPU family information
-CPU_FAMILY
-EFIAPI
-DetermineCPUAMDFamily (
-  IN UINT32 Index
-);
-// DetermineCPUAMDFrequency
-/// Determine CPU frequency information
-/// @param Index The physical package index
-VOID
-EFIAPI
-DetermineCPUAMDFrequency (
-  IN UINT32 Index
-);
-
-#endif
 
 // DetermineCPUVendor
 /// Determine CPU vendor information
@@ -316,8 +278,6 @@ DetermineCPUVendor (
   VOID
 ) {
 
-#if defined(MDE_CPU_IA32) || defined(MDE_CPU_X64) || defined(MDE_CPU_IDF)
-
   // Perform CPUID
   AsmCpuid(0x80000000, mCPUIDRegisters, mCPUIDRegisters + 1, mCPUIDRegisters + 3, mCPUIDRegisters + 2);
   mCPUMaxExtIndex = mCPUIDRegisters[0];
@@ -327,16 +287,11 @@ DetermineCPUVendor (
   if (CompareMem((CONST VOID *)(mCPUIDRegisters + 1), (CONST VOID *)"GenuineIntel", 12) == 0) {
     return CPU_VENDOR_INTEL;
   }
-
-# if defined(MDE_CPU_IA32) || defined(MDE_CPU_X64)
-
   // AMD
   if ((CompareMem((CONST VOID *)(mCPUIDRegisters + 1), (CONST VOID *)"AuthenticAMD", 12) == 0) ||
       (CompareMem((CONST VOID *)(mCPUIDRegisters + 1), (CONST VOID *)"AMDisbetter!", 12) == 0)) {
     return CPU_VENDOR_AMD;
   }
-
-# endif
 
   // KVM virtual machine
   if (CompareMem((CONST VOID *)(mCPUIDRegisters + 1), (CONST VOID *)"KVMKVMKVM\0\0\0", 12) == 0) {
@@ -359,8 +314,6 @@ DetermineCPUVendor (
     return CPU_VENDOR_VIRTUAL_XEN;
   }
 
-#endif
-
   return CPU_VENDOR_UNKNOWN;
 }
 
@@ -370,51 +323,29 @@ DetermineCPUVendor (
 EFI_STATUS
 EFIAPI
 UpdatePackageInformation (
-  IN UINT32 Index
+  IN UINTN Index
 ) {
+  EFI_STATUS Status;
+
   // Get CPU vendor information
-  mSystemInformation.Packages[Index].Vendor = DetermineCPUVendor();
-  if (mSystemInformation.Packages[Index].Vendor == CPU_VENDOR_UNKNOWN) {
+  CPU_VENDOR Vendor = DetermineCPUVendor();
+  if (Vendor == CPU_VENDOR_UNKNOWN) {
     return EFI_UNSUPPORTED;
   }
 
-#if defined(MDE_CPU_IA32) || defined(MDE_CPU_X64) || defined(MDE_CPU_IPF)
-
-  if (mSystemInformation.Packages[Index].Vendor == CPU_VENDOR_INTEL) {
-    // Get CPU model information
-    mSystemInformation.Packages[Index].Model = DetermineCPUIntelModelAndFeatures(Index);
-    if (mSystemInformation.Packages[Index].Model == CPU_MODEL_UNKNOWN) {
-      return EFI_UNSUPPORTED;
-    }
-    // Get CPU family information
-    mSystemInformation.Packages[Index].Family = DetermineCPUIntelFamily(Index);
-    if (mSystemInformation.Packages[Index].Family == CPU_FAMILY_UNKNOWN) {
-      return EFI_UNSUPPORTED;
-    }
-    // Get CPU frequency information
-    DetermineCPUIntelFrequency(Index);
+  // Set vendor for this package in configuration
+  Status = ConfigSSetUnsigned(L"\\CPU\\Package\\%u\\Vendor", (UINTN)Vendor, Index);
+  if (EFI_ERROR(Status)) {
+    return Status;
   }
 
-# if defined(MDE_CPU_IA32) || defined(MDE_CPU_X64)
-
-  else if (mSystemInformation.Packages[Index].Vendor == CPU_VENDOR_AMD) {
-    // Get CPU model information
-    mSystemInformation.Packages[Index].Model = DetermineCPUAMDModelAndFeatures(Index);
-    if (mSystemInformation.Packages[Index].Model == CPU_MODEL_UNKNOWN) {
-      return EFI_UNSUPPORTED;
-    }
-    // Get CPU family information
-    mSystemInformation.Packages[Index].Family = DetermineCPUAMDFamily(Index);
-    if (mSystemInformation.Packages[Index].Family == CPU_FAMILY_UNKNOWN) {
-      return EFI_UNSUPPORTED;
-    }
-    // Get CPU frequency information
-    DetermineCPUAMDFrequency(Index);
+  if (Vendor == CPU_VENDOR_INTEL) {
+    // Get Intel CPU information
+    return UpdateIntelPackageInformation(Index);
+  } else if (Vendor == CPU_VENDOR_AMD) {
+    // Get AMD CPU information
+    return UpdateAMDPackageInformation(Index);
   }
-
-# endif
-
-#endif
 
   return EFI_SUCCESS;
 }
@@ -439,7 +370,7 @@ UpdatePackagesInformation (
     Count = 0;
     Tables = NULL;
     if (!EFI_ERROR(FindSmBiosTables(SMBIOS_TYPE_PROCESSOR_INFORMATION, &Count, &Tables)) && (Tables != NULL)) {
-      UINT32 PkgIndex = 0;
+      UINTN PkgIndex = 0;
       // Iterate through the processor information tables
       for (Index = 0; Index < Count; ++Index) {
         if (Tables[Index] != NULL) {
@@ -452,14 +383,15 @@ UpdatePackagesInformation (
                  ConfigGetBooleanWithDefault(L"\\SMBIOS\\Override\\CPU", FALSE) ||
                  ConfigGetBooleanWithDefault(L"\\SMBIOS\\Override\\CPU\\Clock", FALSE))) {
               // Adjust package clock
-              mSystemInformation.Packages[PkgIndex].Frequency.Clock = (Type4->ExternalClock * 1000000);
+              ConfigSSetUnsigned(L"\\CPU\\Package\\%u\\Clock", Type4->ExternalClock * 1000000, PkgIndex);
             }
             if (ConfigGetBooleanWithDefault(L"\\SMBIOS\\Override", FALSE) ||
                 ConfigGetBooleanWithDefault(L"\\SMBIOS\\Override\\CPU", FALSE) ||
                 ConfigGetBooleanWithDefault(L"\\SMBIOS\\Override\\CPU\\Frequency", FALSE)) {
               // Adjust package frequency
-              UINT64 Frequency = LShiftU64(MultU64x32((UINT64)Type4->CurrentSpeed, 1000000), mSystemInformation.Packages[PkgIndex].Frequency.Step);
-              mSystemInformation.Packages[PkgIndex].Frequency.Maximum = (UINT8)DivU64x64Remainder(Frequency, mSystemInformation.Packages[PkgIndex].Frequency.Clock, NULL);
+              UINT64 Frequency = LShiftU64(MultU64x32((UINT64)Type4->CurrentSpeed, 1000000), ConfigSGetUnsignedWithDefault(L"\\CPU\\Package\\%u\\Step", 0, PkgIndex));
+              ConfigSSetUnsigned(L"\\CPU\\Package\\%u\\Maximum",
+                                (UINTN)DivU64x64Remainder(Frequency, ConfigSGetUnsignedWithDefault(L"\\CPU\\Package\\%u\\Clock", (UINTN)Frequency, PkgIndex), NULL), PkgIndex);
             }
             // Increment package index
             ++PkgIndex;
@@ -467,7 +399,7 @@ UpdatePackagesInformation (
         }
       }
       // Set the package count
-      mSystemInformation.PackageCount = PkgIndex;
+      ConfigSetUnsigned(L"\\CPU\\Count", PkgIndex);
       FreePool(Tables);
     }
   }

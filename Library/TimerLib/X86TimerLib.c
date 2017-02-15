@@ -1,8 +1,6 @@
 /** @file
-  Timer Library functions built upon local APIC on IA32/x64.
+  Timer Library functions
 
-  This library uses the local APIC library so that it supports x2APIC mode.
-  
   Copyright (c) 2010 - 2015, Intel Corporation. All rights reserved.<BR>
   This program and the accompanying materials
   are licensed and made available under the terms and conditions of the BSD License
@@ -14,30 +12,9 @@
 
 **/
 
-#include <Base.h>
+#include <Library/PlatformLib.h>
+
 #include <Library/TimerLib.h>
-#include <Library/BaseLib.h>
-#include <Library/PcdLib.h>
-#include <Library/DebugLib.h>
-#include <Library/LocalApicLib.h>
-
-/**
-  Internal function to return the frequency of the local APIC timer.
-
-  @return The frequency of the timer in Hz.
-
-**/
-UINT32
-EFIAPI
-InternalX86GetTimerFrequency (
-  VOID
-  )
-{
-  UINTN Divisor;
-
-  GetApicTimerState (&Divisor, NULL, NULL);
-  return PcdGet32(PcdFSBClock) / (UINT32)Divisor;
-}
 
 /**
   Stalls the CPU for at least the given number of ticks.
@@ -54,55 +31,32 @@ InternalX86GetTimerFrequency (
 VOID
 EFIAPI
 InternalX86Delay (
-  IN      UINT32                    Delay
+  IN      UINT64                    Delay
   )
 {
-  INT32                             Ticks;
-  UINT32                            Times;
-  UINT32                            InitCount;
-  UINT32                            StartTick;
-
-  //
-  // In case Delay is too larger, separate it into several small delay slot.
-  // Devided Delay by half value of Init Count is to avoid Delay close to
-  // the Init Count, timeout maybe missing if the time consuming between 2
-  // GetApicTimerCurrentCount() invoking is larger than the time gap between
-  // Delay and the Init Count.
-  //
-  InitCount = GetApicTimerInitCount ();
-  ASSERT (InitCount != 0);
-  Times     = Delay / (InitCount / 2);
-  Delay     = Delay % (InitCount / 2);
+  UINT64                            Tick;
+  UINT64                            Ticks;
+  UINT64                            StartTick;
 
   //
   // Get Start Tick and do delay
   //
-  StartTick = GetApicTimerCurrentCount ();
+  StartTick = GetPerformanceCounter();
+  //
+  // Wait until time out by Delay value
+  //
   do {
+    CpuPause ();
     //
-    // Wait until time out by Delay value
+    // Get Ticks from Start to Current.
     //
-    do {
-      CpuPause ();
-      //
-      // Get Ticks from Start to Current.
-      //
-      Ticks = GetApicTimerCurrentCount ();
-      Ticks = StartTick - Ticks;
-      //
-      // Ticks < 0 means Timer wrap-arounds happens.
-      //
-      if (Ticks < 0) {
-        Ticks += InitCount;
-      }
-    } while ((UINT32)Ticks < Delay);
-
-    //
-    // Update StartTick and Delay for next delay slot
-    //
-    StartTick -= (StartTick > Delay) ?  Delay : (Delay - InitCount);
-    Delay      = InitCount / 2;
-  } while (Times-- > 0);
+    Tick = GetPerformanceCounter();
+    if (Tick >= StartTick) {
+      Ticks = Tick - StartTick;
+    } else {
+      Ticks = ~0ULL - (StartTick - Tick);
+    }
+  } while (Ticks < Delay);
 }
 
 /**
@@ -122,13 +76,13 @@ MicroSecondDelay (
   )
 {
   InternalX86Delay (
-    (UINT32)DivU64x32 (
-              MultU64x64 (
-                InternalX86GetTimerFrequency (),
-                MicroSeconds
-                ),
-              1000000u
-              )
+            MultU64x64 (
+              DivU64x32 (
+                GetCPUFrequency(),
+                1000000
+              ),
+              MicroSeconds
+            )
     );
   return MicroSeconds;
 }
@@ -150,13 +104,13 @@ NanoSecondDelay (
   )
 {
   InternalX86Delay (
-    (UINT32)DivU64x32 (
-              MultU64x64 (
-                InternalX86GetTimerFrequency (),
-                NanoSeconds
-                ),
-              1000000000u
-              )
+            MultU64x64 (
+              DivU64x32 (
+                GetCPUFrequency(),
+                1000000000
+              ),
+              NanoSeconds
+            )
     );
   return NanoSeconds;
 }
@@ -178,7 +132,7 @@ GetPerformanceCounter (
   VOID
   )
 {
-  return (UINT64)GetApicTimerCurrentCount ();
+  return AsmReadTsc();
 }
 
 /**
@@ -212,14 +166,14 @@ GetPerformanceCounterProperties (
   )
 {
   if (StartValue != NULL) {
-    *StartValue = (UINT64)GetApicTimerInitCount ();
+    *StartValue = 0;
   }
 
   if (EndValue != NULL) {
-    *EndValue = 0;
+    *EndValue = ~0ULL;
   }
 
-  return (UINT64) InternalX86GetTimerFrequency ();
+  return GetCPUFrequency();
 }
 
 /**

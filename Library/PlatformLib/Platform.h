@@ -26,16 +26,13 @@
 
 // mCPUIDRegisters
 /// Registers for CPUID results
-extern UINT32             mCPUIDRegisters[4];
+extern UINT32 mCPUIDRegisters[4];
 // mCPUMaxIndex
 /// CPU maximum CPUID index
-extern UINT32             mCPUMaxIndex;
+extern UINT32 mCPUMaxIndex;
 // mCPUMaxExtIndex
 /// CPU maximum extended CPUID index
-extern UINT32             mCPUMaxExtIndex;
-// mCPUInformation
-/// CPU information
-extern SYSTEM_INFORMATION mSystemInformation;
+extern UINT32 mCPUMaxExtIndex;
 
 // DetectMemoryInformation
 /// Detect memory information from SPD
@@ -58,7 +55,7 @@ PrintMemoryInformation (
 EFI_STATUS
 EFIAPI
 UpdatePackageInformation (
-  IN UINT32 Index
+  IN UINTN Index
 );
 // UpdatePackagesInformation
 /// Update all packages information

@@ -53,8 +53,7 @@
   #
   CpuLib|MdePkg/Library/BaseCpuLib/BaseCpuLib.inf
   PlatformLib|$(PROJECT_PACKAGE)/Library/PlatformLib/PlatformLib.inf
-  # LocalApicLib|$(PROJECT_PACKAGE)/Library/BaseXApicX2ApicLib/BaseXApicX2ApicLib.inf
-  TimerLib|$(PROJECT_PACKAGE)/Library/MpInitLib/MpInitLib.inf
+  TimerLib|$(PROJECT_PACKAGE)/Library/TimerLib/TimerLib.inf
   MtrrLib|UefiCpuPkg/Library/MtrrLib/MtrrLib.inf
   SmBiosLib|$(PROJECT_PACKAGE)/Library/SmBiosLib/SmBiosLib.inf
 
@@ -66,12 +65,12 @@
   DebugPrintErrorLevelLib|MdePkg/Library/BaseDebugPrintErrorLevelLib/BaseDebugPrintErrorLevelLib.inf
   HobLib|MdePkg/Library/DxeHobLib/DxeHobLib.inf
   IoLib|MdePkg/Library/BaseIoLibIntrinsic/BaseIoLibIntrinsic.inf
+  LocalApicLib|UefiCpuPkg/Library/BaseXApicX2ApicLib/BaseXApicX2ApicLib.inf
   MemoryAllocationLib|MdePkg/Library/UefiMemoryAllocationLib/UefiMemoryAllocationLib.inf
   PcdLib|MdePkg/Library/DxePcdLib/DxePcdLib.inf
   PrintLib|MdePkg/Library/BasePrintLib/BasePrintLib.inf
   StringLib|$(PROJECT_PACKAGE)/Library/StringLib/StringLib.inf
   SynchronizationLib|MdePkg/Library/BaseSynchronizationLib/BaseSynchronizationLib.inf
-  # TimerLib|$(PROJECT_PACKAGE)/Library/SecPeiDxeTimerLibUefiCpu/SecPeiDxeTimerLibUefiCpu.inf
 
   #
   # UEFI Application libraries

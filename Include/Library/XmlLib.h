@@ -40,6 +40,7 @@ typedef struct _XML_PARSER XML_PARSER;
 /// XML document tree inspection callback
 /// @param Tree           The document tree node
 /// @param Level          The level of generation of tree nodes, zero for the root
+/// @param LevelIndex     The index of the tree node relative to the previous level
 /// @param TagName        The tree node tag name
 /// @param Value          The tree node value
 /// @param AttributeCount The tree node attribute count
@@ -54,6 +55,7 @@ typedef BOOLEAN
 *XML_INSPECT) (
   IN XML_TREE       *Tree,
   IN UINTN           Level,
+  IN UINTN           LevelIndex,
   IN CHAR16         *TagName,
   IN CHAR16         *Value OPTIONAL,
   IN UINTN           AttributeCount,
@@ -185,10 +187,11 @@ XmlDocumentInspect (
 );
 // XmlTreeInspect
 /// Inspect the XML document tree
-/// @param Tree      The XML document tree node
-/// @param Level     The level of generation of tree nodes, zero for the root
-/// @param Inspector The inspection callback
-/// @param Context   The context to pass to the inspection callback
+/// @param Tree       The XML document tree node
+/// @param Level      The level of generation of tree nodes, zero for the root
+/// @param LevelIndex The index of the tree node relative to the previous level
+/// @param Inspector  The inspection callback
+/// @param Context    The context to pass to the inspection callback
 /// @param Recursive Whether the inspection should include child nodes
 /// @return Whether the inspection finished or not
 /// @retval EFI_INVALID_PARAMETER If Tree or Inspector is NULL
@@ -199,6 +202,7 @@ EFIAPI
 XmlTreeInspect (
   IN XML_TREE    *Tree,
   IN UINTN        Level,
+  IN UINTN        LevelIndex,
   IN XML_INSPECT  Inspector,
   IN VOID        *Context OPTIONAL,
   IN BOOLEAN      Recursive

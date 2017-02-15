@@ -17,25 +17,28 @@
 #include <Library/IoLib.h>
 #include <Library/TimerLib.h>
 
-// MEMORY_MAX_SLOTS
-/// The maximum memory slots (24 is a multiple of 1, 2, 3, and 4 channels)
-#define MEMORY_MAX_SLOTS 24
+// CONFIG_KEY_MEMORY_DETECT
+/// Configuration key path for enabling/disabling memory detection
+#define CONFIG_KEY_MEMORY_DETECT L"\\Memory\\Detect"
+// CONFIG_KEY_MEMORY_DETECT_VALUE
+/// Default value for enabling/disabling memory detection
+#define CONFIG_KEY_MEMORY_DETECT_VALUE TRUE
+// CONFIG_KEY_MEMORY_COUNT
+/// Configuration key path for memory module count
+#define CONFIG_KEY_MEMORY_COUNT L"\\Memory\\Count"
+// CONFIG_KEY_MEMORY_COUNT_VALUE
+/// Default value for memory module count
+#define CONFIG_KEY_MEMORY_COUNT_VALUE 0
+
 // MEMORY_SPD_SIZE
 /// The size of the SPD information in bytes
 #define MEMORY_SPD_SIZE 512
 // MEMORY_SPD_TIMEOUT
-/// The timeout waiting for the SPD in microseconds (5ms)
-#define MEMORY_SPD_TIMEOUT 5000
+/// The timeout waiting for the SPD in microseconds (25ms)
+#define MEMORY_SPD_TIMEOUT 25000
 // MEMORY_SPD_INTERVAL
 /// The interval checking the SPD for changes in microseconds (100us)
 #define MEMORY_SPD_INTERVAL 100
-
-// mSpdCount
-/// The SPD count
-STATIC UINT8 mSpdCount = 0;
-// mSpd
-/// The SPD information for memory
-STATIC UINT8 mSpd[MEMORY_MAX_SLOTS][MEMORY_SPD_SIZE] = { 0 };
 
 // PrintMemoryInformation
 /// Print memory information
@@ -45,10 +48,64 @@ PrintMemoryInformation (
   VOID
 ) {
   UINTN Index;
-  Log2(L"Memory modules:", L"%u\n", mSpdCount);
-  for (Index = 0; Index < mSpdCount; ++Index) {
-    Log2(L"  Memory module:", L"0x%02X\n", mSpd[Index][SPD_MEMORY_TYPE]);
+  UINTN Count = ConfigGetUnsignedWithDefault(CONFIG_KEY_MEMORY_COUNT, CONFIG_KEY_MEMORY_COUNT_VALUE);
+  Log2(L"Memory modules:", L"%u\n", Count);
+  for (Index = 0; Index < Count; ++Index) {
+    Log2(L"  Memory module:", L"0x%02X\n", ConfigSGetUnsignedWithDefault(L"\\Memory\\Module\\%u\\Type", 0, Index));
   }
+}
+
+// PopulateMemoryInformationFromSPD
+/// TODO: Populate information for slot from SPD information
+/// @param Spd  The SPD information
+/// @param Slot The slot information
+/// @retval TRUE  The slot is populated and the slot information was populated
+/// @retval FALSE The slot is not populated or there was an error
+STATIC BOOLEAN
+PopulateMemoryInformationFromSPD (
+  IN UINTN  Index,
+  IN UINT8 *Spd
+) {
+  //SPD_DDR3  *Ddr3;
+  //SPD_DDR4  *Ddr4;
+  //SPD_LPDDR *Lpddr;
+  // Check parameters
+  if (Spd == NULL) {
+    return FALSE;
+  }
+  // Get the memory by type
+  switch (Spd[SPD_MEMORY_TYPE]) {
+    case SPD_VAL_SDR_TYPE:
+      // SD RAM
+      return TRUE;
+
+    case SPD_VAL_DDR_TYPE:
+      // DDR RAM
+      return TRUE;
+
+    case SPD_VAL_DDR2_TYPE:
+      // DDR2 RAM
+      return TRUE;
+
+    case SPD_VAL_DDR3_TYPE:
+      // DDR3 RAM
+      return TRUE;
+
+    case SPD_VAL_DDR4_TYPE:
+      // DDR4 RAM
+      return TRUE;
+
+    case SPD_VAL_LPDDR3_TYPE:
+      // LPDDR3 RAM
+    case SPD_VAL_LPDDR4_TYPE:
+      // LPDDR4_RAM
+      return TRUE;
+
+    default:
+      break;
+  }
+  // Unknown memory or unpopulated
+  return FALSE;
 }
 
 // ReadMemoryFromIntelDevice
@@ -78,7 +135,7 @@ ReadMemoryFromIntelDevice (
   }
   // Check for time out
   if (Counter >= (MEMORY_SPD_TIMEOUT / MEMORY_SPD_INTERVAL)) {
-    LOG3(LOG_PREFIX_WIDTH - LOG(L"  %u", Index - 0x50), L":", L"Timed out on reset\n");
+    LOG3(LOG_PREFIX_WIDTH - LOG(L"  Slot %u", Index - 0x50), L":", L"Timed out on reset\n");
     return 0;
   }
   // Send the command to retrieve a byte
@@ -93,17 +150,18 @@ ReadMemoryFromIntelDevice (
   }
   // Check for time out
   if (Counter >= (MEMORY_SPD_TIMEOUT / MEMORY_SPD_INTERVAL)) {
-    LOG3(LOG_PREFIX_WIDTH - LOG(L"  %u", Index - 0x50), L":", L"Timed out on read\n");
+    LOG3(LOG_PREFIX_WIDTH - LOG(L"  Slot %u", Index - 0x50), L":", L"Timed out on read\n");
     return 0;
   }
   // Check for an error
   if ((IoRead8(Address) & 2) == 0) {
-    LOG3(LOG_PREFIX_WIDTH - LOG(L"  %u", Index - 0x50), L":", L"Error on read\n");
+    LOG3(LOG_PREFIX_WIDTH - LOG(L"  Slot %u", Index - 0x50), L":", L"Error on read\n");
     return 0;
   }
   // Store the retrieved byte
   return IoRead8(Address + 5);
 }
+
 // DetectMemoryInformationFromIntelDevice
 /// Detect memory information from Intel SMBus device
 /// @param Device The PCI device
@@ -118,6 +176,7 @@ DetectMemoryInformationFromIntelDevice (
   UINT16     PciStatus = 0;
   UINT8      HostStatus = 0;
   UINT8      Index;
+  UINT8      Spd[MEMORY_SPD_SIZE];
   // Check parameters
   if (Device == NULL) {
     return EFI_INVALID_PARAMETER;
@@ -158,32 +217,40 @@ DetectMemoryInformationFromIntelDevice (
     return Status;
   }
   // Get the base address from the configuration value
-  Address = Address & 0xFFF0;
   if (Address == 0) {
     return EFI_UNSUPPORTED;
   }
+  Address &= 0xFFF0;
   LOG2(L"  Base address:", L"0x%08X\n", Address);
   // Iterate through each slot
-  if (mSpdCount < MEMORY_MAX_SLOTS) {
-    for (Index = 0x50; Index < 0x58; ++Index) {
-      UINT16 Offset;
-      UINT8  MemoryType;
-      // Get the memory module type key byte
-      MemoryType = ReadMemoryFromIntelDevice(Address, Index, SPD_MEMORY_TYPE);
-      // Check for invalid module type
-      if ((MemoryType == 0x00) || (MemoryType == 0x0D) || (MemoryType > 0x11)) {
-        mSpd[mSpdCount][SPD_MEMORY_TYPE] = (MemoryType == 0xFF) ? 0xFF : 0x00;
-        break;
-      }
+  for (Index = 0x50; Index < 0x58; ++Index) {
+    UINT16 Offset;
+    UINT8  MemoryType;
+    // Get the current slot count
+    UINTN  Count = ConfigGetUnsignedWithDefault(CONFIG_KEY_MEMORY_COUNT, CONFIG_KEY_MEMORY_COUNT_VALUE);
+    // Get the memory module type key byte
+    MemoryType = ReadMemoryFromIntelDevice(Address, Index, SPD_MEMORY_TYPE);
+    // Check for invalid module type
+    if ((MemoryType == 0x00) || (MemoryType == 0x0D) || (MemoryType > 0x11)) {
+      Spd[SPD_MEMORY_TYPE] = (MemoryType == 0xFF) ? 0xFF : 0x00;
+    } else {
+      LOG3(LOG_PREFIX_WIDTH - LOG(L"  Slot %u", Index - 0x50), L":", L"0x%02X\n", MemoryType);
       // Iterate through the map to read
-      for (Offset = 0; Offset < MEMORY_SPD_SIZE; ++Offset) {
+      for (Offset = 0; Offset < SPD_MEMORY_TYPE; ++Offset) {
         // Store the retrieved byte
-        mSpd[mSpdCount][Offset] = ReadMemoryFromIntelDevice(Address, Index, Offset);
+        Spd[Offset] = ReadMemoryFromIntelDevice(Address, Index, Offset);
       }
-      // Incrememnt the slot count
-      if (++mSpdCount >= MEMORY_MAX_SLOTS) {
-        break;
+      // Skip the type since we already read it
+      for (Offset = SPD_MEMORY_TYPE + 1; Offset < MEMORY_SPD_SIZE; ++Offset) {
+        // Store the retrieved byte
+        Spd[Offset] = ReadMemoryFromIntelDevice(Address, Index, Offset);
       }
+      PopulateMemoryInformationFromSPD(Count, Spd);
+    }
+    // Increment slot count
+    Status = ConfigSetUnsigned(CONFIG_KEY_MEMORY_COUNT, Count + 1);
+    if (EFI_ERROR(Status)) {
+      return Status;
     }
   }
   return EFI_SUCCESS;
@@ -244,78 +311,6 @@ DetectMemoryInformationFromDevice (
   return EFI_UNSUPPORTED;
 }
 
-// PopulateMemoryInformationFromSPD
-/// TODO: Populate information for slot from SPD information
-/// @param Spd  The SPD information
-/// @param Slot The slot information
-/// @retval TRUE  The slot is populated and the slot information was populated
-/// @retval FALSE The slot is not populated or there was an error
-STATIC BOOLEAN
-PopulateMemoryInformationFromSPD (
-  IN     UINT8            *Spd,
-  IN OUT SLOT_INFORMATION *Slot
-) {
-  //SPD_DDR3  *Ddr3;
-  //SPD_DDR4  *Ddr4;
-  //SPD_LPDDR *Lpddr;
-  // Check parameters
-  if ((Slot == NULL) || (Spd == NULL)) {
-    return FALSE;
-  }
-  // Get the memory by type
-  switch (Spd[SPD_MEMORY_TYPE]) {
-    case SPD_VAL_SDR_TYPE:
-      // SD RAM
-      return TRUE;
-
-    case SPD_VAL_DDR_TYPE:
-      // DDR RAM
-      return TRUE;
-
-    case SPD_VAL_DDR2_TYPE:
-      // DDR2 RAM
-      return TRUE;
-
-    case SPD_VAL_DDR3_TYPE:
-      // DDR3 RAM
-      return TRUE;
-
-    case SPD_VAL_DDR4_TYPE:
-      // DDR4 RAM
-      return TRUE;
-
-    case SPD_VAL_LPDDR3_TYPE:
-      // LPDDR3 RAM
-    case SPD_VAL_LPDDR4_TYPE:
-      // LPDDR4_RAM
-      return TRUE;
-
-    default:
-      break;
-  }
-  // Unknown memory or unpopulated
-  return FALSE;
-}
-// PopulateMemoryInformation
-/// Populate memory slot information from SPD information
-STATIC VOID
-PopulateMemoryInformation (
-  VOID
-) {
-  UINT8 Index;
-
-  // Populate the slot information from the SPD information
-  for (Index = 0; Index < mSpdCount; ++Index) {
-    if (PopulateMemoryInformationFromSPD(mSpd[Index], mSystemInformation.Slots + Index)) {
-      mSystemInformation.SlotCount = Index + 1;
-    }
-  }
-  // Fix slot count and assume there is an even count except for one
-  if ((mSystemInformation.SlotCount > 1) && ((mSystemInformation.SlotCount & 1) != 0)) {
-    ++mSystemInformation.SlotCount;
-  }
-}
-
 // DetectMemoryInformation
 /// Detect memory information from SMBus devices
 VOID
@@ -329,7 +324,7 @@ DetectMemoryInformation (
   UINTN                 Index;
 
   // Check if memory information should be detected from SMBus SPD commands
-  if (ConfigGetBooleanWithDefault(L"\\Memory\\Detect", TRUE)) {
+  if (ConfigGetBooleanWithDefault(CONFIG_KEY_MEMORY_DETECT, CONFIG_KEY_MEMORY_DETECT_VALUE)) {
     // Get all SMBus devices
     Count = 0;
     Devices = NULL;
@@ -340,12 +335,10 @@ DetectMemoryInformation (
       }
       FreePool(Devices);
     }
-    // Populate memory slot information with SPD information
-    PopulateMemoryInformation();
   }
   // Check if Memory information should be updated by SMBIOS
-  if ((mSystemInformation.SlotCount == 0) ||
-      !ConfigGetBooleanWithDefault(L"\\Memory\\Detect", TRUE) ||
+  if ((ConfigGetUnsignedWithDefault(CONFIG_KEY_MEMORY_COUNT, CONFIG_KEY_MEMORY_COUNT_VALUE) == 0) ||
+      !ConfigGetBooleanWithDefault(CONFIG_KEY_MEMORY_DETECT, CONFIG_KEY_MEMORY_DETECT_VALUE) ||
        ConfigGetBooleanWithDefault(L"\\SMBIOS\\Override", FALSE) ||
        ConfigGetBooleanWithDefault(L"\\SMBIOS\\Override\\Memory", TRUE)) {
     // Update memory information with information from SMBIOS
@@ -362,7 +355,7 @@ DetectMemoryInformation (
           continue;
         }
         LOG2(L"  Memory array:", L"%u\n", Index);
-        LOG2(L"    Device count:", L"%u\n", Type16->NumberOfMemoryDevices);
+        LOG2(L"    Slot count:", L"%u\n", Type16->NumberOfMemoryDevices);
         // Get the first memory slot table for this memory array
         Table = GetNextSmBiosTable((SMBIOS_STRUCTURE *)Type16);
         while ((Table != NULL) && (Table->Type == SMBIOS_TYPE_MEMORY_DEVICE)) {
@@ -373,10 +366,6 @@ DetectMemoryInformation (
           Table = GetNextSmBiosTable(Table);
           ++SlotIndex;
         }
-      }
-      // Set the slot count
-      if (SlotIndex > mSystemInformation.SlotCount) {
-        mSystemInformation.SlotCount = SlotIndex;
       }
     }
   }

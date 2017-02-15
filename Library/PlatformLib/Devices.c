@@ -113,6 +113,7 @@ FindDevices (
     FoundDevices[DeviceIndex++] = PciIo;
   }
   FreePool(Handles);
+  LOG2(L"  Count:", L"%u\n", DeviceIndex);
   if (DeviceIndex == 0) {
     // No devices not found
     FreePool(FoundDevices);

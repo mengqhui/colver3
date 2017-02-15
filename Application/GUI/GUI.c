@@ -7,6 +7,7 @@
 #include <Library/GUILib.h>
 
 #include <Library/SmBiosLib.h>
+#include <Library/TimerLib.h>
 
 #include <Library/UefiBootServicesTableLib.h>
 
@@ -49,7 +50,7 @@ GUIMain (
     Log2(L"Languages:", L"None\n");
   }
   // Get language from configuration
-  Value = ConfigGetStringWithDefault(L"\\GUI\\Language", NULL);
+  Value = ConfigGetStringWithDefault(L"\\Language", NULL);
   if (Value != NULL) {
     // Allocate string
     Count = StrLen(Value) + 1;

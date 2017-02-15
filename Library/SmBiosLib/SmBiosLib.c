@@ -326,7 +326,7 @@ GetSmBiosSystemName (
     if (Result != NULL) {
       // Copy the strings to the product name string
       AsciiStrCpyS(Result, Length1 + 1, Manufacturer);
-      Result[Length1] = '-';
+      Result[Length1] = ' ';
       AsciiStrCpyS(Result + Length1 + 1, Length2 + 1, ProductName);
     }
     return Result;

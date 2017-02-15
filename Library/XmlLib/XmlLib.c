@@ -760,14 +760,15 @@ XmlDocumentInspect (
   if ((Document == NULL) || (Inspector == NULL)) {
     return EFI_INVALID_PARAMETER;
   }
-  return XmlTreeInspect(Document->Tree, 0, Inspector, Context, Recursive);
+  return XmlTreeInspect(Document->Tree, 0, 0, Inspector, Context, Recursive);
 }
 // XmlTreeInspect
 /// Inspect the XML document tree
-/// @param Tree      The XML document tree node
-/// @param Level     The level of generation of tree nodes, zero for the root
-/// @param Inspector The inspection callback
-/// @param Context   The context to pass to the inspection callback
+/// @param Tree       The XML document tree node
+/// @param Level      The level of generation of tree nodes, zero for the root
+/// @param LevelIndex The index of the tree node relative to the previous level
+/// @param Inspector  The inspection callback
+/// @param Context    The context to pass to the inspection callback
 /// @param Recursive Whether the inspection should include child nodes
 /// @return Whether the inspection finished or not
 /// @retval EFI_INVALID_PARAMETER If Tree or Inspector is NULL
@@ -778,6 +779,7 @@ EFIAPI
 XmlTreeInspect (
   IN XML_TREE    *Tree,
   IN UINTN        Level,
+  IN UINTN        LevelIndex,
   IN XML_INSPECT  Inspector,
   IN VOID        *Context OPTIONAL,
   IN BOOLEAN      Recursive
@@ -800,7 +802,7 @@ XmlTreeInspect (
   ChildCount = 0;
   XmlTreeGetChildren(Tree, &Children, &ChildCount);
   // Inspection callback
-  Success = Inspector(Tree, Level, Tree->Name, Tree->Value, AttributeCount, Attributes, ChildCount, Children, Context);
+  Success = Inspector(Tree, Level, LevelIndex, Tree->Name, Tree->Value, AttributeCount, Attributes, ChildCount, Children, Context);
   if (Attributes != NULL) {
     FreePool(Attributes);
   }
@@ -812,10 +814,11 @@ XmlTreeInspect (
   }
   // Check if recursive inspection
   if (Recursive) {
+    UINTN     Index = 0;
     XML_TREE *Child = Tree->Children;
     while (Child != NULL) {
       // Inspect each child
-      EFI_STATUS Status = XmlTreeInspect(Child, Level + 1, Inspector, Context, Recursive);
+      EFI_STATUS Status = XmlTreeInspect(Child, Level + 1, Index++, Inspector, Context, Recursive);
       if (EFI_ERROR(Status)) {
         return Status;
       }

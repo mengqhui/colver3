@@ -355,18 +355,11 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\..\Application\GUI\GUI.c" />
-    <ClCompile Include="..\..\Library\BaseXApicX2ApicLib\BaseXApicX2ApicLib.c" />
     <ClCompile Include="..\..\Library\ConfigLib\ConfigLib.c" />
     <ClCompile Include="..\..\Library\FileLib\FileLib.c" />
     <ClCompile Include="..\..\Library\FontLib\FontLib.c" />
     <ClCompile Include="..\..\Library\GUILib\GUILib.c" />
     <ClCompile Include="..\..\Library\LogLib\LogLib.c" />
-    <ClCompile Include="..\..\Library\MpInitLib\BaseXApicX2ApicLib.c" />
-    <ClCompile Include="..\..\Library\MpInitLib\IpfTimerLib.c" />
-    <ClCompile Include="..\..\Library\MpInitLib\MpInitLib.c" />
-    <ClCompile Include="..\..\Library\MpInitLib\Microcode.c" />
-    <ClCompile Include="..\..\Library\MpInitLib\MpLib.c" />
-    <ClCompile Include="..\..\Library\MpInitLib\X86TimerLib.c" />
     <ClCompile Include="..\..\Library\ParseLib\ParseLib.c" />
     <ClCompile Include="..\..\Library\PlatformLib\AMD.c" />
     <ClCompile Include="..\..\Library\PlatformLib\CPU.c" />
@@ -374,11 +367,11 @@
     <ClCompile Include="..\..\Library\PlatformLib\Intel.c" />
     <ClCompile Include="..\..\Library\PlatformLib\Memory.c" />
     <ClCompile Include="..\..\Library\PlatformLib\PlatformLib.c" />
-    <ClCompile Include="..\..\Library\SecPeiDxeTimerLibUefiCpu\IpfTimerLib.c" />
-    <ClCompile Include="..\..\Library\SecPeiDxeTimerLibUefiCpu\X86TimerLib.c" />
     <ClCompile Include="..\..\Library\SmBiosLib\SmBiosLib.c" />
     <ClCompile Include="..\..\Library\StringLib\Base64.c" />
     <ClCompile Include="..\..\Library\StringLib\StringLib.c" />
+    <ClCompile Include="..\..\Library\TimerLib\IpfTimerLib.c" />
+    <ClCompile Include="..\..\Library\TimerLib\X86TimerLib.c" />
     <ClCompile Include="..\..\Library\XmlLib\XmlLib.c" />
     <ClCompile Include="..\..\Library\XmlLib\XmlStates.c" />
   </ItemGroup>
@@ -412,25 +405,16 @@
     <None Include="..\..\Build\Windows\Support\SafeName.bat" />
     <None Include="..\..\Build\Windows\Support\Tee.vbs" />
     <None Include="..\..\Build\Windows\Support\Unquote.bat" />
-    <None Include="..\..\Library\BaseXApicX2ApicLib\BaseXApicX2ApicLib.inf" />
-    <None Include="..\..\Library\BaseXApicX2ApicLib\BaseXApicX2ApicLib.uni" />
     <None Include="..\..\Library\ConfigLib\ConfigLib.inf" />
     <None Include="..\..\Library\FileLib\FileLib.inf" />
     <None Include="..\..\Library\FontLib\FontLib.inf" />
     <None Include="..\..\Library\GUILib\GUILib.inf" />
     <None Include="..\..\Library\LogLib\LogLib.inf" />
-    <None Include="..\..\Library\MpInitLib\Ia32\MpEqu.inc" />
-    <None Include="..\..\Library\MpInitLib\Ia32\MpFuncs.nasm" />
-    <None Include="..\..\Library\MpInitLib\MpInitLib.inf" />
-    <None Include="..\..\Library\MpInitLib\MpInitLib.uni" />
-    <None Include="..\..\Library\MpInitLib\X64\MpEqu.inc" />
-    <None Include="..\..\Library\MpInitLib\X64\MpFuncs.nasm" />
     <None Include="..\..\Library\ParseLib\ParseLib.inf" />
     <None Include="..\..\Library\PlatformLib\PlatformLib.inf" />
-    <None Include="..\..\Library\SecPeiDxeTimerLibUefiCpu\SecPeiDxeTimerLibUefiCpu.inf" />
-    <None Include="..\..\Library\SecPeiDxeTimerLibUefiCpu\SecPeiDxeTimerLibUefiCpu.uni" />
     <None Include="..\..\Library\SmBiosLib\SmBiosLib.inf" />
     <None Include="..\..\Library\StringLib\StringLib.inf" />
+    <None Include="..\..\Library\TimerLib\TimerLib.inf" />
     <None Include="..\..\Library\XmlLib\XmlLib.inf" />
     <None Include="..\..\Package.dec" />
     <None Include="..\..\Package.dsc" />
@@ -451,7 +435,6 @@
     <ClInclude Include="..\..\Include\Library\StringLib.h" />
     <ClInclude Include="..\..\Include\Library\XmlLib.h" />
     <ClInclude Include="..\..\Include\Version.h" />
-    <ClInclude Include="..\..\Library\MpInitLib\MpLib.h" />
     <ClInclude Include="..\..\Library\PlatformLib\Platform.h" />
     <ClInclude Include="..\..\Library\StringLib\Unicode.h" />
     <ClInclude Include="..\..\Library\XmlLib\XmlStates.h" />

@@ -6,99 +6,10 @@
 
 #include "Platform.h"
 
+#include <Library/ConfigLib.h>
 #include <Library/SmBiosLib.h>
 
 #include <Library/UefiBootServicesTableLib.h>
-
-// mSystemPlatformLibGuid
-/// CPU information internal GUID
-STATIC EFI_GUID    mSystemPlatformLibGuid = { 0x91BCF481, 0x744E, 0x4764, { 0xA3, 0x3A, 0x09, 0x7A, 0xBC, 0x59, 0x28, 0x0D } };
-// mSystemInformationHandle
-/// CPU information installation handle
-STATIC EFI_HANDLE  mSystemInformationHandle = NULL;
-// mCPUIDRegisters
-/// Registers for CPUID results
-UINT32             mCPUIDRegisters[4] = { 0 };
-// mCPUMaxIndex
-/// CPU maximum CPUID index
-UINT32             mCPUMaxIndex = 0;
-// mCPUMaxExtIndex
-/// CPU maximum extended CPUID index
-UINT32             mCPUMaxExtIndex = 0x80000000;
-// mSystemInformation
-/// CPU information
-SYSTEM_INFORMATION mSystemInformation = {
-  // LogicalCount
-  1,
-  // CoreCount
-  1,
-  // PackageCount
-  1,
-  // Packages
-  {
-    {
-      // Type
-      CPU_VENDOR_UNKNOWN,
-      // Family
-      CPU_FAMILY_UNKNOWN,
-      // Model
-      CPU_MODEL_UNKNOWN,
-      // LogicalCount
-      1,
-      // CoreCount
-      1,
-      // Frequency
-      {
-        // Clock
-        100000000,
-        // Minimum
-        1,
-        // Maximum
-        1,
-        // Step
-        0,
-        // TurboCount
-        0,
-        // Turbo
-        { 0 }
-      },
-      // Features
-      { 0 },
-      // Description
-      { 0 }
-    }
-  },
-  // SlotCount
-  0,
-  // Slots
-  { 0 }
-};
-
-// GetSystemInformation
-/// Get system information such as type, family, frequency, and features
-/// @param Information On output, the system information which should be freed after use
-/// @return Whether the system information was returned successfully or not
-/// @retval EFI_INVALID_PARAMETER If Information is NULL or *Information is not NULL
-/// @retval EFI_OUT_OF_RESOURCES  If memory could not be allocated
-/// @retval EFI_SUCCESS           If the system information was returned
-EFI_STATUS
-EFIAPI
-GetSystemInformation (
-  OUT SYSTEM_INFORMATION **Information
-) {
-  // Check parameters
-  if ((Information == NULL) || (*Information != NULL)) {
-    return EFI_INVALID_PARAMETER;
-  }
-  // Allocate CPU information
-  *Information = AllocateZeroPool((UINTN)sizeof(mSystemInformation));
-  if (*Information == NULL) {
-    return EFI_OUT_OF_RESOURCES;
-  }
-  // Copy CPU information
-  CopyMem((VOID *)*Information, (VOID *)&mSystemInformation, (UINTN)sizeof(mSystemInformation));
-  return EFI_SUCCESS;
-}
 
 // PrintSystemInformation
 /// Print system information
@@ -174,27 +85,14 @@ EFIAPI
 PlatformLibInitialize (
   VOID
 ) {
-  EFI_STATUS           Status;
-  SYSTEM_INFORMATION  *Information = NULL;
+  EFI_STATUS Status;
 
-  // Check for boot services
-  if ((gBS == NULL) || (gBS->LocateProtocol == NULL) ||
-      (gBS->InstallMultipleProtocolInterfaces == NULL) ||
-      (gBS->UninstallMultipleProtocolInterfaces == NULL)) {
-    return EFI_UNSUPPORTED;
-  }
-  // Check if CPU information already exists
-  if ((gBS->LocateProtocol(&mSystemPlatformLibGuid, NULL, (VOID **)&Information) == EFI_SUCCESS) && (Information != NULL)) {
-    // Copy CPU information from installed information
-    CopyMem((VOID *)&mSystemInformation, Information, sizeof(mSystemInformation));
+  // Check if platform information already exists
+  if (ConfigGetBooleanWithDefault(L"\\Platform\\Initialized", FALSE)) {
     return EFI_SUCCESS;
   }
 
-  // Set CPU package count
-  mSystemInformation.PackageCount = 1;
-  mSystemInformation.LogicalCount = 0;
-  mSystemInformation.CoreCount = 0;
-  // Update package count
+  // Update package information
   Status = UpdatePackageInformation(0);
   if (EFI_ERROR(Status)) {
     return Status;
@@ -211,9 +109,8 @@ PlatformLibInitialize (
   // Print system information
   PrintSystemInformation();
 
-  // Install system information
-  mSystemInformationHandle = NULL;
-  return gBS->InstallMultipleProtocolInterfaces(&mSystemInformationHandle, &mSystemPlatformLibGuid, (VOID *)&mSystemInformation, NULL);
+  // Set platform information intialized
+  return ConfigSetBoolean(L"\\Platform\\Initialized", TRUE);
 }
 
 // PlatformLibFinish
@@ -225,10 +122,5 @@ EFIAPI
 PlatformLibFinish (
   VOID
 ) {
-  // Uninstall system information
-  if (mSystemInformationHandle != NULL) {
-    gBS->UninstallMultipleProtocolInterfaces(mSystemInformationHandle, &mSystemPlatformLibGuid, (VOID *)&mSystemInformation, NULL);
-    mSystemInformationHandle = NULL;
-  }
   return EFI_SUCCESS;
 }
