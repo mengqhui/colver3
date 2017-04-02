@@ -8,6 +8,29 @@
 
 #include <Library/PlatformLib.h>
 
+// LANG_MESSAGE_ERROR
+/// Language error message
+#define LANG_MESSAGE_ERROR 1
+// LANG_MESSAGE_WARNING
+/// Language warning message
+#define LANG_MESSAGE_WARNING 2
+
+// LANG_MESSAGE
+/// Language message
+typedef struct _LANG_MESSAGE LANG_MESSAGE;
+struct _LANG_MESSAGE {
+
+  // Next
+  /// The next message
+  LANG_MESSAGE *Next;
+  // Flags
+  /// The message flags
+  UINTN         Flags;
+  // Message
+  /// The message
+  CHAR16       *Message;
+
+};
 // LANG_LIST
 /// Language state list
 typedef struct _LANG_LIST LANG_LIST;
@@ -97,38 +120,165 @@ struct _LANG_PARSER {
   // States
   /// The parser states
   LANG_STATE    **States;
+  // Messages
+  /// The parser messages
+  LANG_MESSAGE   *Messages;
 
 };
 
+// ParseMessage
+/// Add a parser message
+/// @param Parser      The language parser to which to add a message
+/// @param Flags       The message flags
+/// @param MessageDesc The description of the message
+/// @return Whether the message was added or not
+/// @retval EFI_INVALID_PARAMETER If Parser or MessageDesc is NULL
+/// @retval EFI_OUT_OF_RESOURCES  If memory could not be allocated
+/// @retval EFI_SUCCESS           If the message was added successfully
+EFI_STATUS
+EFIAPI
+ParseMessage (
+  IN OUT LANG_PARSER *Parser,
+  IN     UINTN        Flags,
+  IN     CHAR16      *MessageDesc,
+  ...
+) {
+  EFI_STATUS Status;
+  VA_LIST    Args;
+  VA_START(Args, MessageDesc);
+  Status = ParseVMessage(Parser, Flags, MessageDesc, Args);
+  VA_END(Args);
+  return Status;
+}
+// ParseVMessage
+/// Add a parser message
+/// @param Parser      The language parser to which to add a message
+/// @param Flags       The message flags
+/// @param MessageDesc The description of the message
+/// @param Args        The arguments
+/// @return Whether the message was added or not
+/// @retval EFI_INVALID_PARAMETER If Parser or MessageDesc is NULL
+/// @retval EFI_OUT_OF_RESOURCES  If memory could not be allocated
+/// @retval EFI_SUCCESS           If the message was added successfully
+EFI_STATUS
+EFIAPI
+ParseVMessage (
+  IN OUT LANG_PARSER *Parser,
+  IN     UINTN        Flags,
+  IN     CHAR16      *MessageDesc,
+  IN     VA_LIST      Args
+) {
+  LANG_MESSAGE *Message;
+  // Check parameters
+  if ((Parser == NULL) || (MessageDesc == NULL) || (*MessageDesc == L'\0')) {
+    return EFI_INVALID_PARAMETER;
+  }
+  // Allocate a new message
+  Message = (LANG_MESSAGE *)AllocateZeroPool(sizeof(LANG_MESSAGE));
+  if (Message == NULL) {
+    return EFI_OUT_OF_RESOURCES;
+  }
+  // Set message
+  Message->Next = NULL;
+  Message->Flags = Flags;
+  Message->Message = CatVSPrint(NULL, MessageDesc, Args);
+  if (Message->Message == NULL) {
+    FreePool(Message);
+    return EFI_OUT_OF_RESOURCES;
+  }
+  // Add the message
+  if (Parser->Messages == NULL) {
+    Parser->Messages = Message;
+  } else {
+    LANG_MESSAGE *Ptr = Parser->Messages;
+    while (Ptr->Next != NULL) {
+      Ptr = Ptr->Next;
+    }
+    Ptr->Next = Message;
+  }
+  return EFI_SUCCESS;
+}
+
 // ParseError
-/// TODO: Add a parser error
+/// Add a parser error
 /// @param Parser    The language parser to which to add an error
 /// @param ErrorDesc The description of the error
-STATIC VOID
+/// @return Whether the error message was added or not
+/// @retval EFI_INVALID_PARAMETER If Parser or ErrorDesc is NULL
+/// @retval EFI_OUT_OF_RESOURCES  If memory could not be allocated
+/// @retval EFI_SUCCESS           If the error message was added successfully
+EFI_STATUS
 EFIAPI
 ParseError (
   IN OUT LANG_PARSER *Parser,
   IN     CHAR16      *ErrorDesc,
   ...
 ) {
-  VA_LIST Args;
+  EFI_STATUS Status;
+  VA_LIST    Args;
   VA_START(Args, ErrorDesc);
+  Status = ParseVError(Parser, ErrorDesc, Args);
   VA_END(Args);
+  return Status;
 }
+// ParseVError
+/// Add a parser error
+/// @param Parser    The language parser to which to add an error
+/// @param ErrorDesc The description of the error
+/// @param Args      The arguments
+/// @return Whether the error message was added or not
+/// @retval EFI_INVALID_PARAMETER If Parser or ErrorDesc is NULL
+/// @retval EFI_OUT_OF_RESOURCES  If memory could not be allocated
+/// @retval EFI_SUCCESS           If the error message was added successfully
+EFI_STATUS
+EFIAPI
+ParseVError (
+  IN OUT LANG_PARSER *Parser,
+  IN     CHAR16      *ErrorDesc,
+  IN     VA_LIST      Args
+) {
+  return ParseVMessage(Parser, LANG_MESSAGE_ERROR, ErrorDesc, Args);
+}
+
 // ParseWarn
-/// TODO: Add a parser warning
-/// @param Parser    The language parser to which to add a warning
-/// @param WarnDesc  The description of the warning
-STATIC VOID
+/// Add a parser warning
+/// @param Parser   The language parser to which to add a warning
+/// @param WarnDesc The description of the warning
+/// @return Whether the warning message was added or not
+/// @retval EFI_INVALID_PARAMETER If Parser or ErrorDesc is NULL
+/// @retval EFI_OUT_OF_RESOURCES  If memory could not be allocated
+/// @retval EFI_SUCCESS           If the warning message was added successfully
+EFI_STATUS
 EFIAPI
 ParseWarn (
   IN OUT LANG_PARSER *Parser,
   IN     CHAR16      *WarnDesc,
   ...
 ) {
-  VA_LIST Args;
+  EFI_STATUS Status;
+  VA_LIST    Args;
   VA_START(Args, WarnDesc);
+  Status = ParseVWarn(Parser, WarnDesc, Args);
   VA_END(Args);
+  return Status;
+}
+// ParseVWarn
+/// Add a parser warning
+/// @param Parser   The language parser to which to add a warning
+/// @param WarnDesc The description of the warning
+/// @param Args     The arguments
+/// @return Whether the warning message was added or not
+/// @retval EFI_INVALID_PARAMETER If Parser or ErrorDesc is NULL
+/// @retval EFI_OUT_OF_RESOURCES  If memory could not be allocated
+/// @retval EFI_SUCCESS           If the warning message was added successfully
+EFI_STATUS
+EFIAPI
+ParseVWarn (
+  IN OUT LANG_PARSER *Parser,
+  IN     CHAR16      *WarnDesc,
+  IN     VA_LIST      Args
+) {
+  return ParseVMessage(Parser, LANG_MESSAGE_WARNING, WarnDesc, Args);
 }
 
 // FindParseState

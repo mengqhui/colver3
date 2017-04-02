@@ -11,6 +11,12 @@
 
 #include <Library/UefiBootServicesTableLib.h>
 
+#if defined(MDE_CPU_IA32) || defined(MDE_CPU_X64) || defined(MDE_CPU_IPF)
+
+#include <Protocol/LegacyBios.h>
+
+#endif
+
 // GUIMain
 /// GUI entry point
 /// @param ImageHandle The assigned image handle for this application
@@ -29,7 +35,6 @@ GUIMain (
   CHAR8          **Languages;
   UINTN            Count;
   UINTN            Index;
-  EFI_INPUT_KEY    Key = { 0 };
 
   // Clear the watchdog timer
   if ((gBS != NULL) && (gBS->SetWatchdogTimer != NULL)) {
@@ -71,6 +76,20 @@ GUIMain (
   Status = GetLanguage(&Language);
   Log2(L"Language:", L"%a\n", (EFI_ERROR(Status) || (Language == NULL)) ? "None" : Language);
 
+#if defined(MDE_CPU_IA32) || defined(MDE_CPU_X64) || defined(MDE_CPU_IPF)
+
+  // Check if legacy CSM is available
+  if ((gBS != NULL) && (gBS->LocateProtocol != NULL)) {
+    VOID *Tmp = NULL;
+    Status = gBS->LocateProtocol(&gEfiLegacyBiosProtocolGuid, NULL, (VOID **)&Tmp);
+    if (!EFI_ERROR(Status) && (Tmp != NULL)) {
+      ConfigSetBoolean(L"\\System\\Legacy", TRUE, TRUE);
+    }
+  }
+  Log2(L"Legacy support:", L"%s\n", ConfigGetBooleanWithDefault(L"\\System\\Legacy", FALSE) ? L"true" : L"false");
+
+#endif
+
   // Run GUI
   Status = GUIRun();
   Log2(L"GUI status:", L"%r\n", Status);
@@ -84,12 +103,7 @@ GUIMain (
   Log(L"\n\n");
 
   // Wait for key press
-  while (gST->ConIn->ReadKeyStroke(gST->ConIn, &Key) == EFI_NOT_READY);
-
-  // Enable the watchdog timer - 5 minutes (300 seconds)
-  if ((gBS != NULL) && (gBS->SetWatchdogTimer != NULL)) {
-    gBS->SetWatchdogTimer(300, 0, 0, NULL);
-  }
+  WaitForAnyKeyPress();
 
   return Status;
 }

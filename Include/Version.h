@@ -71,6 +71,10 @@
 /// The firmware UEFI specification compliance version code
 #define PROJECT_FIRMWARE_VERSIONCODE _PROJECT_FIRMWARE_VERSIONCODE
 
+// VERSIONCODE_UNKNOWN
+/// Unknown version code
+#define VERSIONCODE_UNKNOWN 0
+
 // VERSIONCODE
 /// A packed integer representation of a major.minor.update version.<br>
 /// The update version is packed in bits 0 ... 11<br>

@@ -3,9 +3,9 @@ rem ===========================================================================
 rem Configure package options
 rem ===========================================================================
 
-set PROJECT_DIR_PACKAGE=%PROJECT_DIR_SOURCE%\Package
+set PROJECT_DIR_OUTPUT=%PROJECT_DIR_SOURCE%\Output
 
-set PROJECT_ISO=%PROJECT_DIR_PACKAGE%\%PROJECT_NAME%
+set PROJECT_ISO=%PROJECT_DIR_OUTPUT%\%PROJECT_NAME%
 if "%BUILD_TARGET%" == "RELEASE" (
   set PROJECT_ISO=%PROJECT_ISO%-%PROJECT_VERSION_BASE%
 ) else (
@@ -33,7 +33,7 @@ rem ===========================================================================
     goto parseArguments
   )
   if /i "%SCRIPT_ARGUMENT%" == "--package-dir" (
-    set PROJECT_DIR_PACKAGE=%~2
+    set PROJECT_DIR_OUTPUT=%~2
     shift
     shift
     goto parseArguments
@@ -44,7 +44,7 @@ rem ===========================================================================
     goto parseArguments
   )
   if /i "%SCRIPT_ARGUMENT:~0,16%" == "--package-dir=" (
-    set PROJECT_DIR_PACKAGE=%SCRIPT_ARGUMENTS:~16%
+    set PROJECT_DIR_OUTPUT=%SCRIPT_ARGUMENTS:~16%
     shift
     goto parseArguments
   )
@@ -57,9 +57,9 @@ rem ===========================================================================
 
 :preparePackage
 
-%TOOL_UNQUOTE% PROJECT_DIR_PACKAGE %PROJECT_DIR_PACKAGE%
-if not defined PROJECT_DIR_PACKAGE set PROJECT_DIR_PACKAGE=%PROJECT_DIR_SOURCE%\Package
-%TOOL_ALIGN% Output: !PROJECT_DIR_PACKAGE:%WORKSPACE%\=!
+%TOOL_UNQUOTE% PROJECT_DIR_OUTPUT %PROJECT_DIR_OUTPUT%
+if not defined PROJECT_DIR_OUTPUT set PROJECT_DIR_OUTPUT=%PROJECT_DIR_SOURCE%\Package
+%TOOL_ALIGN% Output: !PROJECT_DIR_OUTPUT:%WORKSPACE%\=!
 
 %TOOL_UNQUOTE% PROJECT_ISO %PROJECT_ISO%
 if defined PROJECT_ISO %TOOL_ALIGN% ISO: !PROJECT_ISO:%WORKSPACE%\=!

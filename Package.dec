@@ -14,9 +14,7 @@
 
 [Defines]
   DEC_SPECIFICATION              = 0x00010018
-  PACKAGE_NAME                   = $(PROJECT_PACKAGE)
   PACKAGE_GUID                   = ABD19DC0-8A52-4880-A719-650F05471BED
-  PACKAGE_VERSION                = $(PROJECT_VERSION_BASE)
 
 [Includes]
   Include

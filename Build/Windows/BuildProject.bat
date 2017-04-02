@@ -22,16 +22,21 @@ rem ===========================================================================
 rem Setup the build tools
 rem ===========================================================================
 
-set TOOL_BUILD=%BUILD_DIR_SUPPORT%\InternalBuild.bat
+set TOOL_BUILD=call "%BUILD_DIR_SUPPORT%\InternalBuild.bat"
 set TOOL_CLEAN=call "%BUILD_DIR_SUPPORT%\Clean.bat"
 set TOOL_MKDIR=call "%BUILD_DIR_SUPPORT%\MkDir.bat"
 set TOOL_UNQUOTE=call "%BUILD_DIR_SUPPORT%\Unquote.bat"
 set TOOL_SAFENAME=call "%BUILD_DIR_SUPPORT%\SafeName.bat"
 
-set TOOL_MKISO=%BUILD_DIR_SUPPORT%\mkisofs.exe
-set TOOL_CSCRIPT=%SYSTEMROOT%\System32\cscript.exe
-set TOOL_FIND=%SYSTEMROOT%\System32\find.exe
-set TOOL_WHERE=%SYSTEMROOT%\System32\where.exe
+set TOOL_CSCRIPT="%SYSTEMROOT%\System32\cscript.exe"
+set TOOL_FIND="%SYSTEMROOT%\System32\find.exe"
+set TOOL_WHERE="%SYSTEMROOT%\System32\where.exe"
+
+set TOOL_NASM="%BUILD_DIR_SUPPORT%\nasm.exe"
+set TOOL_MKISO="%BUILD_DIR_SUPPORT%\mkisofs.exe"
+set TOOL_MFORMAT="%BUILD_DIR_SUPPORT%\mformat.exe"
+set TOOL_MCOPY="%BUILD_DIR_SUPPORT%\mcopy.exe"
+set TOOL_MMD="%BUILD_DIR_SUPPORT%\mmd.exe"
 
 set TOOL_ALIGN="%TOOL_CSCRIPT%" /Nologo "%BUILD_DIR_SUPPORT%\Align.vbs"
 set TOOL_DATETIME="%TOOL_CSCRIPT%" /Nologo "%BUILD_DIR_SUPPORT%\DateTime.vbs"
@@ -44,7 +49,7 @@ rem Check if run from console
 rem ===========================================================================
 
 set BUILD_RUNFROMCONSOLE=No
-for /f "usebackq delims=" %%i in (` echo %cmdcmdline:"=-% ^| "%TOOL_FIND%" /i "%~dpf0" `) do set BUILD_RUNFROMCONSOLE=Yes
+for /f "usebackq delims=" %%i in (` echo %cmdcmdline:"=-% ^| %TOOL_FIND% /i "%~dpf0" `) do set BUILD_RUNFROMCONSOLE=Yes
 
 rem ===========================================================================
 rem Search for the EDK2 workspace which should be parent of this script
@@ -176,17 +181,21 @@ rem ===========================================================================
 
   if defined BUILD_LOG (
     %TOOL_MKDIR% "%PROJECT_DIR_LOG%"
-    if errorlevel 1 goto failScript
+    if not !errorlevel! == 0 goto failScript
   )
 
   if not defined PYTHONPATH (
     set PYTHONPATH=%BASE_TOOLS_PATH%\Source\Python
   )
 
+  rem ===========================================================================
+  rem Use all these hacky crap methods to get correct behavior
+  rem ===========================================================================
+
   cd %PROJECT_DIR_SOURCE%
-  set OUTLOG=5^>NUL 2^>^&5
-  if defined BUILD_LOG set OUTLOG=5^>"%BUILD_LOG%" 2^>^&5
-  %OUTLOG% ( "%TOOL_BUILD%" %* | %TOOL_TEE% )
+  set OUTLOG=5^>NUL
+  if defined BUILD_LOG set OUTLOG=5^>"%BUILD_LOG%"
+  %OUTLOG% 2>&5 ( %TOOL_BUILD% %* | %TOOL_TEE% )
 
 rem ===========================================================================
 rem Exit the script
@@ -196,16 +205,5 @@ rem ===========================================================================
 
   popd
   if /i "%BUILD_RUNFROMCONSOLE%" == "Yes" pause
-  endlocal
+  if defined FAILSCRIPT exit /b 1
   goto:eof
-
-rem ===========================================================================
-rem Fail the script
-rem ===========================================================================
-
-:failScript
-
-  popd
-  if /i "%BUILD_RUNFROMCONSOLE%" == "Yes" pause
-  endlocal
-  exit /b 1

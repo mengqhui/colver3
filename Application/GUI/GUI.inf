@@ -15,17 +15,19 @@
   BASE_NAME                      = GUI
   FILE_GUID                      = A474E038-7652-4E4D-8B96-6141F6ECFCF5
   MODULE_TYPE                    = UEFI_APPLICATION
-  VERSION_STRING                 = $(PROJECT_VERSION_BASE)
-  SUPPORTED_ARCHITECTURES        = X64|IA32|ARM|AARCH64
+  SUPPORTED_ARCHITECTURES        = X64|IA32|IPF|ARM|AARCH64
   ENTRY_POINT                    = GUIMain
   UNLOAD_IMAGE                   = GUIUnload
 
 [Sources]
   GUI.c
 
-[Packages]
+[Packages.common]
   Package.dec
   MdePkg/MdePkg.dec
+
+[Packages.IA32, Packages.X64, Packages.IPF]
+  IntelFrameworkPkg/IntelFrameworkPkg.dec
 
 [LibraryClasses]
   GUILib
@@ -34,8 +36,8 @@
 [Guids]
   
 
-[Protocols]
-  
+[Protocols.IA32, Protocols.X64, Protocols.IPF]
+  gEfiLegacyBiosProtocolGuid
 
 [Pcd]
   

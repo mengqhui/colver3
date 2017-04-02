@@ -225,6 +225,106 @@ ParseBuffer (
   IN     VOID        *Context OPTIONAL
 );
 
+// ParseMessage
+/// Add a parser message
+/// @param Parser      The language parser to which to add a message
+/// @param Flags       The message flags
+/// @param MessageDesc The description of the message
+/// @return Whether the message was added or not
+/// @retval EFI_INVALID_PARAMETER If Parser or MessageDesc is NULL
+/// @retval EFI_OUT_OF_RESOURCES  If memory could not be allocated
+/// @retval EFI_SUCCESS           If the message was added successfully
+EFI_STATUS
+EFIAPI
+ParseMessage (
+  IN OUT LANG_PARSER *Parser,
+  IN     UINTN        Flags,
+  IN     CHAR16      *MessageDesc,
+  ...
+);
+// ParseVMessage
+/// Add a parser message
+/// @param Parser      The language parser to which to add a message
+/// @param Flags       The message flags
+/// @param MessageDesc The description of the message
+/// @param Args        The arguments
+/// @return Whether the message was added or not
+/// @retval EFI_INVALID_PARAMETER If Parser or MessageDesc is NULL
+/// @retval EFI_OUT_OF_RESOURCES  If memory could not be allocated
+/// @retval EFI_SUCCESS           If the message was added successfully
+EFI_STATUS
+EFIAPI
+ParseVMessage (
+  IN OUT LANG_PARSER *Parser,
+  IN     UINTN        Flags,
+  IN     CHAR16      *MessageDesc,
+  IN     VA_LIST      Args
+);
+
+// ParseError
+/// Add a parser error
+/// @param Parser    The language parser to which to add an error
+/// @param ErrorDesc The description of the error
+/// @return Whether the error message was added or not
+/// @retval EFI_INVALID_PARAMETER If Parser or ErrorDesc is NULL
+/// @retval EFI_OUT_OF_RESOURCES  If memory could not be allocated
+/// @retval EFI_SUCCESS           If the error message was added successfully
+EFI_STATUS
+EFIAPI
+ParseError (
+  IN OUT LANG_PARSER *Parser,
+  IN     CHAR16      *ErrorDesc,
+  ...
+);
+// ParseVError
+/// Add a parser error
+/// @param Parser    The language parser to which to add an error
+/// @param ErrorDesc The description of the error
+/// @param Args      The arguments
+/// @return Whether the error message was added or not
+/// @retval EFI_INVALID_PARAMETER If Parser or ErrorDesc is NULL
+/// @retval EFI_OUT_OF_RESOURCES  If memory could not be allocated
+/// @retval EFI_SUCCESS           If the error message was added successfully
+EFI_STATUS
+EFIAPI
+ParseVError (
+  IN OUT LANG_PARSER *Parser,
+  IN     CHAR16      *ErrorDesc,
+  IN     VA_LIST      Args
+);
+
+// ParseWarn
+/// Add a parser warning
+/// @param Parser   The language parser to which to add a warning
+/// @param WarnDesc The description of the warning
+/// @return Whether the warning message was added or not
+/// @retval EFI_INVALID_PARAMETER If Parser or ErrorDesc is NULL
+/// @retval EFI_OUT_OF_RESOURCES  If memory could not be allocated
+/// @retval EFI_SUCCESS           If the warning message was added successfully
+EFI_STATUS
+EFIAPI
+ParseWarn (
+  IN OUT LANG_PARSER *Parser,
+  IN     CHAR16      *WarnDesc,
+  ...
+);
+// ParseVWarn
+/// Add a parser warning
+/// @param Parser   The language parser to which to add a warning
+/// @param WarnDesc The description of the warning
+/// @param Args     The arguments
+/// @return Whether the warning message was added or not
+/// @retval EFI_INVALID_PARAMETER If Parser or ErrorDesc is NULL
+/// @retval EFI_OUT_OF_RESOURCES  If memory could not be allocated
+/// @retval EFI_SUCCESS           If the warning message was added successfully
+EFI_STATUS
+EFIAPI
+ParseVWarn (
+  IN OUT LANG_PARSER *Parser,
+  IN     CHAR16      *WarnDesc,
+  IN     VA_LIST      Args
+);
+
 // SetParseCallback
 /// Set the parser token parsed callback
 /// @param Parser   The language parser

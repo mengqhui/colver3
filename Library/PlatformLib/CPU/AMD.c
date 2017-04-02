@@ -1,10 +1,10 @@
 ///
-/// @file Library/PlatformLib/AMD.c
+/// @file Library/PlatformLib/CPU/AMD.c
 ///
 /// Platform library AMD CPUs
 ///
 
-#include "Platform.h"
+#include "../Platform.h"
 
 // UpdateAMDPackageInformation
 /// TODO: Update AMD package information

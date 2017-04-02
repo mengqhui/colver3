@@ -3,8 +3,6 @@ rem ===========================================================================
 rem Clean directory script
 rem ===========================================================================
 
-setlocal enableDeleyedExpansion
-
 set CLEAN_RECURSE=
 if /i "%~1" == "/r" (
   set CLEAN_RECURSE=Yes

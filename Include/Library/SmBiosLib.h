@@ -12,20 +12,30 @@
 
 #include <IndustryStandard/SmBios.h>
 
+// GetSmBiosVersion
+/// Get the version of the SMBIOS
+/// @return The SMBIOS version code
+VERSIONCODE
+EFIAPI
+GetSmBiosVersion (
+  VOID
+);
+
 // GetNextSmBiosTable
 /// Get the next SMBIOS table
 /// @param Previous The previous SMBIOS structure or NULL to get the first structure
 /// @return The next SMBIOS structure or NULL if there are no more
-SMBIOS_STRUCTURE *
+SMBIOS_STRUCTURE_POINTER
 EFIAPI
 GetNextSmBiosTable (
-  IN SMBIOS_STRUCTURE *Previous OPTIONAL
+  IN SMBIOS_STRUCTURE_POINTER Previous OPTIONAL
 );
 // GetSmBiosTableCount
 /// Get the count of SMBIOS tables with a specified type
 /// @param Type The type of SMBIOS table to count
 /// @return The count of SMBIOS tables
 UINTN
+EFIAPI
 GetSmBiosTableCount (
   IN UINT8 Type
 );
@@ -34,11 +44,20 @@ GetSmBiosTableCount (
 /// @param Previous The previous SMBIOS structure or NULL to get the first structure
 /// @param Type     The type of SMBIOS table to find
 /// @return The next SMBIOS structure or NULL if there are no more
-SMBIOS_STRUCTURE *
+SMBIOS_STRUCTURE_POINTER
 EFIAPI
 FindSmBiosTable (
-  IN SMBIOS_STRUCTURE *Previous OPTIONAL,
-  IN UINT8             Type
+  IN SMBIOS_STRUCTURE_POINTER Previous OPTIONAL,
+  IN UINT8                    Type
+);
+// FindSmBiosTableByHandle
+/// Find an SMBIOS structure with the specified handle
+/// @param Handle The handle of the SMBIOS table to find
+/// @return The SMBIOS structure or NULL if a table with the given handle was not found
+SMBIOS_STRUCTURE_POINTER
+EFIAPI
+FindSmBiosTableByHandle (
+  IN UINT16 Handle
 );
 // FindSmBiosTables
 /// Find all the SMBIOS tables with specified type
@@ -51,10 +70,21 @@ FindSmBiosTable (
 /// @retval EFI_NOT_FOUND         If not SMBIOS tables with specified type was found
 /// @retval EFI_SUCCESS           If SMBIOS tables were found successfully
 EFI_STATUS
+EFIAPI
 FindSmBiosTables (
-  IN  UINT8               Type,
-  OUT UINTN              *Count,
-  OUT SMBIOS_STRUCTURE ***Tables
+  IN  UINT8                      Type,
+  OUT UINTN                     *Count,
+  OUT SMBIOS_STRUCTURE_POINTER **Tables
+);
+
+// GetSmBiosTableSize
+/// Get the size of an SMBIOS table and string section in bytes
+/// @param Table The SMBIOS table
+/// @return The size in bytes of the SMBIOS table and string section
+UINTN
+EFIAPI
+GetSmBiosTableSize (
+  IN SMBIOS_STRUCTURE_POINTER Table
 );
 
 // GetStringFromSmBiosTable
@@ -65,33 +95,18 @@ FindSmBiosTables (
 CHAR8 *
 EFIAPI
 GetStringFromSmBiosTable (
-  IN SMBIOS_STRUCTURE *Table,
-  IN UINT8             Index
+  IN SMBIOS_STRUCTURE_POINTER Table,
+  IN UINT8                    Index
 );
 
-// GetSmBiosManufacturer
-/// Get the system manufacturer
-/// @return The system manufacturer retrieved from SMBIOS or NULL if not found or there was an error
-CHAR8 *
+// GetSmBiosProcessorUpgrade
+/// Get an SMBIOS socket upgrade type string (Type4->ProcessorUpgrade)
+/// @param ProcessorUpgrade The processor socket upgrade type
+/// @return The socket type string or NULL if there was an error
+CHAR16 *
 EFIAPI
-GetSmBiosManufacturer (
-  VOID
-);
-// GetSmBiosProductName
-/// Get the system product name
-/// @return The system product name retrieved from SMBIOS or NULL if not found or there was an error
-CHAR8 *
-EFIAPI
-GetSmBiosProductName (
-  VOID
-);
-// GetSmBiosSystemName
-/// Get the system name from system manufacturer and system product name
-/// @return The system name retrieved from SMBIOS, which needs freed, or NULL if not found or there was an error
-CHAR8 *
-EFIAPI
-GetSmBiosSystemName (
-  VOID
+GetSmBiosProcessorUpgrade (
+  UINT8 ProcessorUpgrade
 );
 
 #endif // __SMBIOS_LIBRARY_HEADER__

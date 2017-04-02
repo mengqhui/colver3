@@ -1,10 +1,10 @@
 ///
-/// @file Library/PlatformLib/Intel.c
+/// @file Library/PlatformLib/CPU/Intel.c
 ///
 /// Platform library Intel CPUs
 ///
 
-#include "Platform.h"
+#include "Intel.h"
 
 #include <Library/ConfigLib.h>
 
@@ -90,7 +90,8 @@ SwitchCPUIntelFamilyToMobile (
   return Family;
 }
 
-#define SET_CPU_FEATURE(Feature, Value) ConfigSSetBoolean(L"\\CPU\\Package\\%u\\Feature\\" L ## #Feature, (BOOLEAN)(Value), Index)
+#define SET_CPU_FEATURE(Feature, Value) ConfigSetBoolean(L"\\CPU\\Package\\%u\\Feature\\" L ## #Feature, (BOOLEAN)(Value), TRUE, Index)
+#define SET_CPU_FEATURE_BIT(Feature, RegIndex, Bit) SET_CPU_FEATURE(Feature, CPUBitmask(mCPUIDRegisters[RegIndex], Bit, Bit))
 
 // DetermineCPUIntelFeatures
 /// Determine CPU features information
@@ -101,141 +102,141 @@ DetermineCPUIntelFeatures (
   IN UINTN Index
 ) {
   // Floating Point Unit On-Chip, the CPU contains an FPU
-  SET_CPU_FEATURE(FPUOnChip, CPUBitmask(mCPUIDRegisters[3], 0, 0));
+  SET_CPU_FEATURE_BIT(FPUOnChip, 3, 0);
   // Virtual 8086 mode enhancements, including CR4.VME for controlling the feature, CR4.PVI for
   // protected mode virtual interrupts, software interrupt indirection, expansion of the TSS
   // with the software indirection bitmap, and EFLAGS.VIF and EFLAGS.VIP flags
-  SET_CPU_FEATURE(VirtualModeEnhancements, CPUBitmask(mCPUIDRegisters[3], 1, 1));
+  SET_CPU_FEATURE_BIT(VirtualModeEnhancements, 3, 1);
   // Support for I/O breakpoints, including CR4.DE for controlling the feature, and optional trapping of accesses to DR4 and DR5
-  SET_CPU_FEATURE(DebugExtensions, CPUBitmask(mCPUIDRegisters[3], 2, 2));
+  SET_CPU_FEATURE_BIT(DebugExtensions, 3, 2);
   // Large pages of size 4 MByte are supported, including CR4.PSE for controlling the feature, the defined
   // dirty bit in PDE (Page Directory Entries), optional reserved bit trapping in CR3, PDEs, and PTEs
-  SET_CPU_FEATURE(PageSizeExtension, CPUBitmask(mCPUIDRegisters[3], 3, 3));
+  SET_CPU_FEATURE_BIT(PageSizeExtension, 3, 3);
   // The RDTSC instruction is supported, including CR4.TSD for controlling privilege
-  SET_CPU_FEATURE(TimeStampCounter, CPUBitmask(mCPUIDRegisters[3], 4, 4));
+  SET_CPU_FEATURE_BIT(TimeStampCounter, 3, 4);
   // The RDMSR and WRMSR instructions are supported
-  SET_CPU_FEATURE(ModelSpecificRegisters, CPUBitmask(mCPUIDRegisters[3], 5, 5));
+  SET_CPU_FEATURE_BIT(ModelSpecificRegisters, 3, 5);
   // Physical addresses greater than 32 bits are supported: extended page table entry formats, an extra level
   // in the page translation tables is defined, 2-MByte pages are supported instead of 4-Mbyte pages
-  SET_CPU_FEATURE(PhysicalAddressExtension, CPUBitmask(mCPUIDRegisters[3], 6, 6));
+  SET_CPU_FEATURE_BIT(PhysicalAddressExtension, 3, 6);
   // Exception 18 is defined for Machine Checks, including CR4.MCE for controlling the feature
-  SET_CPU_FEATURE(MachineCheckException, CPUBitmask(mCPUIDRegisters[3], 7, 7));
+  SET_CPU_FEATURE_BIT(MachineCheckException, 3, 7);
   // The compare-and-exchange 8 bytes (64 bits) instruction is supported (implicitly locked and atomic)
-  SET_CPU_FEATURE(CMPXCHG8BInstruction, CPUBitmask(mCPUIDRegisters[3], 8, 8));
+  SET_CPU_FEATURE_BIT(CMPXCHG8BInstruction, 3, 8);
   // The processor contains an Advanced Programmable Interrupt Controller (APIC), responding to
   // memory mapped commands in the physical address range FFFE0000H to FFFE0FFFH (by default)
-  SET_CPU_FEATURE(APICOnChip, CPUBitmask(mCPUIDRegisters[3], 9, 9));
+  SET_CPU_FEATURE_BIT(APICOnChip, 3, 9);
   // The SYSENTER and SYSEXIT and associated MSRs are supported
-  SET_CPU_FEATURE(SystemExtensions, CPUBitmask(mCPUIDRegisters[3], 11, 11));
+  SET_CPU_FEATURE_BIT(SystemExtensions, 3, 11);
   // MTRRs are supported, the MTRRcap MSR contains feature bits that describe what memory types
   // are supported, how many variable MTRRs are supported, and whether fixed MTRRs are supported
-  SET_CPU_FEATURE(MemoryTypeRangeRegisters, CPUBitmask(mCPUIDRegisters[3], 12, 12));
+  SET_CPU_FEATURE_BIT(MemoryTypeRangeRegisters, 3, 12);
   // The global bit is supported in paging-structure entries that map a page, indicating TLB entries that
   // are common to different processes and need not be flushed. The CR4.PGE bit controls this feature
-  SET_CPU_FEATURE(PageGlobal, CPUBitmask(mCPUIDRegisters[3], 13, 13));
+  SET_CPU_FEATURE_BIT(PageGlobal, 3, 13);
   // Machine Check Architecture of reporting machine errors is supported. The MCG_CAP MSR
   // contains feature bits describing how many banks of error reporting MSRs are supported
-  SET_CPU_FEATURE(MachineCheckArchitecture, CPUBitmask(mCPUIDRegisters[3], 14, 14));
+  SET_CPU_FEATURE_BIT(MachineCheckArchitecture, 3, 14);
   // The conditional move instruction CMOV is supported, if FPU is present then the FCOMI and FCMOV instructions are supported
-  SET_CPU_FEATURE(ConditionalMove, CPUBitmask(mCPUIDRegisters[3], 15, 15));
+  SET_CPU_FEATURE_BIT(ConditionalMove, 3, 15);
   // Page Attribute Table is supported, this feature augments the Memory Type Range Registers (MTRRs), allowing
   // an operating system to specify attributes of memory accessed through a linear address on a 4KB granularity
-  SET_CPU_FEATURE(PageAttributeTable, CPUBitmask(mCPUIDRegisters[3], 16, 16));
+  SET_CPU_FEATURE_BIT(PageAttributeTable, 3, 16);
   // 4-MByte pages addressing physical memory beyond 4 GBytes are supported with 32-bit paging. This feature
   // indicates that upper bits of the physical address of a 4-MByte page are encoded in bits 20:13 of the
   // page-directory entry. Such physical addresses are limited by MAXPHYADDR and may be up to 40 bits in size
-  SET_CPU_FEATURE(PageSizeExtension, CPUBitmask(mCPUIDRegisters[3], 17, 17));
+  SET_CPU_FEATURE_BIT(PageSizeExtension, 3, 17);
   // The processor supports the 96-bit processor identification number feature and the feature is enabled
-  SET_CPU_FEATURE(ProcessorSerialNumber, CPUBitmask(mCPUIDRegisters[3], 18, 18));
+  SET_CPU_FEATURE_BIT(ProcessorSerialNumber, 3, 18);
   // CLFLUSH Instruction is supported
-  SET_CPU_FEATURE(CLFLUSHInstruction, CPUBitmask(mCPUIDRegisters[3], 19, 19));
+  SET_CPU_FEATURE_BIT(CLFLUSHInstruction, 3, 19);
   // The processor supports the ability to write debug information into a memory resident buffer
-  SET_CPU_FEATURE(DebugStore, CPUBitmask(mCPUIDRegisters[3], 21, 21));
+  SET_CPU_FEATURE_BIT(DebugStore, 3, 21);
   // The processor implements internal MSRs that allow processor temperature to be monitored and
   // processor performance to be modulated in predefined duty cycles under software control
-  SET_CPU_FEATURE(ACPIThermalMonitor, CPUBitmask(mCPUIDRegisters[3], 22, 22));
+  SET_CPU_FEATURE_BIT(ACPIThermalMonitor, 3, 22);
   // The processor supports the Intel MMX technology
-  SET_CPU_FEATURE(MMXInstructions, CPUBitmask(mCPUIDRegisters[3], 23, 23));
+  SET_CPU_FEATURE_BIT(MMXInstructions, 3, 23);
   // The FXSAVE and FXRSTOR instructions are supported for fast save and restore of the
   // floating point context. Presence of this bit also indicates that CR4.OSFXSR is available
   // for an operating system to indicate that it supports the FXSAVE and FXRSTOR instructions
-  SET_CPU_FEATURE(FastInstructions, CPUBitmask(mCPUIDRegisters[3], 24, 24));
+  SET_CPU_FEATURE_BIT(FastInstructions, 3, 24);
   // The processor supports the SSE extensions
-  SET_CPU_FEATURE(SSEInstructions, CPUBitmask(mCPUIDRegisters[3], 25, 25));
+  SET_CPU_FEATURE_BIT(SSEInstructions, 3, 25);
   // The processor supports the SSE2 extensions
-  SET_CPU_FEATURE(SSE2Instructions, CPUBitmask(mCPUIDRegisters[3], 26, 26));
+  SET_CPU_FEATURE_BIT(SSE2Instructions, 3, 26);
   // The processor supports the management of conflicting memory types by performing
   // a snoop of its own cache structure for transactions issued to the bus
-  SET_CPU_FEATURE(SelfSnoop, CPUBitmask(mCPUIDRegisters[3], 27, 27));
+  SET_CPU_FEATURE_BIT(SelfSnoop, 3, 27);
   // The processor supports hardware multithreading
-  SET_CPU_FEATURE(HardwareMultiThread, CPUBitmask(mCPUIDRegisters[3], 28, 28));
+  SET_CPU_FEATURE_BIT(HardwareMultiThread, 3, 28);
   // The processor implements the thermal monitor automatic thermal control circuitry (TCC)
-  SET_CPU_FEATURE(ThermalMonitor, CPUBitmask(mCPUIDRegisters[3], 29, 29));
+  SET_CPU_FEATURE_BIT(ThermalMonitor, 3, 29);
   // The processor supports the use of the FERR#/PBE# pin when the processor is in the stop-clock state (STPCLK# is asserted)
   // to signal the processor that an interrupt is pending and that the processor should return to normal
   // operation to handle the interrupt. Bit 10 (PBE enable) in the IA32_MISC_ENABLE MSR enables this capability
-  SET_CPU_FEATURE(PendingBreakEnable, CPUBitmask(mCPUIDRegisters[3], 31, 31));
+  SET_CPU_FEATURE_BIT(PendingBreakEnable, 3, 31);
   // Streaming SIMD Extensions 3 (SSE3)
-  SET_CPU_FEATURE(SSE3Instructions, CPUBitmask(mCPUIDRegisters[2], 0, 0));
+  SET_CPU_FEATURE_BIT(SSE3Instructions, 2, 0);
   // Indicates the processor supports the PCLMULQDQ instruction
-  SET_CPU_FEATURE(PCLMULQDQInstruction, CPUBitmask(mCPUIDRegisters[2], 1, 1));
+  SET_CPU_FEATURE_BIT(PCLMULQDQInstruction, 2, 1);
   // Indicates the processor supports DS area using 64-bit layout
-  SET_CPU_FEATURE(DebugStoreArea64Bit, CPUBitmask(mCPUIDRegisters[2], 2, 2));
+  SET_CPU_FEATURE_BIT(DebugStoreArea64Bit, 2, 2);
   // Indicates the processor supports MONITOR/MWAIT
-  SET_CPU_FEATURE(MonitorWait, CPUBitmask(mCPUIDRegisters[2], 3, 3));
+  SET_CPU_FEATURE_BIT(MonitorWait, 2, 3);
   // Indicates the processor supports the extensions to the Debug Store feature to allow for branch message storage qualified by CPL
-  SET_CPU_FEATURE(DebugStoreCPL, CPUBitmask(mCPUIDRegisters[2], 4, 4));
+  SET_CPU_FEATURE_BIT(DebugStoreCPL, 2, 4);
   // Indicates that the processor supports this virtual machine extensions
-  SET_CPU_FEATURE(VMExtensions, CPUBitmask(mCPUIDRegisters[2], 5, 5));
+  SET_CPU_FEATURE_BIT(VMExtensions, 2, 5);
   // Indicates that the processor supports Safer Mode
-  SET_CPU_FEATURE(SaferModeExtensions, CPUBitmask(mCPUIDRegisters[2], 6, 6));
+  SET_CPU_FEATURE_BIT(SaferModeExtensions, 2, 6);
   // Whether CPU supports dynamic frequency
-  SET_CPU_FEATURE(Dynamic, CPUBitmask(mCPUIDRegisters[2], 7, 7));
+  SET_CPU_FEATURE_BIT(Dynamic, 2, 7);
   // Indicates whether the processor supports Thermal Monitor 2
-  SET_CPU_FEATURE(ThermalMonitor2, CPUBitmask(mCPUIDRegisters[2], 8, 8));
+  SET_CPU_FEATURE_BIT(ThermalMonitor2, 2, 8);
   // Indicates the presence of the Supplemental Streaming SIMD Extensions 3 (SSSE3)
-  SET_CPU_FEATURE(SSSE3Instructions, CPUBitmask(mCPUIDRegisters[2], 9, 9));
+  SET_CPU_FEATURE_BIT(SSSE3Instructions, 2, 9);
   // Indicates the L1 data cache mode can be set to either adaptive mode or shared mode
-  SET_CPU_FEATURE(L1ContextID, CPUBitmask(mCPUIDRegisters[2], 10, 10));
+  SET_CPU_FEATURE_BIT(L1ContextID, 2, 10);
   // The processor supports IA32_DEBUG_INTERFACE MSR for silicon debug
-  SET_CPU_FEATURE(DebugInterface, CPUBitmask(mCPUIDRegisters[2], 11, 11));
+  SET_CPU_FEATURE_BIT(DebugInterface, 2, 11);
   // Indicates the processor supports FMA extensions using YMM state
-  SET_CPU_FEATURE(FMAExtensions, CPUBitmask(mCPUIDRegisters[2], 12, 12));
+  SET_CPU_FEATURE_BIT(FMAExtensions, 2, 12);
   // The compare-and-exchange 16 bytes (128 bits) instruction is supported (implicitly locked and atomic)
-  SET_CPU_FEATURE(CMPXCHG16BInstruction, CPUBitmask(mCPUIDRegisters[2], 13, 13));
+  SET_CPU_FEATURE_BIT(CMPXCHG16BInstruction, 2, 13);
   // Indicates that the processor supports changing IA32_MISC_ENABLE[bit 23]
-  SET_CPU_FEATURE(xTPRUpdateControl, CPUBitmask(mCPUIDRegisters[2], 14, 14));
+  SET_CPU_FEATURE_BIT(xTPRUpdateControl, 2, 14);
   // Indicates the processor supports the performance and debug feature indication MSR IA32_PERF_CAPABILITIES
-  SET_CPU_FEATURE(PerfmonDebug, CPUBitmask(mCPUIDRegisters[2], 15, 15));
+  SET_CPU_FEATURE_BIT(PerfmonDebug, 2, 15);
   // Indicates that the processor supports PCIDs and that software may set CR4.PCIDE to 1
-  SET_CPU_FEATURE(ProcessContextIdentifiers, CPUBitmask(mCPUIDRegisters[2], 17, 17));
+  SET_CPU_FEATURE_BIT(ProcessContextIdentifiers, 2, 17);
   // Indicates the processor supports the ability to prefetch data from a memory mapped device
-  SET_CPU_FEATURE(Prefetch, CPUBitmask(mCPUIDRegisters[2], 18, 18));
+  SET_CPU_FEATURE_BIT(Prefetch, 2, 18);
   // Indicates that the processor supports SSE4.1
-  SET_CPU_FEATURE(SSE41Instructions, CPUBitmask(mCPUIDRegisters[2], 19, 19));
+  SET_CPU_FEATURE_BIT(SSE41Instructions, 2, 19);
   // Indicates that the processor supports SSE4.2
-  SET_CPU_FEATURE(SSE42Instructions, CPUBitmask(mCPUIDRegisters[2], 20, 20));
+  SET_CPU_FEATURE_BIT(SSE42Instructions, 2, 20);
   // Indicates that the processor supports x2APIC feature
-  SET_CPU_FEATURE(x2APIC, CPUBitmask(mCPUIDRegisters[2], 21, 21));
+  SET_CPU_FEATURE_BIT(x2APIC, 2, 21);
   // Indicates that the processor supports MOVBE instruction
-  SET_CPU_FEATURE(MOVEBEInstruction, CPUBitmask(mCPUIDRegisters[2], 22, 22));
+  SET_CPU_FEATURE_BIT(MOVEBEInstruction, 2, 22);
   // Indicates that the processor supports the POPCNT instruction
-  SET_CPU_FEATURE(POPCNTInstruction, CPUBitmask(mCPUIDRegisters[2], 23, 23));
+  SET_CPU_FEATURE_BIT(POPCNTInstruction, 2, 23);
   // Indicates that the processor’s local APIC timer supports one-shot operation using a TSC deadline value
-  SET_CPU_FEATURE(TimeStampCounterDeadline, CPUBitmask(mCPUIDRegisters[2], 24, 24));
+  SET_CPU_FEATURE_BIT(TimeStampCounterDeadline, 2, 24);
   // Indicates that the processor supports the AESNI instruction extensions
-  SET_CPU_FEATURE(AESNIInstructions, CPUBitmask(mCPUIDRegisters[2], 25, 25));
+  SET_CPU_FEATURE_BIT(AESNIInstructions, 2, 25);
   // Indicates that the processor supports the XSAVE/XRSTOR processor extended states feature, the XSETBV/XGETBV instructions, and XCR0
-  SET_CPU_FEATURE(ExtFastInstructions, CPUBitmask(mCPUIDRegisters[2], 26, 26));
+  SET_CPU_FEATURE_BIT(ExtFastInstructions, 2, 26);
   // Indicates that the OS has set CR4.OSXSAVE[bit 18] to enable XSETBV/XGETBV instructions to access XCR0
   // and to support processor extended state management using XSAVE/XRSTOR
-  SET_CPU_FEATURE(OSExtFastInstructions, CPUBitmask(mCPUIDRegisters[2], 27, 27));
+  SET_CPU_FEATURE_BIT(OSExtFastInstructions, 2, 27);
   // Indicates the processor supports the AVX instruction extensions
-  SET_CPU_FEATURE(AVXInstructions, CPUBitmask(mCPUIDRegisters[2], 28, 28));
+  SET_CPU_FEATURE_BIT(AVXInstructions, 2, 28);
   // Indicates that processor supports 16-bit floating-point conversion instructions
-  SET_CPU_FEATURE(FP16BitConversion, CPUBitmask(mCPUIDRegisters[2], 29, 29));
+  SET_CPU_FEATURE_BIT(FP16BitConversion, 2, 29);
   // Indicates that processor supports RDRAND instruction
-  SET_CPU_FEATURE(RDRANDInstruction, CPUBitmask(mCPUIDRegisters[2], 30, 30));
+  SET_CPU_FEATURE_BIT(RDRANDInstruction, 2, 30);
 }
 // DetermineCPUIntelExtendedFeatures
 /// Determine CPU extended features information
@@ -246,63 +247,63 @@ DetermineCPUIntelExtendedFeatures (
   IN UINTN Index
 ) {
   // Indicates that processor supports RDFSBASE/RDGSBASE/WRFSBASE/WRGSBASE instructions
-  SET_CPU_FEATURE(FSGSBASEInstructions, CPUBitmask(mCPUIDRegisters[1], 0, 0));
+  SET_CPU_FEATURE_BIT(FSGSBASEInstructions, 1, 0);
   // Indicates that processor supports IA32_TSC_ADJUST machine specific register
-  SET_CPU_FEATURE(TimeStampCounterAdjust, CPUBitmask(mCPUIDRegisters[1], 1, 1));
+  SET_CPU_FEATURE_BIT(TimeStampCounterAdjust, 1, 1);
   // Indicates that processor supports supports Intel Software Guard Extensions
-  SET_CPU_FEATURE(SoftwareGuardExtensions, CPUBitmask(mCPUIDRegisters[1], 2, 2));
+  SET_CPU_FEATURE_BIT(SoftwareGuardExtensions, 1, 2);
   // Indicates that processor supports supports BMI1 instructions
-  SET_CPU_FEATURE(BitManip1Instructions, CPUBitmask(mCPUIDRegisters[1], 3, 3));
+  SET_CPU_FEATURE_BIT(BitManip1Instructions, 1, 3);
   // Indicates that processor supports supports HLE instructions
-  SET_CPU_FEATURE(HardwareLockElision, CPUBitmask(mCPUIDRegisters[1], 4, 4));
+  SET_CPU_FEATURE_BIT(HardwareLockElision, 1, 4);
   // Indicates that processor supports supports AVX2 instructions
-  SET_CPU_FEATURE(AVX2Instructions, CPUBitmask(mCPUIDRegisters[1], 5, 5));
+  SET_CPU_FEATURE_BIT(AVX2Instructions, 1, 5);
   // Indicates floating point unit data pointer updated only on floating point exceptions
-  SET_CPU_FEATURE(FPDPExceptionOnly, CPUBitmask(mCPUIDRegisters[1], 6, 6));
+  SET_CPU_FEATURE_BIT(FPDPExceptionOnly, 1, 6);
   // Indicates that processor supports Supervisor-Mode Execution Prevention
-  SET_CPU_FEATURE(SupervisorExecutePrevent, CPUBitmask(mCPUIDRegisters[1], 7, 7));
+  SET_CPU_FEATURE_BIT(SupervisorExecutePrevent, 1, 7);
   // Indicates that processor supports supports RTM extensions
-  SET_CPU_FEATURE(TransactSyncExtensions, CPUBitmask(mCPUIDRegisters[1], 8, 8));
+  SET_CPU_FEATURE_BIT(TransactSyncExtensions, 1, 8);
   // Indicates that processor supports Enhanced REP MOVSB/STOSB instructions
-  SET_CPU_FEATURE(ERMSBInstructions, CPUBitmask(mCPUIDRegisters[1], 9, 9));
+  SET_CPU_FEATURE_BIT(ERMSBInstructions, 1, 9);
   // Indicates that processor supports INVPCID instruction for system software that manages process-context identifiers
-  SET_CPU_FEATURE(INVPCIDInstruction, CPUBitmask(mCPUIDRegisters[1], 10, 10));
+  SET_CPU_FEATURE_BIT(INVPCIDInstruction, 1, 10);
   // Indicates that processor supports supports HLE instructions
-  SET_CPU_FEATURE(HardwareLockElision, CPUBitmask(mCPUIDRegisters[1], 11, 11));
+  SET_CPU_FEATURE_BIT(HardwareLockElision, 1, 11);
   // Indicates that processor supports Intel Resource Director Technology Monitoring capability
-  SET_CPU_FEATURE(ResourceDirectorMonitor, CPUBitmask(mCPUIDRegisters[1], 12, 12));
+  SET_CPU_FEATURE_BIT(ResourceDirectorMonitor, 1, 12);
   // Indicates that processor deprecates FPU CS and FPU DS
-  SET_CPU_FEATURE(FPUDeprecated, CPUBitmask(mCPUIDRegisters[1], 13, 13));
+  SET_CPU_FEATURE_BIT(FPUDeprecated, 1, 13);
   // Indicates that processor supports Intel Memory Protection Extensions
-  SET_CPU_FEATURE(MemoryProtectionExtensions, CPUBitmask(mCPUIDRegisters[1], 14, 14));
+  SET_CPU_FEATURE_BIT(MemoryProtectionExtensions, 1, 14);
   // Indicates that processor supports Intel Resource Director Technology Allocation
-  SET_CPU_FEATURE(ResourceDirectorAllocation, CPUBitmask(mCPUIDRegisters[1], 15, 15));
+  SET_CPU_FEATURE_BIT(ResourceDirectorAllocation, 1, 15);
   // Indicates that processor supports RDSEED instruction
-  SET_CPU_FEATURE(RDSEEDInstruction, CPUBitmask(mCPUIDRegisters[1], 18, 18));
+  SET_CPU_FEATURE_BIT(RDSEEDInstruction, 1, 18);
   // Indicates that processor supports arbitrary precision arithmetic extensions
-  SET_CPU_FEATURE(ArithmeticExtensions, CPUBitmask(mCPUIDRegisters[1], 19, 19));
+  SET_CPU_FEATURE_BIT(ArithmeticExtensions, 1, 19);
   // Indicates that processor supports Supervisor-Mode Access Prevention (and the CLAC/STAC instructions)
-  SET_CPU_FEATURE(SupervisorAccessPrevent, CPUBitmask(mCPUIDRegisters[1], 20, 20));
+  SET_CPU_FEATURE_BIT(SupervisorAccessPrevent, 1, 20);
   // Indicates that processor supports CLFLUSHOPT instruction
-  SET_CPU_FEATURE(CLFLUSHOPTInstruction, CPUBitmask(mCPUIDRegisters[1], 23, 23));
+  SET_CPU_FEATURE_BIT(CLFLUSHOPTInstruction, 1, 23);
   // Indicates that processor supports CLWB instruction
-  SET_CPU_FEATURE(CLWBInstruction, CPUBitmask(mCPUIDRegisters[1], 24, 24));
+  SET_CPU_FEATURE_BIT(CLWBInstruction, 1, 24);
   // Indicates that processor supports Intel Processor Trace
-  SET_CPU_FEATURE(ProcessorTrace, CPUBitmask(mCPUIDRegisters[1], 25, 25));
+  SET_CPU_FEATURE_BIT(ProcessorTrace, 1, 25);
   // Indicates that processor supports Intel Secure Hash Algorithm Extensions
-  SET_CPU_FEATURE(SHAExtensions, CPUBitmask(mCPUIDRegisters[1], 29, 29));
+  SET_CPU_FEATURE_BIT(SHAExtensions, 1, 29);
   // Indicates that processor supports PREFETCHWT1 instruction
-  SET_CPU_FEATURE(PREFETCHWT1Instruction, CPUBitmask(mCPUIDRegisters[2], 0, 0));
+  SET_CPU_FEATURE_BIT(PREFETCHWT1Instruction, 2, 0);
   // Indicates that processor supports user-mode instruction prevention
-  SET_CPU_FEATURE(UserModeIntructionPrevent, CPUBitmask(mCPUIDRegisters[2], 2, 2));
+  SET_CPU_FEATURE_BIT(UserModeIntructionPrevent, 2, 2);
   // Indicates that processor supports protection keys for user-mode pages
-  SET_CPU_FEATURE(UserModeProtectKeys, CPUBitmask(mCPUIDRegisters[2], 3, 3));
+  SET_CPU_FEATURE_BIT(UserModeProtectKeys, 2, 3);
   // Indicates that OS has set CR4.PKE to enable protection keys (and the RDPKRU/WRPKRU instructions)
-  SET_CPU_FEATURE(OSProtectKeys, CPUBitmask(mCPUIDRegisters[2], 4, 4)); 
+  SET_CPU_FEATURE_BIT(OSProtectKeys, 2, 4); 
   // Indicates that processor supports RDPID instruction
-  SET_CPU_FEATURE(RDPIDInstruction, CPUBitmask(mCPUIDRegisters[2], 22, 22));
+  SET_CPU_FEATURE_BIT(RDPIDInstruction, 2, 22);
   // Indicates that processor supports Software Guard Launch Configuration
-  SET_CPU_FEATURE(SoftwareGuardLaunchConfig, CPUBitmask(mCPUIDRegisters[2], 30, 30));
+  SET_CPU_FEATURE_BIT(SoftwareGuardLaunchConfig, 2, 30);
 }
 // DetermineCPUIntelOtherFeatures
 /// Determine CPU features information
@@ -313,21 +314,32 @@ DetermineCPUIntelOtherFeatures (
   IN UINTN Index
 ) {
   // Indicates LAHF/SAHF available in 64-bit mode
-  SET_CPU_FEATURE(AHFromFlags64Bit, CPUBitmask(mCPUIDRegisters[2], 0, 0));
+  SET_CPU_FEATURE_BIT(AHFromFlags64Bit, 2, 0);
   // Indicates the processor supports the LZCNT instruction
-  SET_CPU_FEATURE(LZCNTInstruction, CPUBitmask(mCPUIDRegisters[2], 5, 5));
+  SET_CPU_FEATURE_BIT(LZCNTInstruction, 2, 5);
   // Indicates the processor supports the PREFETCHW instruction
-  SET_CPU_FEATURE(PREFETCHWInstruction, CPUBitmask(mCPUIDRegisters[2], 8, 8));
+  SET_CPU_FEATURE_BIT(PREFETCHWInstruction, 2, 8);
   // Indicates SYSCALL/SYSRET available in 64-bit mode
-  SET_CPU_FEATURE(SystemExtensions64Bit, CPUBitmask(mCPUIDRegisters[3], 11, 11));
+  SET_CPU_FEATURE_BIT(SystemExtensions64Bit, 3, 11);
   // Indicates Execute Disable Bit available
-  SET_CPU_FEATURE(ExecuteDisableBit, CPUBitmask(mCPUIDRegisters[3], 20, 20));
+  SET_CPU_FEATURE_BIT(ExecuteDisableBit, 3, 20);
   // Indicates 1-GByte pages are available
-  SET_CPU_FEATURE(GBPageExtension, CPUBitmask(mCPUIDRegisters[3], 26, 26));
+  SET_CPU_FEATURE_BIT(GBPageExtension, 3, 26);
   // Indicates RDTSCP instruction and IA32_TSC_AUX machine specific register are available
-  SET_CPU_FEATURE(RDTSCPInstruction, CPUBitmask(mCPUIDRegisters[3], 27, 27));
+  SET_CPU_FEATURE_BIT(RDTSCPInstruction, 3, 27);
   // Indicates Intel64 or AMD64 Architecture available
-  SET_CPU_FEATURE(X64, CPUBitmask(mCPUIDRegisters[3], 29, 29));
+  SET_CPU_FEATURE_BIT(X64, 3, 29);
+}
+// DetermineCPUIntelOtherExtendedFeatures
+/// Determine CPU features information
+/// @param Index The physical package index
+STATIC VOID
+EFIAPI
+DetermineCPUIntelOtherExtendedFeatures (
+  IN UINTN Index
+) {
+  // Indicates invariant TSC available
+  SET_CPU_FEATURE_BIT(InvariantTSC, 3, 8);
 }
 // DetermineCPUIntelFrequency
 /// Determine CPU frequency information
@@ -340,15 +352,10 @@ DetermineCPUIntelFrequency (
   IN CPU_FAMILY Family
 ) {
   UINT64 MSR;
-  UINTN  Step;
-  UINTN  Minimum;
-  UINTN  Maximum;
-
-#if defined(MDE_CPU_IA32)
-
-  UINTN  Clock;
-
-#endif
+  UINT64 Clock = 0;
+  UINTN  Step = 0;
+  UINTN  Minimum = 0;
+  UINTN  Maximum = 0;
 
   // Determine CPU clock frequency from CPU family
   switch (Family) {
@@ -361,22 +368,22 @@ DetermineCPUIntelFrequency (
       switch (CPUBitmask(AsmReadMsr32(0x2C), 0, 2)) {
         case 1:
           // 001B 133 MHz
-          ConfigSSetUnsigned(L"\\CPU\\Package\\%u\\Clock", 133333333, Index);
+          Clock = 133333333;
           break;
 
         case 2:
           // 010B 200 MHz
-          ConfigSSetUnsigned(L"\\CPU\\Package\\%u\\Clock", 200000000, Index);
+          Clock = 200000000;
           break;
 
         case 3:
           // 011B 166 MHz
-          ConfigSSetUnsigned(L"\\CPU\\Package\\%u\\Clock", 166666667, Index);
+          Clock = 166666667;
           break;
 
         case 4:
           // 100B 333 MHz (Model 6)
-          ConfigSSetUnsigned(L"\\CPU\\Package\\%u\\Clock", 333333333, Index);
+          Clock = 333333333;
           break;
 
         default:
@@ -385,13 +392,13 @@ DetermineCPUIntelFrequency (
             case 3:
             case 4:
               // 000B 266 MHz (Model 3 or 4)
-              ConfigSSetUnsigned(L"\\CPU\\Package\\%u\\Clock", 266666667, Index);
+              Clock = 266666667;
               break;
 
             case 2:
             default:
               // 000B 100 MHz (Model 2)
-              ConfigSSetUnsigned(L"\\CPU\\Package\\%u\\Clock", 100000000, Index);
+              Clock = 100000000;
               break;
           }
           break;
@@ -407,38 +414,38 @@ DetermineCPUIntelFrequency (
       switch (CPUBitmask(AsmReadMsr32(0xCD), 0, 2)) {
         case 0:
           // 000B: 267 MHz (FSB 1067)
-          ConfigSSetUnsigned(L"\\CPU\\Package\\%u\\Clock", 266666667, Index);
+          Clock = 266666667;
           break;
 
         case 1:
           // 001B: 133 MHz (FSB 533)
-          ConfigSSetUnsigned(L"\\CPU\\Package\\%u\\Clock", 133333333, Index);
+          Clock = 133333333;
           break;
 
         case 2:
           // 010B: 200 MHz (FSB 800)
-          ConfigSSetUnsigned(L"\\CPU\\Package\\%u\\Clock", 200000000, Index);
+          Clock = 200000000;
           break;
 
         case 3:
           // 011B: 167 MHz (FSB 667)
-          ConfigSSetUnsigned(L"\\CPU\\Package\\%u\\Clock", 166666667, Index);
+          Clock = 166666667;
           break;
 
         case 4:
           // 100B: 333 MHz (FSB 1333)
-          ConfigSSetUnsigned(L"\\CPU\\Package\\%u\\Clock", 333333333, Index);
+          Clock = 333333333;
           break;
 
         case 6:
           // 110B: 400 MHz (FSB 1600)
-          ConfigSSetUnsigned(L"\\CPU\\Package\\%u\\Clock", 400000000, Index);
+          Clock = 400000000;
           break;
 
         case 5:
         default:
           // 101B: 100 MHz (FSB 400)
-          ConfigSSetUnsigned(L"\\CPU\\Package\\%u\\Clock", 100000000, Index);
+          Clock = 100000000;
           break;
       }
       break;
@@ -448,23 +455,23 @@ DetermineCPUIntelFrequency (
       switch (CPUBitmask(AsmReadMsr32(0xCD), 0, 2)) {
         case 1:
           // 001B: 133 MHz (FSB 533)
-          ConfigSSetUnsigned(L"\\CPU\\Package\\%u\\Clock", 133333333, Index);
+          Clock = 133333333;
           break;
 
         case 3:
           // 011B: 167 MHz (FSB 667)
-          ConfigSSetUnsigned(L"\\CPU\\Package\\%u\\Clock", 166666667, Index);
+          Clock = 166666667;
           break;
 
         case 7:
           // 111B: 083 MHz (FSB 333)
-          ConfigSSetUnsigned(L"\\CPU\\Package\\%u\\Clock", 83333333, Index);
+          Clock = 83333333;
           break;
 
         case 5:
         default:
           // 101B: 100 MHz (FSB 400)
-          ConfigSSetUnsigned(L"\\CPU\\Package\\%u\\Clock", 100000000, Index);
+          Clock = 100000000;
           break;
       }
       break;
@@ -474,28 +481,28 @@ DetermineCPUIntelFrequency (
       switch (CPUBitmask(AsmReadMsr32(0xCD), 0, 2)) {
         case 0:
           // 000B: 083.3 MHz
-          ConfigSSetUnsigned(L"\\CPU\\Package\\%u\\Clock", 83333333, Index);
+          Clock = 83333333;
           break;
 
         case 2:
           // 010B: 133.3 MHz
-          ConfigSSetUnsigned(L"\\CPU\\Package\\%u\\Clock", 133333333, Index);
+          Clock = 133333333;
           break;
 
         case 3:
           // 011B: 116.7 MHz
-          ConfigSSetUnsigned(L"\\CPU\\Package\\%u\\Clock", 116666667, Index);
+          Clock = 116666667;
           break;
 
         case 4:
           // 100B: 080.0 MHz
-          ConfigSSetUnsigned(L"\\CPU\\Package\\%u\\Clock", 80000000, Index);
+          Clock = 80000000;
           break;
 
         case 1:
         default:
           // 001B: 100.0 MHz
-          ConfigSSetUnsigned(L"\\CPU\\Package\\%u\\Clock", 100000000, Index);
+          Clock = 100000000;
           break;
       }
       break;
@@ -505,48 +512,48 @@ DetermineCPUIntelFrequency (
       switch (CPUBitmask(AsmReadMsr32(0xCD), 0, 3)) {
         case 0:
           // 0000B: 083.3 MHz
-          ConfigSSetUnsigned(L"\\CPU\\Package\\%u\\Clock", 83333333, Index);
+          Clock = 83333333;
           break;
 
         case 2:
           // 0010B: 133.3 MHz
-          ConfigSSetUnsigned(L"\\CPU\\Package\\%u\\Clock", 133333333, Index);
+          Clock = 133333333;
           break;
 
         case 3:
           // 0011B: 116.7 MHz
-          ConfigSSetUnsigned(L"\\CPU\\Package\\%u\\Clock", 116666667, Index);
+          Clock = 116666667;
           break;
 
         case 4:
           // 0100B: 080.0 MHz
-          ConfigSSetUnsigned(L"\\CPU\\Package\\%u\\Clock", 80000000, Index);
+          Clock = 80000000;
           break;
 
         case 5:
           // 0101B: 093.3 MHz
-          ConfigSSetUnsigned(L"\\CPU\\Package\\%u\\Clock", 93333333, Index);
+          Clock = 93333333;
           break;
 
         case 6:
           // 0110B: 090.0 MHz
-          ConfigSSetUnsigned(L"\\CPU\\Package\\%u\\Clock", 90000000, Index);
+          Clock = 90000000;
           break;
 
         case 7:
           // 0111B: 088.9 MHz
-          ConfigSSetUnsigned(L"\\CPU\\Package\\%u\\Clock", 88888889, Index);
+          Clock = 88888889;
           break;
 
         case 8:
           // 1000B: 087.5 MHz
-          ConfigSSetUnsigned(L"\\CPU\\Package\\%u\\Clock", 87500000, Index);
+          Clock = 87500000;
           break;
 
         case 1:
         default:
           // 0000B: 100.0 Mhz
-          ConfigSSetUnsigned(L"\\CPU\\Package\\%u\\Clock", 100000000, Index);
+          Clock = 100000000;
           break;
       }
       break;
@@ -555,7 +562,7 @@ DetermineCPUIntelFrequency (
       // 4th Gen Atom clock frequency
       switch (CPUBitmask(AsmReadMsr32(0xCD), 0, 3)) {
         default:
-          ConfigSSetUnsigned(L"\\CPU\\Package\\%u\\Clock", 100000000, Index);
+          Clock = 100000000;
           break;
       }
       break;
@@ -564,7 +571,7 @@ DetermineCPUIntelFrequency (
     case CPU_FAMILY_CORE_i_MOBILE:
     case CPU_FAMILY_XEON_CORE_i:
       // Core i clock frequency - 133MHz
-      ConfigSSetUnsigned(L"\\CPU\\Package\\%u\\Clock", 133333333, Index);
+      Clock = 133333333;
       break;
 
     case CPU_FAMILY_PENTIUM_M:
@@ -587,25 +594,25 @@ DetermineCPUIntelFrequency (
     case CPU_FAMILY_XEON_6TH_CORE_i:
     case CPU_FAMILY_XEON_7TH_CORE_i:
       // >= 2nd Gen Core i families clock frequency - 100MHz
-      ConfigSSetUnsigned(L"\\CPU\\Package\\%u\\Clock", 100000000, Index);
+      Clock = 100000000;
       break;
 
     case CPU_FAMILY_XEON_PHI:
       // Xeon Phi clock frequency
-      ConfigSSetUnsigned(L"\\CPU\\Package\\%u\\Clock", 100000000, Index);
+      Clock = 100000000;
       break;
 
 #if defined(MDE_CPU_IA32)
 
     case CPU_FAMILY_ITANIUM:
       // Itanium clock frequency - 133MHz
-      ConfigSSetUnsigned(L"\\CPU\\Package\\%u\\Clock", 133333333, Index);
+      Clock = 133333333;
       break;
 
     case CPU_FAMILY_ITANIUM2:
       // Itanium 2 clock frequency
       // Default clock is 400MHz but no idea how to determine frequency in IA32 mode
-      ConfigSSetUnsigned(L"\\CPU\\Package\\%u\\Clock", 400000000, Index);
+      Clock = 400000000;
       break;
 
     case CPU_FAMILY_PENTIUM_PRO:
@@ -618,16 +625,16 @@ DetermineCPUIntelFrequency (
       // P6 families
       switch (CPUBitmask(AsmReadMsr32(0x2A), 18, 19)) {
         case 1:
-          ConfigSSetUnsigned(L"\\CPU\\Package\\%u\\Clock", 133333333, Index);
+          Clock = 133333333;
           break;
 
         case 2:
-          ConfigSSetUnsigned(L"\\CPU\\Package\\%u\\Clock", 100000000, Index);
+          Clock = 100000000;
           break;
 
         case 0:
         default:
-          ConfigSSetUnsigned(L"\\CPU\\Package\\%u\\Clock", 66666667, Index);
+          Clock = 66666667;
           break;
       }
       break;
@@ -644,7 +651,7 @@ DetermineCPUIntelFrequency (
 
     default:
       // Determine clock frequency by TSC if possible
-      ConfigSSetUnsigned(L"\\CPU\\Package\\%u\\Clock", (UINTN)DetectCPUFrequency(), Index);
+      Clock = DetectCPUFrequency();
       break;
 
   }
@@ -654,9 +661,9 @@ DetermineCPUIntelFrequency (
 #if defined(MDE_CPU_IA32)
 
     case CPU_FAMILY_PENTIUM_MMX:
-      ConfigSSetUnsigned(L"\\CPU\\Package\\%u\\Step", 1, Index);
-      Maximum = (UINTN)DivU64x32(LShiftU64((UINT64)ConfigSGetUnsignedWithDefault(L"\\CPU\\Package\\%u\\Clock", 0, Index), 1), 66666667);
-      ConfigSSetUnsigned(L"\\CPU\\Package\\%u\\Clock", 66666667, Index);
+      Step = 1;
+      Minimum = Maximum = (UINTN)DivU64x32(LShiftU64(Clock, Step), 66666667);
+      Clock = 66666667;
       break;
 
     case CPU_FAMILY_PENTIUM:
@@ -664,66 +671,63 @@ DetermineCPUIntelFrequency (
     case CPU_FAMILY_PENTIUM_OVERDRIVE:
     case CPU_FAMILY_MOBILE_PENTIUM_MMX:
     case CPU_FAMILY_PENTIUM_MMX_OVERDRIVE:
-      ConfigSSetUnsigned(L"\\CPU\\Package\\%u\\Step", 1, Index);
-      Clock = ConfigSGetUnsignedWithDefault(L"\\CPU\\Package\\%u\\Clock", 0, Index);
+      Step = 1;
       if ((Clock >= 70000000) && (Clock <= 80000000)) {
         // 75MHz
-        ConfigSSetUnsigned(L"\\CPU\\Package\\%u\\Clock", 50000000, Index);
-        Maximum = 3;
+        Clock = 50000000;
+        Minimum = Maximum = 3;
       } else if ((Clock > 80000000) && (Clock <= 85000000)) {
         // 83MHz
-        ConfigSSetUnsigned(L"\\CPU\\Package\\%u\\Clock", 66666667, Index);
-        Maximum = 3;
+        Clock = 66666667;
+        Minimum = Maximum = 3;
       } else if ((Clock > 85000000) && (Clock <= 95000000)) {
         // 90MHz
-        ConfigSSetUnsigned(L"\\CPU\\Package\\%u\\Clock", 60000000, Index);
-        Maximum = 3;
+        Clock = 60000000;
+        Minimum = Maximum = 3;
       } else if ((Clock > 95000000) && (Clock <= 105000000)) {
         // 100MHz
-        ConfigSSetUnsigned(L"\\CPU\\Package\\%u\\Clock", 66666667, Index);
-        Maximum = 3;
+        Clock = 66666667;
+        Minimum = Maximum = 3;
       } else if ((Clock > 115000000) && (Clock <= 125000000)) {
         // 120MHz
-        ConfigSSetUnsigned(L"\\CPU\\Package\\%u\\Clock", 60000000, Index);
-        Maximum = 4;
+        Clock = 60000000;
+        Minimum = Maximum = 4;
       } else if ((Clock > 128000000) && (Clock <= 138000000)) {
         // 133MHz
-        ConfigSSetUnsigned(L"\\CPU\\Package\\%u\\Clock", 66666667, Index);
-        Maximum = 4;
+        Clock = 66666667;
+        Minimum = Maximum = 4;
       } else if ((Clock > 145000000) && (Clock <= 155000000)) {
         // 150MHz
-        ConfigSSetUnsigned(L"\\CPU\\Package\\%u\\Clock", 60000000, Index);
-        Maximum = 3;
+        Clock = 60000000;
+        Minimum = Maximum = 3;
       } else if ((Clock > 161000000) && (Clock <= 171000000)) {
         // 166MHz
-        ConfigSSetUnsigned(L"\\CPU\\Package\\%u\\Clock", 66666667, Index);
-        Maximum = 5;
+        Clock = 66666667;
+        Minimum = Maximum = 5;
       } else if ((Clock > 175000000) && (Clock <= 185000000)) {
         // 180MHz
-        ConfigSSetUnsigned(L"\\CPU\\Package\\%u\\Clock", 60000000, Index);
-        Maximum = 6;
+        Clock = 60000000;
+        Minimum = Maximum = 6;
       } else if ((Clock > 195000000) && (Clock <= 205000000)) {
         // 200MHz
-        ConfigSSetUnsigned(L"\\CPU\\Package\\%u\\Clock", 66666667, Index);
-        Maximum = 6;
+        Clock = 66666667;
+        Minimum = Maximum = 6;
       } else if ((Clock > 228000000) && (Clock <= 238000000)) {
         // 233MHz
-        ConfigSSetUnsigned(L"\\CPU\\Package\\%u\\Clock", 66666667, Index);
-        Maximum = 7;
+        Clock = 66666667;
+        Minimum = Maximum = 7;
       } else if ((Clock > 261000000) && (Clock <= 271000000)) {
         // 266MHz
-        ConfigSSetUnsigned(L"\\CPU\\Package\\%u\\Clock", 66666667, Index);
-        Maximum = 8;
+        Clock = 66666667;
+        Minimum = Maximum = 8;
       } else if ((Clock > 295000000) && (Clock <= 305000000)) {
         // 300MHz
-        ConfigSSetUnsigned(L"\\CPU\\Package\\%u\\Clock", 66666667, Index);
-        Maximum = 9;
+        Clock = 66666667;
+        Minimum = Maximum = 9;
       } else {
         // Set default multiplers
-        Maximum = 2;
+        Minimum = Maximum = 2;
       }
-      ConfigSSetUnsigned(L"\\CPU\\Package\\%u\\Minimum", Maximum, Index);
-      ConfigSSetUnsigned(L"\\CPU\\Package\\%u\\Maximum", Maximum, Index);
       break;
 
 #endif
@@ -741,7 +745,7 @@ DetermineCPUIntelFrequency (
     case CPU_FAMILY_ATOM:
     case CPU_FAMILY_XEON_PHI:
       // Determine Pentium M/Core/Core2/Atom multipliers
-      if (ConfigSGetBooleanWithDefault(L"\\CPU\\Package\\%u\\Feature\\ModelSpecificRegisters", FALSE, Index)) {
+      if (ConfigGetBooleanWithDefault(L"\\CPU\\Package\\%u\\Feature\\ModelSpecificRegisters", FALSE, Index)) {
         // Read the MSR_PERF_STATUS model specific register
         MSR = AsmReadMsr64(0x198);
         Step = (UINTN)CPUBitmask(MSR, 46, 46);
@@ -753,21 +757,14 @@ DetermineCPUIntelFrequency (
           // Get maximum from MSR_PLATFORM_ID model specific register
           Maximum = (UINTN)CPUBitmask(AsmReadMsr64(0x17), 8, 13);
         }
-        // Check if multipliers exist
-        if ((Minimum != 0) && (Maximum != 0)) {
-          // Set turbo multiplier
-          if (ConfigSGetBooleanWithDefault(L"\\CPU\\Package\\%u\\Feature\\Turbo", FALSE, Index)) {
-            ConfigSSetUnsigned(L"\\CPU\\Package\\%u\\Turbo\\Count", 1, Index);
-            ConfigSSetUnsigned(L"\\CPU\\Package\\%u\\Turbo\\%u", Maximum + (UINTN)LShiftU64(1, Step), Index, 0);
-          }
-          if (Step != 0) {
-            ConfigSSetUnsigned(L"\\CPU\\Package\\%u\\Step", 1, Index);
-          }
-          ConfigSSetUnsigned(L"\\CPU\\Package\\%u\\Minimum", Minimum, Index);
-          ConfigSSetUnsigned(L"\\CPU\\Package\\%u\\Maximum", Maximum, Index);
-          break;
+        // Set turbo multiplier
+        if (ConfigGetBooleanWithDefault(L"\\CPU\\Package\\%u\\Feature\\Turbo", FALSE, Index)) {
+          UINTN Turbo = Maximum + (UINTN)LShiftU64(1, Step);
+          ConfigSetUnsigned(L"\\CPU\\Package\\%u\\Turbo\\Count", 1, TRUE, Index);
+          ConfigSetUnsigned(L"\\CPU\\Package\\%u\\Turbo\\Ratio\\0", Turbo, TRUE, Index);
         }
-      } else
+      }
+      break;
 
     case CPU_FAMILY_CORE_i:
     case CPU_FAMILY_2ND_CORE_i:
@@ -794,32 +791,32 @@ DetermineCPUIntelFrequency (
     case CPU_FAMILY_3RD_ATOM:
     case CPU_FAMILY_4TH_ATOM:
       // Core i families
-      if (ConfigSGetBooleanWithDefault(L"\\CPU\\Package\\%u\\Feature\\ModelSpecificRegisters", FALSE, Index)) {
+      if (ConfigGetBooleanWithDefault(L"\\CPU\\Package\\%u\\Feature\\ModelSpecificRegisters", FALSE, Index)) {
         // Determine CPU minimum and maximum multipliers from MSR_PLATFORM_INFO model specific register
         MSR = AsmReadMsr64(0xCE);
         Maximum = (UINT8)CPUBitmask(MSR, 8, 15);
         Minimum = (UINT8)CPUBitmask(MSR, 40, 47);
-        // Check if multipliers exist
-        if ((Minimum != 0) && (Maximum != 0)) {
-          // Determine CPU turbo multipliers
-          if (ConfigSGetBooleanWithDefault(L"\\CPU\\Package\\%u\\Feature\\Turbo", FALSE, Index)) {
-            UINTN Mask;
-            UINTN TurboCount = 0;
-            // Read MSR_TURBO_RATIO_LIMIT model specific register
-            MSR = AsmReadMsr64(0x1AD);
+        // Determine CPU turbo multipliers
+        if (ConfigGetBooleanWithDefault(L"\\CPU\\Package\\%u\\Feature\\Turbo", FALSE, Index)) {
+          UINTN Mask;
+          UINTN TurboCount = 0;
+          // Read MSR_TURBO_RATIO_LIMIT model specific register
+          MSR = AsmReadMsr64(0x1AD);
+          if (MSR != 0) {
             for (Mask = 64; Mask >= 8; Mask -= 8) {
               // Get each turbo group ratio
               UINTN Ratio = (UINTN)CPUBitmask(MSR, (Mask - 8), (Mask - 1));
               if (Ratio != 0) {
-                ConfigSSetUnsigned(L"\\CPU\\Package\\%u\\Turbo\\%u", Ratio, Index, TurboCount++);
+                ConfigSetUnsigned(L"\\CPU\\Package\\%u\\Turbo\\Ratio\\%u", Ratio, TRUE, Index, TurboCount++);
               }
             }
+            if (TurboCount != 0) {
+              ConfigSetUnsigned(L"\\CPU\\Package\\%u\\Turbo\\Count", TurboCount, TRUE, Index);
+            }
           }
-          ConfigSSetUnsigned(L"\\CPU\\Package\\%u\\Minimum", Minimum, Index);
-          ConfigSSetUnsigned(L"\\CPU\\Package\\%u\\Maximum", Maximum, Index);
-          break;
         }
-      } else
+      }
+      break;
 
 #if defined(MDE_CPU_IA32)
 
@@ -831,42 +828,36 @@ DetermineCPUIntelFrequency (
     case CPU_FAMILY_XEON_PENTIUM_III:
     case CPU_FAMILY_CELERON:
       // P6 families
-      if (ConfigSGetBooleanWithDefault(L"\\CPU\\Package\\%u\\Feature\\ModelSpecificRegisters", FALSE, Index)) {
+      if (ConfigGetBooleanWithDefault(L"\\CPU\\Package\\%u\\Feature\\ModelSpecificRegisters", FALSE, Index)) {
         switch (CPUBitmask(AsmReadMsr32(0x2A), 22, 25)) {
           case 1:
-            ConfigSSetUnsigned(L"\\CPU\\Package\\%u\\Minimum", 3, Index);
-            ConfigSSetUnsigned(L"\\CPU\\Package\\%u\\Maximum", 3, Index);
+            Minimum = Maximum = 3;
             break;
 
           case 2:
-            ConfigSSetUnsigned(L"\\CPU\\Package\\%u\\Minimum", 4, Index);
-            ConfigSSetUnsigned(L"\\CPU\\Package\\%u\\Maximum", 4, Index);
+            Minimum = Maximum = 4;
             break;
 
           case 5:
-            ConfigSSetUnsigned(L"\\CPU\\Package\\%u\\Minimum", 7, Index);
-            ConfigSSetUnsigned(L"\\CPU\\Package\\%u\\Maximum", 7, Index);
-            ConfigSSetUnsigned(L"\\CPU\\Package\\%u\\Step", 1, Index);
+            Step = 1;
+            Minimum = Maximum = 7;
             break;
 
           case 6:
-            ConfigSSetUnsigned(L"\\CPU\\Package\\%u\\Minimum", 9, Index);
-            ConfigSSetUnsigned(L"\\CPU\\Package\\%u\\Maximum", 9, Index);
-            ConfigSSetUnsigned(L"\\CPU\\Package\\%u\\Step", 1, Index);
+            Step = 1;
+            Minimum = Maximum = 9;
             break;
 
           case 7:
-            ConfigSSetUnsigned(L"\\CPU\\Package\\%u\\Minimum", 5, Index);
-            ConfigSSetUnsigned(L"\\CPU\\Package\\%u\\Maximum", 5, Index);
-            ConfigSSetUnsigned(L"\\CPU\\Package\\%u\\Step", 1, Index);
+            Step = 1;
+            Minimum = Maximum = 5;
             break;
 
           case 0:
           case 3:
           case 4:
           default:
-            ConfigSSetUnsigned(L"\\CPU\\Package\\%u\\Minimum", 2, Index);
-            ConfigSSetUnsigned(L"\\CPU\\Package\\%u\\Maximum", 2, Index);
+            Minimum = Maximum = 2;
             break;
         }
         break;
@@ -877,10 +868,27 @@ DetermineCPUIntelFrequency (
 #endif
 
     default:
-      // Set default multiplers
-      ConfigSSetUnsigned(L"\\CPU\\Package\\%u\\Minimum", 1, Index);
-      ConfigSSetUnsigned(L"\\CPU\\Package\\%u\\Maximum", 1, Index);
       break;
+  }
+  // Print clock frequency
+  if (Clock != 0) {
+    LOG2(L"    Clock:", L"%u MHz\n", ((UINTN)Clock) / 1000000);
+    ConfigSetUnsigned(L"\\CPU\\Package\\%u\\Clock", (UINTN)Clock, FALSE, Index);
+  }
+  // Print multiplier ratio step
+  if (Step != 0) {
+    LOG2(L"    Step:", L"%u\n", Step);
+    ConfigSetUnsigned(L"\\CPU\\Package\\%u\\Step", Step, FALSE, Index);
+  }
+  // Print minimum multiplier ratio
+  if (Minimum != 0) {
+    LOG2(L"    Minimum:", L"%u\n", Minimum);
+    ConfigSetUnsigned(L"\\CPU\\Package\\%u\\Minimum", Minimum, FALSE, Index);
+  }
+  // Print maximum multiplier ratio
+  if (Maximum != 0) {
+    LOG2(L"    Maximum:", L"%u\n", Maximum);
+    ConfigSetUnsigned(L"\\CPU\\Package\\%u\\Maximum", Maximum, FALSE, Index);
   }
 }
 // DetermineCPUIntelFamily
@@ -1025,6 +1033,7 @@ DetermineCPUIntelFamily (
 
     case CPU_MODEL_2ND_CORE_i:
     case CPU_MODEL_2ND_CORE_i_D2:
+    case CPU_MODEL_2ND_CORE_i_J1:
       // 2nd Gen Core i family
       return CPU_FAMILY_2ND_CORE_i;
         
@@ -1054,7 +1063,6 @@ DetermineCPUIntelFamily (
     case CPU_MODEL_2ND_CORE_i_MOBILE_A1:
     case CPU_MODEL_2ND_CORE_i_MOBILE_A2:
     case CPU_MODEL_2ND_CORE_i_MOBILE_K0:
-    case CPU_MODEL_2ND_CORE_i_MOBILE_J1:
       // 2nd Gen Core i Mobile family
       SET_CPU_FEATURE(Mobile, TRUE);
       return CPU_FAMILY_2ND_CORE_i_MOBILE;
@@ -1516,7 +1524,7 @@ UpdateIntelPackageInformation (
   // Determine features
   DetermineCPUIntelFeatures(Index);
   // Check if hardware multi threading is supported if core or cache topology reporting is not or failed
-  if (ConfigSGetBooleanWithDefault(L"\\CPU\\Package\\%u\\Feature\\HardwareMultiThread", FALSE, Index) && (SubIndex == 0)) {
+  if (ConfigGetBooleanWithDefault(L"\\CPU\\Package\\%u\\Feature\\HardwareMultiThread", FALSE, Index) && (SubIndex == 0)) {
     // Get the logical CPU count the old way
     Threads = (UINTN)CPUBitmask(mCPUIDRegisters[1], 16, 23);
   }
@@ -1532,10 +1540,10 @@ UpdateIntelPackageInformation (
     Threads = Cores;
   }
   // Add these counts to the total system counts
-  ConfigSSetUnsigned(L"\\CPU\\Package\\%u\\Threads", Threads, Index);
-  ConfigSSetUnsigned(L"\\CPU\\Package\\%u\\Cores", Cores, Index);
-  ConfigSetUnsigned(L"\\CPU\\Threads", ConfigGetUnsignedWithDefault(L"\\CPU\\Threads", 0) + Threads);
-  ConfigSetUnsigned(L"\\CPU\\Cores", ConfigGetUnsignedWithDefault(L"\\CPU\\Cores", 0) + Cores);
+  ConfigSetUnsigned(L"\\CPU\\Package\\%u\\Threads", Threads, TRUE, Index);
+  ConfigSetUnsigned(L"\\CPU\\Package\\%u\\Cores", Cores, TRUE, Index);
+  ConfigSetUnsigned(L"\\CPU\\Threads", ConfigGetUnsignedWithDefault(L"\\CPU\\Threads", 0) + Threads, TRUE);
+  ConfigSetUnsigned(L"\\CPU\\Cores", ConfigGetUnsignedWithDefault(L"\\CPU\\Cores", 0) + Cores, TRUE);
   // Determine extended features
   if (mCPUMaxIndex >= 0x7) {
     CPUID(0x7);
@@ -1545,6 +1553,11 @@ UpdateIntelPackageInformation (
   if (mCPUMaxExtIndex >= 0x80000001) {
     CPUID(0x80000001);
     DetermineCPUIntelOtherFeatures(Index);
+  }
+  // Determine other extended features
+  if (mCPUMaxExtIndex >= 0x80000007) {
+    CPUID(0x80000007);
+    DetermineCPUIntelOtherExtendedFeatures(Index);
   }
   // Get CPU description
   if (mCPUMaxExtIndex >= 0x80000004) {
@@ -1565,37 +1578,41 @@ UpdateIntelPackageInformation (
     while (*Str == ' ') {
       ++Str;
     }
+    LOG2(L"    Description:", L"%a\n", Str);
     // Create a unicode copy of the string
     if (!EFI_ERROR(AsciiStrToUnicodeStrS(Str, String, ARRAY_SIZE(String)))) {
       // Copy description to CPU information
-      ConfigSSetString(L"\\CPU\\Package\\%u\\Description", String, Index);
+      ConfigSetString(L"\\CPU\\Package\\%u\\Description", String, TRUE, Index);
     }
   }
   // Read IA32_MISC_ENABLE model specific register
-  if (ConfigSGetBooleanWithDefault(L"\\CPU\\Package\\%u\\Feature\\ModelSpecificRegisters", FALSE, Index)) {
-    UINT64 MSR;
-    MSR = AsmReadMsr64(0x1A0);
+  if (ConfigGetBooleanWithDefault(L"\\CPU\\Package\\%u\\Feature\\ModelSpecificRegisters", FALSE, Index)) {
     // Determine if speedstep is enabled
-    if (ConfigSGetBooleanWithDefault(L"\\CPU\\Package\\%u\\Feature\\Dynamic", FALSE, Index)) {
+    if (ConfigGetBooleanWithDefault(L"\\CPU\\Package\\%u\\Feature\\Dynamic", FALSE, Index)) {
+      UINT64 MSR = AsmReadMsr64(0x1A0);
       SET_CPU_FEATURE(Dynamic, CPUBitmask(MSR, 16, 16));
-    }
-    // Determine if turbo is enabled
-    if ((mCPUMaxIndex >= 0x6) && (CPUBitmask(MSR, 38, 38) == 0)) {
-      CPUID(0x6);
-      SET_CPU_FEATURE(Turbo, CPUBitmask(mCPUIDRegisters[0], 1, 1));
+      // Determine if turbo is enabled
+      if ((mCPUMaxIndex >= 0x6) && (CPUBitmask(MSR, 38, 38) == 0)) {
+        CPUID(0x6);
+        SET_CPU_FEATURE(Turbo, CPUBitmask(mCPUIDRegisters[0], 1, 1));
+      }
     }
     // Determine mobile from IA32_PLATFORM_ID model specific register
     if (CPUBitmask(AsmReadMsr32(0x17), 28, 28) != 0) {
       SET_CPU_FEATURE(Mobile, TRUE);
     }
-    if (ConfigSGetBooleanWithDefault(L"\\CPU\\Package\\%u\\Feature\\Mobile", FALSE, Index)) {
+    if (ConfigGetBooleanWithDefault(L"\\CPU\\Package\\%u\\Feature\\Mobile", FALSE, Index)) {
       Family = SwitchCPUIntelFamilyToMobile(Family);
     }
   }
+  LOG2(L"    Family:", L"%s (%u)\n", GetCPUFamilyString(Family), Family);
+  LOG2(L"    Model:", L"%X\n", Model);
+  LOG2(L"    Threads:", L"%u\n", Threads);
+  LOG2(L"    Cores:", L"%u\n", Cores);
   // Determine frequency
   DetermineCPUIntelFrequency(Index, Model, Family);
   // Set family
-  ConfigSSetUnsigned(L"\\CPU\\Package\\%u\\Family", Family, Index);
+  ConfigSetUnsigned(L"\\CPU\\Package\\%u\\Family", Family, TRUE, Index);
   // Set model
-  return ConfigSSetUnsigned(L"\\CPU\\Package\\%u\\Model", Model, Index);
+  return ConfigSetUnsigned(L"\\CPU\\Package\\%u\\Model", Model, TRUE, Index);
 }

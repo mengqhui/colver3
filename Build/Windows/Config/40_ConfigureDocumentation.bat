@@ -10,7 +10,7 @@ rem ===========================================================================
 set BUILD_DOCS=
 set BUILD_DOCS_FILE=
 
-set PROJECT_DIR_DOCS=%PROJECT_DIR_PACKAGE%\Documentation
+set PROJECT_DIR_DOCS=%PROJECT_DIR_OUTPUT%\Documentation
 set PROJECT_DIR_SUPPORT_DOCS=%PROJECT_DIR_SUPPORT%\Doxygen
 set PROJECT_DOCS_INPUT=
 
@@ -75,7 +75,7 @@ rem ===========================================================================
 
 :configureDoxygen
 
-if not defined TOOL_DOXYGEN for /f "usebackq delims=" %%i in (` "%TOOL_WHERE%" doxygen 2^>NUL `) do set TOOL_DOXYGEN=%%~i
+if not defined TOOL_DOXYGEN for /f "usebackq delims=" %%i in (` %TOOL_WHERE% doxygen 2^>NUL `) do set TOOL_DOXYGEN="%%~i"
 if not defined TOOL_DOXYGEN (
   set BUILD_DOCS=
   %TOOL_ALIGN% doxygen: Not found
@@ -88,7 +88,7 @@ rem Prepare documentation
 rem ===========================================================================
 
 %TOOL_UNQUOTE% PROJECT_DIR_DOCS %PROJECT_DIR_DOCS%
-if not defined PROJECT_DIR_DOCS set PROJECT_DIR_DOCS=%PROJECT_DIR_PACKAGE%\Documentation
+if not defined PROJECT_DIR_DOCS set PROJECT_DIR_DOCS=%PROJECT_DIR_OUTPUT%\Documentation
 if defined BUILD_DOCS %TOOL_ALIGN% Documentation: !PROJECT_DIR_DOCS:%WORKSPACE%\=!
 
 %TOOL_UNQUOTE% BUILD_DOCS_FILE %BUILD_DOCS_FILE%

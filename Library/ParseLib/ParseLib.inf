@@ -15,8 +15,7 @@
   BASE_NAME                      = ParseLib
   FILE_GUID                      = 8DDD5AA3-5F8C-4A17-BF19-D25B59BF5ACE
   MODULE_TYPE                    = BASE
-  VERSION_STRING                 = $(PROJECT_VERSION_BASE)
-  SUPPORTED_ARCHITECTURES        = X64|IA32|ARM|AARCH64
+  SUPPORTED_ARCHITECTURES        = X64|IA32|IPF|ARM|AARCH64
   CONSTRUCTOR                    = ParseLibInitialize
   DESTRUCTOR                     = ParseLibFinish
   LIBRARY_CLASS                  = ParseLib

@@ -11,8 +11,8 @@
 BUILD_CONFIG_DIR=
 BUILD_CONFIG_FILE=
 BUILD_TOOL_CHAIN_DEFAULT=ELFGCC
-BUILD_TARGET_DEFAULT=DEBUG
-BUILD_ARCH_DEFAULT=X64 IA32
+BUILD_TARGET_DEFAULT=RELEASE
+BUILD_ARCH_DEFAULT="IA32 X64"
 
 BUILD_DRYRUN=
 BUILD_CLEAN=
@@ -32,6 +32,7 @@ PROJECT_DIR_BUILD=
 
 COUNTER=1
 while [ ${COUNTER} -le $# ]; do
+  echo ${COUNTER} ${*:${COUNTER}:1}
   case "${*:${COUNTER}:1}" in
     "clean")
       BUILD_CLEAN=Yes
@@ -153,21 +154,6 @@ while [ ${COUNTER} -le $# ]; do
 done
 
 ###############################################################################
-# Set the default build options
-###############################################################################
-
-if [ ! -z ${BUILD_CONFIG_DIR:+x} ]; then
-  set PROJECT_BUILD_ARGUMENTS=${PROJECT_BUILD_ARGUMENTS} --conf="${BUILD_CONFIG_DIR}"
-fi
-if [ -z ${BUILD_CONFIG_FILE:+x} ]; then
-  if [ ! -z ${BUILD_CONFIG_DIR:+x} ]; then
-    BUILD_CONFIG_FILE=${BUILD_CONFIG_DIR}\target.txt
-  else
-    BUILD_CONFIG_FILE=${WORKSPACE}\Conf\target.txt
-  fi
-fi
-
-###############################################################################
 # Set default build options if options have no value
 ###############################################################################
 
@@ -192,6 +178,18 @@ if [ -z ${PROJECT_DIR_STAGE:+x} ]; then
 fi
 if [ -z ${PROJECT_DIR_BUILD:+x} ]; then
   PROJECT_DIR_BUILD=${PROJECT_DIR_STAGE}/${BUILD_TARGET}_${BUILD_TOOL_CHAIN}
+fi
+
+###############################################################################
+# Set the default build options
+###############################################################################
+
+if [ -z ${BUILD_CONFIG_DIR:+x} ]; then
+  BUILD_CONFIG_DIR=${PROJECT_DIR_SUPPORT}/Conf
+fi
+PROJECT_BUILD_ARGUMENTS="${PROJECT_BUILD_ARGUMENTS} --conf=${BUILD_CONFIG_DIR}"
+if [ -z ${BUILD_CONFIG_FILE:+x} ]; then
+  BUILD_CONFIG_FILE=${BUILD_CONFIG_DIR}/target.txt
 fi
 
 ###############################################################################

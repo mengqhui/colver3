@@ -50,7 +50,6 @@ FindDevices (
     return EFI_INVALID_PARAMETER;
   }
   // Get all PCI devices
-  LOG2(L"Find devices:", L"0x%04X, 0x%04X, 0x%02X, 0x%02X, 0x%0X\n", VendorId, DeviceId, BaseClass, SubClass, Options);
   Status = gBS->LocateHandleBuffer(ByProtocol, &gEfiPciIoProtocolGuid, NULL, &DeviceCount, &Handles);
   if (EFI_ERROR(Status)) {
     return Status;
@@ -69,7 +68,6 @@ FindDevices (
     return EFI_OUT_OF_RESOURCES;
   }
   // Iterate through each PCI device
-  LOG2(L"Devices:", L"%u\n", DeviceCount);
   for (Index = 0; Index < DeviceCount; ++Index) {
     if (Handles[Index] == NULL) {
       continue;
@@ -92,7 +90,6 @@ FindDevices (
     if (EFI_ERROR(PciIo->Pci.Read(PciIo, EfiPciIoWidthUint8, 0xA, ARRAY_SIZE(Class), Class))) {
       continue;
     }
-    LOG3(LOG_PREFIX_WIDTH - LOG(L"  Device(%u)", Index), L":", L"0x%04X, 0x%04X, 0x%02X, 0x%02X\n", Ids[0], Ids[1], Class[1], Class[0]);
     // Check for vendor id match
     if (((Options & FIND_DEVICE_VENDOR_ID) != 0) && (Ids[0] != VendorId)) {
       continue;
@@ -113,7 +110,6 @@ FindDevices (
     FoundDevices[DeviceIndex++] = PciIo;
   }
   FreePool(Handles);
-  LOG2(L"  Count:", L"%u\n", DeviceIndex);
   if (DeviceIndex == 0) {
     // No devices not found
     FreePool(FoundDevices);

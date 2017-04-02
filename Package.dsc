@@ -17,7 +17,7 @@
   PLATFORM_GUID                  = 6759CA12-7CEE-4368-AB2D-052ECCCBEEE9
   PLATFORM_VERSION               = $(PROJECT_VERSION_BASE)
   OUTPUT_DIRECTORY               = $(PROJECT_DIR_STAGE)
-  SUPPORTED_ARCHITECTURES        = X64|IA32|ARM|AARCH64
+  SUPPORTED_ARCHITECTURES        = X64|IA32|IPF|ARM|AARCH64
   BUILD_TARGETS                  = DEBUG|RELEASE
   SKUID_IDENTIFIER               = DEFAULT
 
@@ -46,6 +46,9 @@
   DevicePathLib|MdePkg/Library/UefiDevicePathLib/UefiDevicePathLib.inf
   FileHandleLib|MdePkg/Library/UefiFileHandleLib/UefiFileHandleLib.inf
   FileLib|$(PROJECT_PACKAGE)/Library/FileLib/FileLib.inf
+  IoLib|MdePkg/Library/BaseIoLibIntrinsic/BaseIoLibIntrinsic.inf
+  PciExpressLib|MdePkg/Library/BasePciExpressLib/BasePciExpressLib.inf
+  PciLib|MdePkg/Library/BasePciLibPciExpress/BasePciLibPciExpress.inf
   SmbusLib|MdePkg/Library/DxeSmbusLib/DxeSmbusLib.inf
 
   #
@@ -62,12 +65,8 @@
   #
   BaseLib|MdePkg/Library/BaseLib/BaseLib.inf
   BaseMemoryLib|MdePkg/Library/UefiMemoryLib/UefiMemoryLib.inf
-  DebugPrintErrorLevelLib|MdePkg/Library/BaseDebugPrintErrorLevelLib/BaseDebugPrintErrorLevelLib.inf
-  HobLib|MdePkg/Library/DxeHobLib/DxeHobLib.inf
-  IoLib|MdePkg/Library/BaseIoLibIntrinsic/BaseIoLibIntrinsic.inf
-  LocalApicLib|UefiCpuPkg/Library/BaseXApicX2ApicLib/BaseXApicX2ApicLib.inf
   MemoryAllocationLib|MdePkg/Library/UefiMemoryAllocationLib/UefiMemoryAllocationLib.inf
-  PcdLib|MdePkg/Library/DxePcdLib/DxePcdLib.inf
+  PcdLib|MdePkg/Library/BasePcdLibNull/BasePcdLibNull.inf
   PrintLib|MdePkg/Library/BasePrintLib/BasePrintLib.inf
   StringLib|$(PROJECT_PACKAGE)/Library/StringLib/StringLib.inf
   SynchronizationLib|MdePkg/Library/BaseSynchronizationLib/BaseSynchronizationLib.inf
@@ -76,7 +75,6 @@
   # UEFI Application libraries
   #
   UefiLib|MdePkg/Library/UefiLib/UefiLib.inf
-  UefiCpuLib|UefiCpuPkg/Library/BaseUefiCpuLib/BaseUefiCpuLib.inf
   UefiBootServicesTableLib|MdePkg/Library/UefiBootServicesTableLib/UefiBootServicesTableLib.inf
   UefiRuntimeServicesTableLib|MdePkg/Library/UefiRuntimeServicesTableLib/UefiRuntimeServicesTableLib.inf
   UefiApplicationEntryPoint|MdePkg/Library/UefiApplicationEntryPoint/UefiApplicationEntryPoint.inf
@@ -86,7 +84,18 @@
   #
   DebugLib|MdePkg/Library/BaseDebugLibNull/BaseDebugLibNull.inf
 
+!if $(TARGET) == "DEBUG"
+  PlatformHookLib|MdeModulePkg/Library/BasePlatformHookLibNull/BasePlatformHookLibNull.inf
+  SerialPortLib|MdeModulePkg/Library/BaseSerialPortLib16550/BaseSerialPortLib16550.inf
+!else
+  SerialPortLib|MdePkg/Library/BaseSerialPortLibNull/BaseSerialPortLibNull.inf
+!endif
+
+[LibraryClasses.IPF]
+  PalLib|MdePkg/Library/UefiPalLib/UefiPalLib.inf
+
 [BuildOptions]
   XCODE:*_*_*_CC_FLAGS = -Os -DDISABLE_NEW_DEPRECATED_INTERFACES $(PROJECT_BUILD_OPTIONS) $(PROJECT_DEBUG_OPTIONS) $(PROJECT_ARCH_OPTIONS)
   GCC:*_*_*_CC_FLAGS = -Os -DDISABLE_NEW_DEPRECATED_INTERFACES $(PROJECT_BUILD_OPTIONS) $(PROJECT_DEBUG_OPTIONS) $(PROJECT_ARCH_OPTIONS)
-  MSFT:*_*_*_CC_FLAGS = /Os /W4 /WX -DDISABLE_NEW_DEPRECATED_INTERFACES $(PROJECT_BUILD_OPTIONS) $(PROJECT_DEBUG_OPTIONS) $(PROJECT_ARCH_OPTIONS)
+  MSFT:*_*_*_CC_FLAGS = /Os -DDISABLE_NEW_DEPRECATED_INTERFACES $(PROJECT_BUILD_OPTIONS) $(PROJECT_DEBUG_OPTIONS) $(PROJECT_ARCH_OPTIONS)
+  MSFT:*_*_*_DLINK_FLAGS = /INCREMENTAL:No
