@@ -15,8 +15,7 @@
   BASE_NAME                      = StringLib
   FILE_GUID                      = 50738973-9958-466A-B7E5-31FC74FEB9F9
   MODULE_TYPE                    = BASE
-  VERSION_STRING                 = $(PROJECT_VERSION_BASE)
-  SUPPORTED_ARCHITECTURES        = X64|IA32|ARM|AARCH64
+  SUPPORTED_ARCHITECTURES        = X64|IA32|IPF|ARM|AARCH64
   CONSTRUCTOR                    = StringLibInitialize
   DESTRUCTOR                     = StringLibFinish
   LIBRARY_CLASS                  = StringLib

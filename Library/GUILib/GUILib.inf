@@ -15,8 +15,7 @@
   BASE_NAME                      = GUILib
   FILE_GUID                      = C720E247-A7B3-4018-BE15-C9F7AEE5885C
   MODULE_TYPE                    = BASE
-  VERSION_STRING                 = $(PROJECT_VERSION_BASE)
-  SUPPORTED_ARCHITECTURES        = X64|IA32|ARM|AARCH64
+  SUPPORTED_ARCHITECTURES        = X64|IA32|IPF|ARM|AARCH64
   CONSTRUCTOR                    = GUILibInitialize
   DESTRUCTOR                     = GUILibFinish
   LIBRARY_CLASS                  = GUILib

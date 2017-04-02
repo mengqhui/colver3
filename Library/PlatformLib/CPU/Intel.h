@@ -1,5 +1,5 @@
 //
-/// @file Library/CPU/Intel.h
+/// @file Library/PlatformLib/CPU/Intel.h
 ///
 /// Platform information library Intel CPU models
 ///
@@ -7,6 +7,8 @@
 #pragma once
 #ifndef __CPU_MODELS_INTEL_HEADER__
 #define __CPU_MODELS_INTEL_HEADER__
+
+#include "../Platform.h"
 
 #if defined(MDE_CPU_IA32)
 
@@ -480,6 +482,9 @@
 // CPU_MODEL_CORE_i_D2
 /// 2nd Gen Core i compatible CPU model
 #define CPU_MODEL_2ND_CORE_i_D2 0x206A5
+// CPU_MODEL_2ND_CORE_i_J1
+/// 2nd Gen Core i compatible CPU model
+#define CPU_MODEL_2ND_CORE_i_J1 0x206A7
 
 //
 // Intel 3rd Gen Core i compatible CPU models
@@ -533,33 +538,30 @@
 //
 
 // CPU_MODEL_2ND_CORE_i_MOBILE
-/// Core i Mobile compatible CPU model
+/// 2nd Gen Core i Mobile compatible CPU model
 #define CPU_MODEL_2ND_CORE_i_MOBILE    0x20650
 // CPU_MODEL_2ND_CORE_i_MOBILE_A1
-/// Core i Mobile compatible CPU model
+/// 2nd Gen Core i Mobile compatible CPU model
 #define CPU_MODEL_2ND_CORE_i_MOBILE_A1 0x20651
 // CPU_MODEL_2ND_CORE_i_MOBILE_A2
-/// Core i Mobile compatible CPU model
+/// 2nd Gen Core i Mobile compatible CPU model
 #define CPU_MODEL_2ND_CORE_i_MOBILE_A2 0x20652
 // CPU_MODEL_2ND_CORE_i_MOBILE
-/// Core i Mobile compatible CPU model
+/// 2nd Gen Core i Mobile compatible CPU model
 #define CPU_MODEL_2ND_CORE_i_MOBILE_K0 0x20655
-// CPU_MODEL_2ND_CORE_i_MOBILE
-/// Core i Mobile compatible CPU model
-#define CPU_MODEL_2ND_CORE_i_MOBILE_J1 0x206A7
 
 //
 // Intel 3rd Gen Core i Mobile compatible CPU models
 //
 
 // CPU_MODEL_3RD_CORE_i_MOBILE
-/// Core i Mobile compatible CPU model
+/// 3rd Gen Core i Mobile compatible CPU model
 #define CPU_MODEL_3RD_CORE_i_MOBILE    0x306C3
 // CPU_MODEL_3RD_CORE_i_MOBILE_D0
-/// Core i Mobile compatible CPU model
+/// 3rd Gen Core i Mobile compatible CPU model
 #define CPU_MODEL_3RD_CORE_i_MOBILE_D0 0x306D4
 // CPU_MODEL_3RD_CORE_i_MOBILE_E1
-/// Core i Mobile compatible CPU model
+/// 3rd Gen Core i Mobile compatible CPU model
 #define CPU_MODEL_3RD_CORE_i_MOBILE_E1 0x306A9
 
 //

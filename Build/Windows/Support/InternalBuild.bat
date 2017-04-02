@@ -32,7 +32,7 @@ for /r "%BUILD_DIR_CONFIG%" %%v in (*.bat) do (
   set BUILD_SCRIPT=%%v
   %TOOL_ALIGN% Executing: !BUILD_SCRIPT:%BUILD_DIR_CONFIG%\=!
   call "%%v" %*
-  if errorlevel 1 goto failScript
+  if not !errorlevel! == 0 goto failScript
   echo.
 )
 
@@ -47,10 +47,10 @@ if defined BUILD_CLEAN (
   rem =======================================================================
 
   call:printStripe Cleaning package
-  if not exist "%PROJECT_DIR_PACKAGE%" (
-    %TOOL_ALIGN% Cleaned: !PROJECT_DIR_PACKAGE:%WORKSPACE%\=!
+  if not exist "%PROJECT_DIR_OUTPUT%" (
+    %TOOL_ALIGN% Cleaned: !PROJECT_DIR_OUTPUT:%WORKSPACE%\=!
   ) else (
-    %TOOL_CLEAN% /r "%PROJECT_DIR_PACKAGE%"
+    %TOOL_CLEAN% /r "%PROJECT_DIR_OUTPUT%"
   )
   if /i "%BUILD_CLEAN%" == "All" (
     if not exist "%PROJECT_DIR_STAGE%" (
@@ -71,7 +71,7 @@ if defined BUILD_CLEAN (
     )
   )
   echo.
-  if errorlevel 1 goto failScript
+  if not !errorlevel! == 0 goto failScript
   goto exitScript
 
 )
@@ -88,6 +88,7 @@ set PROJECT_DIR_STAGE_RELATIVE=!PROJECT_DIR_STAGE:%WORKSPACE%\=!
 set PROJECT_BUILD_OPTIONS=%PROJECT_BUILD_OPTIONS% /I"%PROJECT_DIR_BUILD%\Include"
 set BUILD_PROJECT_ARGUMENTS=--platform="%BUILD_SOURCE%" -D "PROJECT_DIR_STAGE=%PROJECT_DIR_STAGE_RELATIVE:\=/%"
 set BUILD_PROJECT_ARGUMENTS=%BUILD_PROJECT_ARGUMENTS% -D "PROJECT_NAME=%PROJECT_NAME%" -D "PROJECT_SAFE_NAME=%PROJECT_SAFE_NAME%" -D "PROJECT_PACKAGE=%PROJECT_PACKAGE%"
+
 call:printStripe Building package
 %TOOL_ALIGN% Architecture: %BUILD_ARCH%
 if defined PROJECT_BUILD_ARGUMENTS %TOOL_ALIGN% Arguments: %PROJECT_BUILD_ARGUMENTS%
@@ -95,7 +96,7 @@ echo.
 
 for %%i in (%BUILD_ARCH%) do (
   call:buildArchitecture %%i
-  if errorlevel 1 goto failScript
+  if not !errorlevel! == 0 goto failScript
 )
 
 rem =========================================================================
@@ -109,7 +110,7 @@ for /r "%BUILD_DIR_POST%" %%v in (*.bat) do (
   set BUILD_SCRIPT=%%v
   %TOOL_ALIGN% Executing: !BUILD_SCRIPT:%BUILD_DIR_POST%\=!
   call "%%v"
-  if errorlevel 1 goto failScript
+  if not !errorlevel! == 0 goto failScript
   echo.
 )
 
@@ -122,7 +123,6 @@ rem ===========================================================================
   call:buildTime
   call:printStripe Build finished at %BUILD_FINISH_TIME% on %BUILD_FINISH_DATE% after %BUILD_DURATION%
   popd
-  endlocal
   goto:eof
 
 rem ===========================================================================
@@ -134,7 +134,7 @@ rem ===========================================================================
   call:buildTime
   call:printStripe Build failed at %BUILD_FINISH_TIME% on %BUILD_FINISH_DATE% after %BUILD_DURATION%
   popd
-  endlocal
+  set FAILSCRIPT=Yes
   exit /b 1
 
 rem =========================================================================
@@ -151,6 +151,7 @@ rem =========================================================================
   %TOOL_SAFENAME% PROJECT_SAFE_ARCH
   set PROJECT_ARCH_OPTIONS=-D_PROJECT_ARCH=L\"%~1\" -D_PROJECT_ARCH_A=\"%~1\" -D_PROJECT_SAFE_ARCH=L\"%PROJECT_SAFE_ARCH%\" -D_PROJECT_SAFE_ARCH_A=\"%PROJECT_SAFE_ARCH%\"
   build --arch=%~1 %BUILD_PROJECT_ARGUMENTS% %PROJECT_BUILD_ARGUMENTS% 2>&1
+  if not !errorlevel! == 0 exit /b 1
   goto:eof
 
 rem =========================================================================

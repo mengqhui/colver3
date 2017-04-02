@@ -23,4 +23,5 @@
 *.vcxproj.user
 Build/Logs/
 Build/Stage/
-Package/
+Build/Support/Conf/.cache/
+Output/

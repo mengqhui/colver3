@@ -10,6 +10,16 @@
 
 #include <Library/PlatformLib.h>
 
+#if defined(PROJECT_DEBUG)
+
+#define PLATFORM_LOG_FILE LOG_DEFAULT_FILE
+
+#else
+
+#define PLATFORM_LOG_FILE NULL
+
+#endif
+
 // CPUID
 /// Perform CPUID
 #define CPUID(Index) AsmCpuid(Index, mCPUIDRegisters, mCPUIDRegisters + 1, mCPUIDRegisters + 2, mCPUIDRegisters + 3)

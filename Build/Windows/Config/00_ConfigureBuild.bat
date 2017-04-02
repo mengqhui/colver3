@@ -160,16 +160,6 @@ rem ===========================================================================
 
 :setDefaultBuildOptions
 
-%TOOL_UNQUOTE% BUILD_CONFIG_DIR %BUILD_CONFIG_DIR%
-if defined BUILD_CONFIG_DIR set PROJECT_BUILD_ARGUMENTS=%PROJECT_BUILD_ARGUMENTS% --conf="%BUILD_CONFIG_DIR%"
-if not defined BUILD_CONFIG_FILE (
-  if defined BUILD_CONFIG_DIR (
-    set BUILD_CONFIG_FILE=%BUILD_CONFIG_DIR%\target.txt
-  ) else (
-    set BUILD_CONFIG_FILE=%WORKSPACE%\Conf\target.txt
-  )
-)
-
 rem ===========================================================================
 rem Set default build options if options have no value
 rem ===========================================================================
@@ -183,6 +173,11 @@ if not defined PROJECT_DIR_SUPPORT set PROJECT_DIR_SUPPORT=%PROJECT_DIR_SOURCE%\
 if not defined PROJECT_DIR_STAGE set PROJECT_DIR_STAGE=%PROJECT_DIR_SOURCE%\Build\Stage
 %TOOL_UNQUOTE% PROJECT_DIR_BUILD %PROJECT_DIR_BUILD%
 if not defined PROJECT_DIR_BUILD set PROJECT_DIR_BUILD=%PROJECT_DIR_STAGE%\%BUILD_TARGET%_%BUILD_TOOL_CHAIN%
+
+if not defined BUILD_CONFIG_DIR set BUILD_CONFIG_DIR=%PROJECT_DIR_SUPPORT%\Conf
+%TOOL_UNQUOTE% BUILD_CONFIG_DIR %BUILD_CONFIG_DIR%
+set BUILD_PROJECT_ARGUMENTS=%BUILD_PROJECT_ARGUMENTS% --conf="%BUILD_CONFIG_DIR%"
+if not defined BUILD_CONFIG_FILE set BUILD_CONFIG_FILE=%BUILD_CONFIG_DIR%\target.txt
 
 rem ===========================================================================
 rem Print the build options

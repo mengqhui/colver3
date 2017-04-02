@@ -54,9 +54,6 @@
     <Filter Include="Build\Unix\Support">
       <UniqueIdentifier>{89307a02-a71e-49db-b796-96f07f50c45b}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Include\Library\CPU">
-      <UniqueIdentifier>{1a258f8e-e98f-447a-8cfc-35f65048d5c2}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Library\LogLib">
       <UniqueIdentifier>{c1142cad-4929-4846-b807-8c7f608eeb05}</UniqueIdentifier>
     </Filter>
@@ -86,6 +83,18 @@
     </Filter>
     <Filter Include="Library\TimerLib">
       <UniqueIdentifier>{9446af92-f27d-4f8f-ad13-2603d885c922}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Library\PlatformLib\CPU">
+      <UniqueIdentifier>{21d40e21-c8b8-4540-9b7e-9b13db59b4a9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Library\PlatformLib\Memory">
+      <UniqueIdentifier>{24e8858a-4061-4b0d-827a-0f7e48e34a35}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Build\Support\Conf">
+      <UniqueIdentifier>{1153961b-09a3-4700-973a-79a8e1a103b9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Build\Support\Boot">
+      <UniqueIdentifier>{672a5511-5861-44a0-8f48-b4b95ede6be7}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -125,22 +134,10 @@
     <ClCompile Include="..\..\Library\SmBiosLib\SmBiosLib.c">
       <Filter>Library\SmBiosLib</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\Library\PlatformLib\AMD.c">
-      <Filter>Library\PlatformLib</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\Library\PlatformLib\Devices.c">
       <Filter>Library\PlatformLib</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\Library\PlatformLib\Intel.c">
-      <Filter>Library\PlatformLib</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\Library\PlatformLib\Memory.c">
-      <Filter>Library\PlatformLib</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\Library\PlatformLib\PlatformLib.c">
-      <Filter>Library\PlatformLib</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\Library\PlatformLib\CPU.c">
       <Filter>Library\PlatformLib</Filter>
     </ClCompile>
     <ClCompile Include="..\..\Library\TimerLib\IpfTimerLib.c">
@@ -148,6 +145,24 @@
     </ClCompile>
     <ClCompile Include="..\..\Library\TimerLib\X86TimerLib.c">
       <Filter>Library\TimerLib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Library\PlatformLib\CPU\AMD.c">
+      <Filter>Library\PlatformLib\CPU</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Library\PlatformLib\CPU\Intel.c">
+      <Filter>Library\PlatformLib\CPU</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Library\PlatformLib\CPU\X86.c">
+      <Filter>Library\PlatformLib\CPU</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Library\PlatformLib\Memory\Intel.c">
+      <Filter>Library\PlatformLib\Memory</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Library\PlatformLib\Memory\X86.c">
+      <Filter>Library\PlatformLib\Memory</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Library\PlatformLib\Memory\Manufacturers.c">
+      <Filter>Library\PlatformLib\Memory</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -273,6 +288,34 @@
     <None Include="..\..\Library\TimerLib\TimerLib.inf">
       <Filter>Library\TimerLib</Filter>
     </None>
+    <None Include="..\..\.gitignore" />
+    <None Include="..\..\Build\Windows\Support\mcopy.exe">
+      <Filter>Build\Windows\Support</Filter>
+    </None>
+    <None Include="..\..\Build\Windows\Support\mformat.exe">
+      <Filter>Build\Windows\Support</Filter>
+    </None>
+    <None Include="..\..\Build\Windows\Support\mkisofs.exe">
+      <Filter>Build\Windows\Support</Filter>
+    </None>
+    <None Include="..\..\Build\Windows\Support\mmd.exe">
+      <Filter>Build\Windows\Support</Filter>
+    </None>
+    <None Include="..\..\Build\Windows\Support\nasm.exe">
+      <Filter>Build\Windows\Support</Filter>
+    </None>
+    <None Include="..\..\Build\Windows\Support\Rebuild.bat">
+      <Filter>Build\Windows\Support</Filter>
+    </None>
+    <None Include="..\..\Build\Support\Boot\bootiso.s">
+      <Filter>Build\Support\Boot</Filter>
+    </None>
+    <None Include="..\..\Build\Support\Boot\bootfat.s">
+      <Filter>Build\Support\Boot</Filter>
+    </None>
+    <None Include="..\..\Build\Support\Boot\bootmbr.s">
+      <Filter>Build\Support\Boot</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\Include\Version.h">
@@ -280,18 +323,6 @@
     </ClInclude>
     <ClInclude Include="..\..\Include\Library\GUILib.h">
       <Filter>Include\Library</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Include\Library\MpInitLib.h">
-      <Filter>Include\Library</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Include\Library\LocalApicLib.h">
-      <Filter>Include\Library</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Include\Library\CPU\AMD.h">
-      <Filter>Include\Library\CPU</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Include\Library\CPU\Intel.h">
-      <Filter>Include\Library\CPU</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Include\Library\LogLib.h">
       <Filter>Include\Library</Filter>
@@ -329,19 +360,33 @@
     <ClInclude Include="..\..\Include\Library\PlatformLib.h">
       <Filter>Include\Library</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\Library\PlatformLib\Memory\Memory.h">
+      <Filter>Library\PlatformLib\Memory</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Library\PlatformLib\CPU\AMD.h">
+      <Filter>Library\PlatformLib\CPU</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Library\PlatformLib\CPU\Intel.h">
+      <Filter>Library\PlatformLib\CPU</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Xml Include="..\..\Build\Support\Doxygen\Layout.xml">
       <Filter>Build\Support\Doxygen</Filter>
     </Xml>
-    <Xml Include="..\..\Application\GUI\Config.IA32.xml">
-      <Filter>Application\GUI</Filter>
-    </Xml>
-    <Xml Include="..\..\Application\GUI\Config.X64.xml">
-      <Filter>Application\GUI</Filter>
-    </Xml>
     <Xml Include="..\..\Application\GUI\Config.xml">
       <Filter>Application\GUI</Filter>
     </Xml>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="..\..\Build\Support\Conf\build_rule.txt">
+      <Filter>Build\Support\Conf</Filter>
+    </Text>
+    <Text Include="..\..\Build\Support\Conf\target.txt">
+      <Filter>Build\Support\Conf</Filter>
+    </Text>
+    <Text Include="..\..\Build\Support\Conf\tools_def.txt">
+      <Filter>Build\Support\Conf</Filter>
+    </Text>
   </ItemGroup>
 </Project>

@@ -227,9 +227,8 @@
     <IncludePath>$(SolutionDir)..\..\Include;$(SolutionDir)..\..\..\MdePkg\Include;$(SolutionDir)..\..\..\MdeModulePkg\Include;$(SolutionDir)..\..\..\IntelFrameworkPkg\Include;$(SolutionDir)..\..\..\IntelFrameworkModulePkg\Include;$(SolutionDir)..\..\..\UefiCpuPkg\Include;$(SolutionDir)..\..\..\MdePkg\Include\X64;$(SolutionDir)..\..\..\AppPkg\Applications\Python\Python-2.7.2\Modules\expat;$(IncludePath)</IncludePath>
     <NMakeIncludeSearchPath>$(VC_IncludePath)</NMakeIncludeSearchPath>
     <NMakeBuildCommandLine>"$(SolutionDir)..\..\Build\Windows\BuildProject.bat" --no-log$(ProjectBuildISO)$(ProjectBuildDocs)$(ProjectBuildLite)$(ProjectPlatformToolset)$(ProjectBuildTarget)$(ProjectBuildArch)</NMakeBuildCommandLine>
-    <NMakeCleanCommandLine>"$(SolutionDir)..\..\Build\Windows\BuildProject.bat" --no-log$(ProjectBuildISO)$(ProjectBuildDocs)$(ProjectBuildLite)$(ProjectPlatformToolset)$(ProjectBuildTarget)$(ProjectBuildArch) clean</NMakeCleanCommandLine>
-    <NMakeReBuildCommandLine>"$(SolutionDir)..\..\Build\Windows\BuildProject.bat" --no-log$(ProjectBuildISO)$(ProjectBuildDocs)$(ProjectBuildLite)$(ProjectPlatformToolset)$(ProjectBuildTarget)$(ProjectBuildArch) clean
-"$(SolutionDir)..\..\Build\Windows\BuildProject.bat" --no-log$(ProjectBuildISO)$(ProjectBuildDocs)$(ProjectBuildLite)$(ProjectPlatformToolset)$(ProjectBuildTarget)$(ProjectBuildArch)</NMakeReBuildCommandLine>
+    <NMakeCleanCommandLine>"$(SolutionDir)..\..\Build\Windows\BuildProject.bat" --no-log$(ProjectBuildISO)$(ProjectBuildDocs)$(ProjectBuildLite)$(ProjectPlatformToolset)$(ProjectBuildTarget)$(ProjectBuildArch) cleanall</NMakeCleanCommandLine>
+    <NMakeReBuildCommandLine>"$(SolutionDir)..\..\Build\Windows\Support\Rebuild.bat" --no-log$(ProjectBuildISO)$(ProjectBuildDocs)$(ProjectBuildLite)$(ProjectPlatformToolset)$(ProjectBuildTarget)$(ProjectBuildArch)</NMakeReBuildCommandLine>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug Lite|ARM'">
     <NMakePreprocessorDefinitions>_PROJECT_NAME=L"";_PROJECT_NAME_A="";_PROJECT_SAFE_NAME=L"";_PROJECT_SAFE_NAME_A="";_PROJECT_ARCH=L"";_PROJECT_ARCH_A="";_PROJECT_SAFE_ARCH=L"";_PROJECT_SAFE_ARCH_A="";_PROJECT_ROOT_PATH=L"";_PROJECT_ROOT_PATH_A="";_PROJECT_VERSION=L"";_PROJECT_VERSION_A="";_PROJECT_VERSIONCODE=0;_PROJECT_DATETIME=L"";_PROJECT_DATETIME_A="";_PROJECT_FIRMWARE_VERSION=L"";_PROJECT_FIRMWARE_VERSION_A="";_PROJECT_FIRMWARE_VERSIONCODE=0;$(NMakePreprocessorDefinitions)</NMakePreprocessorDefinitions>
@@ -361,11 +360,13 @@
     <ClCompile Include="..\..\Library\GUILib\GUILib.c" />
     <ClCompile Include="..\..\Library\LogLib\LogLib.c" />
     <ClCompile Include="..\..\Library\ParseLib\ParseLib.c" />
-    <ClCompile Include="..\..\Library\PlatformLib\AMD.c" />
-    <ClCompile Include="..\..\Library\PlatformLib\CPU.c" />
+    <ClCompile Include="..\..\Library\PlatformLib\CPU\AMD.c" />
+    <ClCompile Include="..\..\Library\PlatformLib\CPU\Intel.c" />
+    <ClCompile Include="..\..\Library\PlatformLib\CPU\X86.c" />
     <ClCompile Include="..\..\Library\PlatformLib\Devices.c" />
-    <ClCompile Include="..\..\Library\PlatformLib\Intel.c" />
-    <ClCompile Include="..\..\Library\PlatformLib\Memory.c" />
+    <ClCompile Include="..\..\Library\PlatformLib\Memory\Intel.c" />
+    <ClCompile Include="..\..\Library\PlatformLib\Memory\Manufacturers.c" />
+    <ClCompile Include="..\..\Library\PlatformLib\Memory\X86.c" />
     <ClCompile Include="..\..\Library\PlatformLib\PlatformLib.c" />
     <ClCompile Include="..\..\Library\SmBiosLib\SmBiosLib.c" />
     <ClCompile Include="..\..\Library\StringLib\Base64.c" />
@@ -376,7 +377,11 @@
     <ClCompile Include="..\..\Library\XmlLib\XmlStates.c" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="..\..\.gitignore" />
     <None Include="..\..\Application\GUI\GUI.inf" />
+    <None Include="..\..\Build\Support\Boot\bootfat.s" />
+    <None Include="..\..\Build\Support\Boot\bootiso.s" />
+    <None Include="..\..\Build\Support\Boot\bootmbr.s" />
     <None Include="..\..\Build\Support\Doxygen\Doxyfile" />
     <None Include="..\..\Build\Support\Version" />
     <None Include="..\..\Build\Unix\BuildProject.sh" />
@@ -401,7 +406,13 @@
     <None Include="..\..\Build\Windows\Support\Clean.bat" />
     <None Include="..\..\Build\Windows\Support\DateTime.vbs" />
     <None Include="..\..\Build\Windows\Support\InternalBuild.bat" />
+    <None Include="..\..\Build\Windows\Support\mcopy.exe" />
+    <None Include="..\..\Build\Windows\Support\mformat.exe" />
     <None Include="..\..\Build\Windows\Support\MkDir.bat" />
+    <None Include="..\..\Build\Windows\Support\mkisofs.exe" />
+    <None Include="..\..\Build\Windows\Support\mmd.exe" />
+    <None Include="..\..\Build\Windows\Support\nasm.exe" />
+    <None Include="..\..\Build\Windows\Support\Rebuild.bat" />
     <None Include="..\..\Build\Windows\Support\SafeName.bat" />
     <None Include="..\..\Build\Windows\Support\Tee.vbs" />
     <None Include="..\..\Build\Windows\Support\Unquote.bat" />
@@ -421,31 +432,33 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\Include\Library\ConfigLib.h" />
-    <ClInclude Include="..\..\Include\Library\CPU\AMD.h" />
-    <ClInclude Include="..\..\Include\Library\CPU\Intel.h" />
     <ClInclude Include="..\..\Include\Library\FileLib.h" />
     <ClInclude Include="..\..\Include\Library\FontLib.h" />
     <ClInclude Include="..\..\Include\Library\GUILib.h" />
     <ClInclude Include="..\..\Include\Library\PlatformLib.h" />
-    <ClInclude Include="..\..\Include\Library\LocalApicLib.h" />
     <ClInclude Include="..\..\Include\Library\LogLib.h" />
-    <ClInclude Include="..\..\Include\Library\MpInitLib.h" />
     <ClInclude Include="..\..\Include\Library\ParseLib.h" />
     <ClInclude Include="..\..\Include\Library\SmBiosLib.h" />
     <ClInclude Include="..\..\Include\Library\StringLib.h" />
     <ClInclude Include="..\..\Include\Library\XmlLib.h" />
     <ClInclude Include="..\..\Include\Version.h" />
+    <ClInclude Include="..\..\Library\PlatformLib\CPU\AMD.h" />
+    <ClInclude Include="..\..\Library\PlatformLib\CPU\Intel.h" />
+    <ClInclude Include="..\..\Library\PlatformLib\Memory\Memory.h" />
     <ClInclude Include="..\..\Library\PlatformLib\Platform.h" />
     <ClInclude Include="..\..\Library\StringLib\Unicode.h" />
     <ClInclude Include="..\..\Library\XmlLib\XmlStates.h" />
   </ItemGroup>
   <ItemGroup>
-    <Xml Include="..\..\Application\GUI\Config.IA32.xml" />
-    <Xml Include="..\..\Application\GUI\Config.X64.xml" />
     <Xml Include="..\..\Application\GUI\Config.xml">
       <SubType>Designer</SubType>
     </Xml>
     <Xml Include="..\..\Build\Support\Doxygen\Layout.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="..\..\Build\Support\Conf\build_rule.txt" />
+    <Text Include="..\..\Build\Support\Conf\target.txt" />
+    <Text Include="..\..\Build\Support\Conf\tools_def.txt" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

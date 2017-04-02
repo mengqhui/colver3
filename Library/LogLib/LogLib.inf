@@ -15,8 +15,7 @@
   BASE_NAME                      = LogLib
   FILE_GUID                      = 5951982D-0B0C-4795-B019-BCFF915FF4CE
   MODULE_TYPE                    = BASE
-  VERSION_STRING                 = $(PROJECT_VERSION_BASE)
-  SUPPORTED_ARCHITECTURES        = X64|IA32|ARM|AARCH64
+  SUPPORTED_ARCHITECTURES        = X64|IA32|IPF|ARM|AARCH64
   CONSTRUCTOR                    = LogLibInitialize
   DESTRUCTOR                     = LogLibFinish
   LIBRARY_CLASS                  = LogLib
@@ -30,6 +29,7 @@
 
 [LibraryClasses]
   SynchronizationLib
+  SerialPortLib
   XmlLib
   FileLib
 

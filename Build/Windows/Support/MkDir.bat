@@ -3,8 +3,6 @@ rem ===========================================================================
 rem Make directory script
 rem ===========================================================================
 
-setlocal enableDelayedExpansion
-
 if /i "%~1" == "/f" (
   set MKDIR_DIR=%~dp2
 ) else (

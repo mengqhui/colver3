@@ -15,8 +15,7 @@
   BASE_NAME                      = FileLib
   FILE_GUID                      = 0A4FCF88-B0D3-4223-9C1D-444A549BB0BC
   MODULE_TYPE                    = BASE
-  VERSION_STRING                 = $(PROJECT_VERSION_BASE)
-  SUPPORTED_ARCHITECTURES        = X64|IA32|ARM|AARCH64
+  SUPPORTED_ARCHITECTURES        = X64|IA32|IPF|ARM|AARCH64
   CONSTRUCTOR                    = FileLibInitialize
   DESTRUCTOR                     = FileLibFinish
   LIBRARY_CLASS                  = FileLib

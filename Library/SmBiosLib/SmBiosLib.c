@@ -6,6 +6,7 @@
 
 #include <Library/SmBiosLib.h>
 
+#include <Library/ConfigLib.h>
 #include <Library/LogLib.h>
 
 #include <Guid/SmBios.h>
@@ -23,66 +24,82 @@ STATIC SMBIOS_TABLE_ENTRY_POINT     *mSmBiosTable = NULL;
 /// 64bit SMBIOS table
 STATIC SMBIOS_TABLE_3_0_ENTRY_POINT *mSmBios3Table = NULL;
 
+// GetSmBiosVersion
+/// Get the version of the SMBIOS
+/// @return The SMBIOS version code
+VERSIONCODE
+EFIAPI
+GetSmBiosVersion (
+  VOID
+) {
+  if (mSmBios3Table != NULL) {
+    return PACK_VERSIONCODE(mSmBios3Table->MajorVersion, mSmBios3Table->MinorVersion);
+  } else if (mSmBiosTable != NULL) {
+    return PACK_VERSIONCODE(mSmBiosTable->MajorVersion, mSmBiosTable->MinorVersion);
+  }
+  return VERSIONCODE_UNKNOWN;
+}
+
 // GetNextSmBiosTable
 /// Get the next SMBIOS table
 /// @param Previous The previous SMBIOS structure or NULL to get the first structure
 /// @return The next SMBIOS structure or NULL if there are no more
-SMBIOS_STRUCTURE *
+SMBIOS_STRUCTURE_POINTER
 EFIAPI
 GetNextSmBiosTable (
-  IN SMBIOS_STRUCTURE *Previous OPTIONAL
+  IN SMBIOS_STRUCTURE_POINTER Previous OPTIONAL
 ) {
   // Check parameters
-  if (Previous == NULL) {
+  if (Previous.Hdr == NULL) {
     if (mSmBios3Table != NULL) {
       // If SMBIOS 3 present use that
-      Previous = (SMBIOS_STRUCTURE *)(UINTN)mSmBios3Table->TableAddress;
+      Previous.Hdr = (SMBIOS_STRUCTURE *)(UINTN)mSmBios3Table->TableAddress;
     } else if (mSmBiosTable != NULL) {
       // If SMBIOS present use that
-      Previous = (SMBIOS_STRUCTURE *)(UINTN)mSmBiosTable->TableAddress;
+      Previous.Hdr = (SMBIOS_STRUCTURE *)(UINTN)mSmBiosTable->TableAddress;
     }
   } else {
     UINTN  Size = 0;
     UINT8 *Ptr;
     // Get the maximum length of searching just in case
     if (mSmBiosTable != NULL) {
-      UINT32 Offset = (UINT32)Previous;
+      UINT32 Offset = (UINT32)Previous.Hdr;
       if ((Offset >= mSmBiosTable->TableAddress) && (Offset < (mSmBiosTable->TableAddress + mSmBiosTable->TableLength))) {
         Size = (UINTN)mSmBiosTable->TableLength - (UINTN)(Offset - mSmBiosTable->TableAddress);
       } else {
         Size = 0;
       }
     } else if (mSmBios3Table != NULL) {
-      UINT64 Offset = (UINT64)Previous;
-      if ((Offset >= mSmBiosTable->TableAddress) && (Offset < (mSmBiosTable->TableAddress + mSmBiosTable->TableLength))) {
+      UINT64 Offset = (UINT64)Previous.Hdr;
+      if ((Offset >= mSmBios3Table->TableAddress) && (Offset < (mSmBios3Table->TableAddress + mSmBios3Table->TableMaximumSize))) {
         Size = (UINTN)mSmBios3Table->TableMaximumSize - (UINTN)(Offset - mSmBios3Table->TableAddress);
       } else {
         Size = 0;
       }
     }
-    if (Size == 0) {
-      Previous = NULL;
+    if ((Size == 0) || (Previous.Hdr->Length == 0)) {
+      Previous.Hdr = NULL;
     } else {
       UINTN TableSize = 0;
       // Find the string section after this structure
-      Ptr = (UINT8 *)Previous;
-      Ptr += Previous->Length;
+      Ptr = (UINT8 *)Previous.Hdr;
+      Ptr += Previous.Hdr->Length;
       do {
         do {
-          TableSize = Ptr - (UINT8 *)Previous;
+          TableSize = Ptr - (UINT8 *)Previous.Hdr;
         } while ((TableSize < Size) && (*Ptr++ != 0));
       } while ((TableSize < Size) && (*Ptr++ != 0));
       if (TableSize >= Size) {
-        Previous = NULL;
+        Previous.Hdr = NULL;
       } else {
-        Previous = (SMBIOS_STRUCTURE *)Ptr;
+        Previous.Hdr = (SMBIOS_STRUCTURE *)Ptr;
       }
     }
   }
   // Check if last entry
-  if (Previous != NULL) {
-    if (Previous->Type == 0x7F) {
-      Previous = NULL;
+  if (Previous.Hdr != NULL) {
+    if (Previous.Hdr->Type == 0x7F) {
+      Previous.Hdr = NULL;
     }
   }
   // Return next table or NULL if end
@@ -93,15 +110,16 @@ GetNextSmBiosTable (
 /// @param Type The type of SMBIOS table to count
 /// @return The count of SMBIOS tables
 UINTN
+EFIAPI
 GetSmBiosTableCount (
   IN UINT8 Type
 ) {
-  UINTN             Count = 0;
-  SMBIOS_STRUCTURE *Previous = NULL;
+  UINTN                    Count = 0;
+  SMBIOS_STRUCTURE_POINTER Previous = { NULL };
   // Count the tables
   do {
     Previous = FindSmBiosTable(Previous, Type);
-    if (Previous == NULL) {
+    if (Previous.Hdr == NULL) {
       break;
     }
     ++Count;
@@ -113,28 +131,48 @@ GetSmBiosTableCount (
 /// @param Previous The previous SMBIOS structure or NULL to get the first structure
 /// @param Type     The type of SMBIOS table to find
 /// @return The next SMBIOS structure or NULL if there are no more
-SMBIOS_STRUCTURE *
+SMBIOS_STRUCTURE_POINTER
 EFIAPI
 FindSmBiosTable (
-  IN SMBIOS_STRUCTURE *Previous OPTIONAL,
-  IN UINT8             Type
+  IN SMBIOS_STRUCTURE_POINTER Previous OPTIONAL,
+  IN UINT8                    Type
 ) {
-  // Check parameters
-  Previous = GetNextSmBiosTable(Previous);
-  if ((Type == 0x7F) || (Previous == NULL)) {
-    return NULL;
-  }
   // Iterate through tables until match or end
   do {
-    // Check if type matches
-    if (Previous->Type == Type) {
-      return Previous;
-    }
     // Get next table
     Previous = GetNextSmBiosTable(Previous);
-  } while (Previous != NULL);
-  // Not found
-  return NULL;
+    if (Previous.Hdr == NULL) {
+      // Not found
+      break;
+    }
+    // Check if type matches
+  } while (Previous.Hdr->Type != Type);
+  return Previous;
+}
+// FindSmBiosTableByHandle
+/// Find an SMBIOS structure with the specified handle
+/// @param Handle The handle of the SMBIOS table to find
+/// @return The SMBIOS structure or NULL if a table with the given handle was not found
+SMBIOS_STRUCTURE_POINTER
+EFIAPI
+FindSmBiosTableByHandle (
+  IN UINT16 Handle
+) {
+  SMBIOS_STRUCTURE_POINTER Previous = { NULL };
+  // Check parameters
+  if (((GetSmBiosVersion() >= PACK_VERSIONCODE(2, 1)) && (Handle >= 0xFEFF)) || (Handle >= 0xFFFE)) {
+    return Previous;
+  }
+  // Traverse all tables to find handle
+  do {
+    Previous = GetNextSmBiosTable(Previous);
+    if (Previous.Hdr == NULL) {
+      break;
+    }
+    // Check if handle matches
+  } while (Previous.Hdr->Handle != Handle);
+  // Return the handle if found
+  return Previous;
 }
 // FindSmBiosTables
 /// Find all the SMBIOS tables with specified type
@@ -147,15 +185,16 @@ FindSmBiosTable (
 /// @retval EFI_NOT_FOUND         If not SMBIOS tables with specified type was found
 /// @retval EFI_SUCCESS           If SMBIOS tables were found successfully
 EFI_STATUS
+EFIAPI
 FindSmBiosTables (
-  IN  UINT8               Type,
-  OUT UINTN              *Count,
-  OUT SMBIOS_STRUCTURE ***Tables
+  IN  UINT8                      Type,
+  OUT UINTN                     *Count,
+  OUT SMBIOS_STRUCTURE_POINTER **Tables
 ) {
-  SMBIOS_STRUCTURE **FoundTables = NULL;
-  SMBIOS_STRUCTURE  *Previous = NULL;
-  UINTN              TableCount;
-  UINTN              Index;
+  SMBIOS_STRUCTURE_POINTER *FoundTables = { NULL };
+  SMBIOS_STRUCTURE_POINTER  Previous = { NULL };
+  UINTN                     TableCount;
+  UINTN                     Index;
   // Check parameters
   if ((Type > SMBIOS_MAX_TABLE_TYPE) || (Count == NULL) || (Tables == NULL) || (*Tables != NULL)) {
     return EFI_INVALID_PARAMETER;
@@ -166,7 +205,7 @@ FindSmBiosTables (
     return EFI_NOT_FOUND;
   }
   // Allocate new buffer for tables list
-  FoundTables = (SMBIOS_STRUCTURE **)AllocateZeroPool(TableCount * sizeof(SMBIOS_STRUCTURE *));
+  FoundTables = (SMBIOS_STRUCTURE_POINTER *)AllocateZeroPool(TableCount * sizeof(SMBIOS_STRUCTURE_POINTER));
   if (FoundTables == NULL) {
     return EFI_OUT_OF_RESOURCES;
   }
@@ -174,7 +213,7 @@ FindSmBiosTables (
   for (Index = 0; Index < TableCount; ++Index) {
     // Get next SMBIOS table with specified type
     Previous = FindSmBiosTable(Previous, Type);
-    if (Previous == NULL) {
+    if (Previous.Hdr == NULL) {
       break;
     }
     FoundTables[Index] = Previous;
@@ -188,6 +227,33 @@ FindSmBiosTables (
   return EFI_SUCCESS;
 }
 
+// GetSmBiosTableSize
+/// Get the size of an SMBIOS table and string section in bytes
+/// @param Table The SMBIOS table
+/// @return The size in bytes of the SMBIOS table and string section
+UINTN
+EFIAPI
+GetSmBiosTableSize (
+  IN SMBIOS_STRUCTURE_POINTER Table
+) {
+  CHAR8 *Start;
+  CHAR8 *End;
+  // Check parameters
+  if (Table.Hdr == NULL) {
+    return 0;
+  }
+  // Get the beginning of the structure
+  End = Start = (CHAR8 *)Table.Hdr;
+  // Get the beginning of the string section
+  End += Table.Hdr->Length;
+  // Find the end of the string section
+  while (*End++ != L'\0') {
+    while (*End++ != L'\0');
+  }
+  // Return the size of the entire table
+  return (UINTN)(End - Start);
+}
+
 // GetStringFromSmBiosTable
 /// Get a string from an SMBIOS table
 /// @param Table The SMBIOS table
@@ -196,67 +262,120 @@ FindSmBiosTables (
 CHAR8 *
 EFIAPI
 GetStringFromSmBiosTable (
-  IN SMBIOS_STRUCTURE    *Table,
-  IN SMBIOS_TABLE_STRING  Index
+  IN SMBIOS_STRUCTURE_POINTER Table,
+  IN SMBIOS_TABLE_STRING      Index
 ) {
   CHAR8 *Strings;
-  UINTN  Size = 0;
-  if ((Table == NULL) || (Index == 0)) {
+  UINTN  Count = 0;
+  if ((Table.Hdr == NULL) || (Index == 0)) {
     return NULL;
   }
-  Strings = ((CHAR8 *)Table) + Table->Length;
-  // Get the maximum length of searching just in case
-  if (mSmBiosTable != NULL) {
-    UINT32 Offset = (UINT32)Table;
-    if ((Offset >= mSmBiosTable->TableAddress) && (Offset < (mSmBiosTable->TableAddress + mSmBiosTable->TableLength))) {
-      Size = (UINTN)mSmBiosTable->TableLength - (UINTN)(Offset - mSmBiosTable->TableAddress);
-    } else {
-      Size = 0;
+  // Find the string section after this structure
+  Strings = (CHAR8 *)Table.Hdr;
+  Strings += Table.Hdr->Length;
+  do {
+    if ((Index == ++Count) && (*Strings != L'\0')) {
+      return Strings;
     }
-  } else if (mSmBios3Table != NULL) {
-    UINT64 Offset = (UINT64)Table;
-    if ((Offset >= mSmBiosTable->TableAddress) && (Offset < (mSmBiosTable->TableAddress + mSmBiosTable->TableLength))) {
-      Size = (UINTN)mSmBios3Table->TableMaximumSize - (UINTN)(Offset - mSmBios3Table->TableAddress);
-    } else {
-      Size = 0;
-    }
-  }
-  if (Size != 0) {
-    UINTN               TableSize = 0;
-    SMBIOS_TABLE_STRING Count = 0;
-    // Find the string section after this structure
-    Strings = (CHAR8 *)Table;
-    Strings += Table->Length;
-    do {
-      if ((Index == ++Count) && (*Strings != '\0')) {
-        return Strings;
-      }
-      if (Count >= Index) {
-        break;
-      }
-      do {
-        TableSize = Strings - (CHAR8 *)Table;
-      } while ((TableSize < Size) && (*Strings++ != '\0'));
-    } while ((TableSize < Size) && (*Strings != '\0'));
-  }
+    // Skip the rest of this string
+    while (*Strings++ != L'\0');
+    // Check if end of strings
+  } while (*Strings != L'\0');
   return NULL;
 }
 
-// GetSmBiosManufacturer
-/// Get the system manufacturer
-/// @return The system manufacturer retrieved from SMBIOS or NULL if not found or there was an error
-CHAR8 *
+// mSocketStrings
+/// The socket upgrade type strings
+STATIC CHAR16 *mSocketStrings[] = {
+  NULL,
+  L"Other",
+  L"Unknown",
+  L"Daughter Board",
+  L"ZIF Socket",
+  L"Replaceable Piggy Back",
+  L"None",
+  L"LIF Socket",
+  L"Slot 1",
+  L"Slot 2",
+  L"370-pin socket",
+  L"Slot A",
+  L"Slot M",
+  L"Socket 423",
+  L"Socket A (Socket 462)",
+  L"Socket 478",
+  L"Socket 754",
+  L"Socket 940",
+  L"Socket 939",
+  L"Socket mPGA604",
+  L"Socket LGA771",
+  L"Socket LGA775",
+  L"Socket S1",
+  L"Socket AM2",
+  L"Socket F (1207)",
+  L"Socket LGA1366",
+  L"Socket G34",
+  L"Socket AM3",
+  L"Socket C32",
+  L"Socket LGA1156",
+  L"Socket LGA1567",
+  L"Socket PGA988A",
+  L"Socket BGA1288",
+  L"Socket rPGA988B",
+  L"Socket BGA1023",
+  L"Socket BGA1224",
+  L"Socket LGA1155",
+  L"Socket LGA1356",
+  L"Socket LGA2011",
+  L"Socket FS1",
+  L"Socket FS2",
+  L"Socket FM1",
+  L"Socket FM2",
+  L"Socket LGA2011-3",
+  L"Socket LGA1356-3",
+  L"Socket LGA1150",
+  L"Socket BGA1168",
+  L"Socket BGA1234",
+  L"Socket BGA1364",
+  L"Socket AM4",
+  L"Socket LGA1151",
+  L"Socket BGA1356",
+  L"Socket BGA1440",
+  L"Socket BGA1515",
+  L"Socket LGA3647-1",
+  L"Socket SP3",
+  L"Socket SP3r2"
+};
+
+// GetSmBiosProcessorUpgrade
+/// Get an SMBIOS socket upgrade type string (Type4->ProcessorUpgrade)
+/// @param ProcessorUpgrade The processor socket upgrade type
+/// @return The socket type string or NULL if there was an error
+CHAR16 *
 EFIAPI
-GetSmBiosManufacturer (
+GetSmBiosProcessorUpgrade (
+  UINT8 ProcessorUpgrade
+) {
+  // Check parameters
+  if (ProcessorUpgrade >= ARRAY_SIZE(mSocketStrings)) {
+    return NULL;
+  }
+  return mSocketStrings[ProcessorUpgrade];
+}
+
+// SetSmBiosManufacturer
+/// Set the system manufacturer
+STATIC VOID
+EFIAPI
+SetSmBiosManufacturer (
   VOID
 ) {
-  CHAR8 *Manufacturer = NULL;
+  CHAR8                    *Manufacturer = NULL;
+  SMBIOS_STRUCTURE_POINTER  Table = { NULL };
   // Get the system table
-  SMBIOS_STRUCTURE *Table = FindSmBiosTable(NULL, 1);
-  if (Table != NULL) {
-    SMBIOS_TABLE_TYPE1 *Type1 = (SMBIOS_TABLE_TYPE1 *)Table;
+  Table = FindSmBiosTable(Table, 1);
+  if (Table.Hdr != NULL) {
     // Get the system manufacturer name
-    Manufacturer = GetStringFromSmBiosTable(Table, Type1->Manufacturer);
+    Manufacturer = GetStringFromSmBiosTable(Table, Table.Type1->Manufacturer);
   }
   // Check the manufacturer is valid
   if ((Manufacturer == NULL) ||
@@ -264,30 +383,35 @@ GetSmBiosManufacturer (
       (AsciiStriCmp(Manufacturer, "To be filled by O.E.M.") == 0)) {
     Manufacturer = NULL;
     // Get the baseboard table
-    Table = FindSmBiosTable(NULL, 2);
-    if (Table != NULL) {
-      SMBIOS_TABLE_TYPE2 *Type2 = (SMBIOS_TABLE_TYPE2 *)Table;
+    Table.Hdr = NULL;
+    Table = FindSmBiosTable(Table, 2);
+    if (Table.Hdr != NULL) {
       // Get the system manufacturer name
-      Manufacturer = GetStringFromSmBiosTable(Table, Type2->Manufacturer);
+      Manufacturer = GetStringFromSmBiosTable(Table, Table.Type2->Manufacturer);
     }
   }
-  return Manufacturer;
+  if (Manufacturer != NULL) {
+    CHAR16 *String = FromAscii(Manufacturer);
+    if (String != NULL) {
+      ConfigSetString(L"\\System\\Manufacturer", String, FALSE);
+      FreePool(String);
+    }
+  }
 }
-// GetSmBiosProductName
-/// Get the system product name
-/// @return The system product name retrieved from SMBIOS or NULL if not found or there was an error
-CHAR8 *
+// SetSmBiosProductName
+/// Set the system product name
+STATIC VOID
 EFIAPI
-GetSmBiosProductName (
+SetSmBiosProductName (
   VOID
 ) {
-  CHAR8 *ProductName = NULL;
+  CHAR8                    *ProductName = NULL;
+  SMBIOS_STRUCTURE_POINTER  Table = { NULL };
   // Get the system table
-  SMBIOS_STRUCTURE *Table = FindSmBiosTable(NULL, 1);
-  if (Table != NULL) {
-    SMBIOS_TABLE_TYPE1 *Type1 = (SMBIOS_TABLE_TYPE1 *)Table;
+  Table = FindSmBiosTable(Table, 1);
+  if (Table.Hdr != NULL) {
     // Get the system ProductName name
-    ProductName = GetStringFromSmBiosTable(Table, Type1->ProductName);
+    ProductName = GetStringFromSmBiosTable(Table, Table.Type1->ProductName);
   }
   // Check the product name is valid
   if ((ProductName == NULL) ||
@@ -295,50 +419,47 @@ GetSmBiosProductName (
       (AsciiStriCmp(ProductName, "To be filled by O.E.M.") == 0)) {
     ProductName = NULL;
     // Get the baseboard table
-    Table = FindSmBiosTable(NULL, 2);
-    if (Table != NULL) {
-      SMBIOS_TABLE_TYPE2 *Type2 = (SMBIOS_TABLE_TYPE2 *)Table;
+    Table.Hdr = NULL;
+    Table = FindSmBiosTable(Table, 2);
+    if (Table.Hdr != NULL) {
       // Get the system ProductName name
-      ProductName = GetStringFromSmBiosTable(Table, Type2->ProductName);
+      ProductName = GetStringFromSmBiosTable(Table, Table.Type2->ProductName);
     }
   }
-  return ProductName;
+  if (ProductName != NULL) {
+    CHAR16 *String = FromAscii(ProductName);
+    if (String != NULL) {
+      ConfigSetString(L"\\System\\ProductName", String, FALSE);
+      FreePool(String);
+    }
+  }
 }
-// GetSmBiosSystemName
-/// Get the system name from system manufacturer and system product name
-/// @return The system name retrieved from SMBIOS, which needs freed, or NULL if not found or there was an error
-CHAR8 *
+// SetSmBiosSystemName
+/// Set the system name from system manufacturer and system product name
+STATIC VOID
 EFIAPI
-GetSmBiosSystemName (
+SetSmBiosSystemName (
   VOID
 ) {
   // Get the system manufacturer name
-  CHAR8 *Manufacturer = GetSmBiosManufacturer();
+  CHAR16 *Manufacturer = ConfigGetStringWithDefault(L"\\System\\Manufacturer", NULL);
   // Get the system product name
-  CHAR8 *ProductName = GetSmBiosProductName();
+  CHAR16 *ProductName = ConfigGetStringWithDefault(L"\\System\\ProductName", NULL);
   // Create a product name string
   if ((Manufacturer != NULL) && (ProductName != NULL)) {
     // Create product name from system manufacturer and product name
-    UINTN  Length1 = AsciiStrLen(Manufacturer);
-    UINTN  Length2 = AsciiStrLen(ProductName);
-    // Allocate the product name string
-    CHAR8 *Result = (CHAR8 *)AllocateZeroPool((Length1 + Length2 + 2) * sizeof(CHAR8));
-    if (Result != NULL) {
-      // Copy the strings to the product name string
-      AsciiStrCpyS(Result, Length1 + 1, Manufacturer);
-      Result[Length1] = ' ';
-      AsciiStrCpyS(Result + Length1 + 1, Length2 + 1, ProductName);
+    CHAR16 *SystemName = CatSPrint(NULL, L"%s %s", Manufacturer, ProductName);
+    if (SystemName != NULL) {
+      ConfigSetString(L"\\System\\Name", SystemName, FALSE);
+      FreePool(SystemName);
     }
-    return Result;
   } else if (Manufacturer != NULL) {
     // Create product name from system manufacturer
-    return AsciiStrDup(Manufacturer);
+    ConfigSetString(L"\\System\\Name", Manufacturer, FALSE);
   } else if (ProductName != NULL) {
     // Create product name from system product name
-    return AsciiStrDup(ProductName);
+    ConfigSetString(L"\\System\\Name", ProductName, FALSE);
   }
-  // Could not create product name
-  return NULL;
 }
 
 // SmBiosLibInitialize
@@ -351,8 +472,7 @@ EFIAPI
 SmBiosLibInitialize (
   VOID
 ) {
-  CHAR8 *SystemName = NULL;
-  UINTN  Index;
+  UINTN Index;
   // Check parameters
   if ((gST == NULL) || (gST->NumberOfTableEntries == 0) || (gST->ConfigurationTable == NULL)) {
     return EFI_UNSUPPORTED;
@@ -386,13 +506,12 @@ SmBiosLibInitialize (
   if ((mSmBios3Table == NULL) && (mSmBiosTable == NULL)) {
     return EFI_NOT_FOUND;
   }
-  // Print firmware and system name
-  Log2(L"Firmware:", L"%s %u.%u\n", gST->FirmwareVendor, ((gST->Hdr.Revision >> 16) & 0xFFFF), (gST->Hdr.Revision & 0xFFFF));
-  SystemName = GetSmBiosSystemName();
-  if (SystemName != NULL) {
-    Log2(L"System name:", L"%a\n", SystemName);
-    FreePool(SystemName);
-  }
+  // Set manufacturer
+  SetSmBiosManufacturer();
+  // Set system name
+  SetSmBiosProductName();
+  // Set system name
+  SetSmBiosSystemName();
   return EFI_SUCCESS;
 }
 

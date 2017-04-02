@@ -12,6 +12,10 @@
 
 #include <Protocol/SimpleFileSystem.h>
 
+// DEFAULT_CONFIG_FILE
+/// Default configuration file
+#define DEFAULT_CONFIG_FILE PROJECT_ROOT_PATH L"\\" PROJECT_SAFE_NAME L"\\" PROJECT_SAFE_NAME L".XML"
+
 // CONFIG_TYPE
 /// Configuration value type
 typedef enum _CONFIG_TYPE CONFIG_TYPE;
@@ -76,6 +80,23 @@ union _CONFIG_VALUE {
 
 };
 
+// CONFIG_INSPECT
+/// Configuration value inspector
+/// @param Path    The configuration path
+/// @param Type    The type of the configuration key
+/// @param Value   The value of the configuration key if Type is a valid value type (not CONFIG_TYPE_UNKNOWN or CONFIG_TYPE_LIST)
+/// @param Context The context passed when inspection was invoked
+/// @retval TRUE  if inspection should continue
+/// @retval FALSE If inspection should be aborted
+typedef BOOLEAN
+(EFIAPI
+*CONFIG_INSPECT) (
+  IN CHAR16       *Path,
+  IN CONFIG_TYPE   Type,
+  IN CONFIG_VALUE *Value OPTIONAL,
+  IN VOID         *Context
+);
+
 // ConfigLoad
 /// Load configuration information from file
 /// @param Root If Path is NULL the file handle to use to load, otherwise the root file handle
@@ -94,25 +115,29 @@ ConfigLoad (
 /// Parse configuration information from string
 /// @param Size   The size, in bytes, of the configuration string
 /// @param Config The configuration string to parse
+/// @param Source The unique source name
 /// @return Whether the configuration was parsed successfully or not
 /// @retval EFI_INVALID_PARAMETER If Config is NULL or Size is zero
 /// @retval EFI_SUCCESS           If the configuration string was parsed successfully
 EFI_STATUS
 EFIAPI
 ConfigParse (
-  IN UINTN  Size,
-  IN VOID  *Config
+  IN UINTN   Size,
+  IN VOID   *Config,
+  IN CHAR16 *Source OPTIONAL
 );
 // ConfigParseXml
 /// Parse configuration information from XML document tree
-/// @param Tree The XML document tree to parse
+/// @param Tree   The XML document tree to parse
+/// @param Source The unique source name
 /// @return Whether the configuration was parsed successfully or not
 /// @retval EFI_INVALID_PARAMETER If Tree is NULL
 /// @retval EFI_SUCCESS           If the configuration was parsed successfully
 EFI_STATUS
 EFIAPI
 ConfigParseXml (
-  IN XML_TREE *Tree
+  IN XML_TREE *Tree,
+  IN CHAR16   *Source OPTIONAL
 );
 
 // ConfigFree
@@ -127,61 +152,103 @@ ConfigFree (
 // ConfigPartialFree
 /// Free configuration values with a configuration path
 /// @param Path The configuration path to use as root to free or NULL for root (same as ConfigFree)
+/// @param ...  The argument list
 /// @return Whether the configuration values were freed or not
-/// @retval EFI_SUCCESS If the configuration values were freed
+/// @retval EFI_OUT_OF_RESOURCES  If memory could not be allocated
+/// @retval EFI_SUCCESS           If the configuration values were freed
 EFI_STATUS
 EFIAPI
 ConfigPartialFree (
-  IN CHAR16 *Path OPTIONAL
-);
-// ConfigSPartialFree
-/// Free configuration values with a configuration path
-/// @param Path The configuration path to use as root to free
-/// @param ...  The argument list
-/// @return Whether the configuration values were freed or not
-/// @retval EFI_INVALID_PARAMETER If Path is NULL
-/// @retval EFI_OUT_OF_RESOURCES  If memory could not be allocated
-/// @retval EFI_SUCCESS           If the configuration values were freed
-EFI_STATUS
-EFIAPI
-ConfigSPartialFree (
-  IN CHAR16 *Path,
+  IN CHAR16 *Path OPTIONAL,
   IN ...
 );
-// ConfigVSPartialFree
+// ConfigVPartialFree
 /// Free configuration values with a configuration path
-/// @param Path The configuration path to use as root to free
+/// @param Path The configuration path to use as root to free or NULL for root (same as ConfigFree)
 /// @param Args The argument list
 /// @return Whether the configuration values were freed or not
-/// @retval EFI_INVALID_PARAMETER If Path is NULL
 /// @retval EFI_OUT_OF_RESOURCES  If memory could not be allocated
 /// @retval EFI_SUCCESS           If the configuration values were freed
 EFI_STATUS
 EFIAPI
-ConfigVSPartialFree (
+ConfigVPartialFree (
+  IN CHAR16  *Path OPTIONAL,
+  IN VA_LIST  Args
+);
+
+// ConfigExists
+/// Check if a configuration key exists
+/// @param Path The configuration path
+/// @param ...  The argument list
+/// @return Whether the configuration key exists or not
+/// @retval EFI_INVALID_PARAMETER If Path is NULL
+/// @retval EFI_NOT_FOUND         If the configuration key path does not exist
+/// @retval EFI_SUCCESS           If the configuration key path exists
+EFI_STATUS
+EFIAPI
+ConfigExists (
+  IN CHAR16 *Path,
+  ...
+);
+// ConfigVExists
+/// Check if a configuration key exists
+/// @param Path The configuration path
+/// @param Args The argument list
+/// @return Whether the configuration key exists or not
+/// @retval EFI_INVALID_PARAMETER If Path is NULL
+/// @retval EFI_NOT_FOUND         If the configuration key path does not exist
+/// @retval EFI_SUCCESS           If the configuration key path exists
+EFI_STATUS
+EFIAPI
+ConfigVExists (
   IN CHAR16  *Path,
   IN VA_LIST  Args
 );
 
-// ConfigGetList
-/// Get a list of names for the children of the configuration path
-/// @param Path  The configuration path of which to get child names or NULL for root
-/// @param List  On output, the string list of names of children
-/// @param Count On output, the count of strings in the list
-/// @return Whether the string list was returned or not
-/// @retval EFI_INVALID_PARAMETER If List or Count is NULL or *List is not NULL
-/// @retval EFI_OUT_OF_RESOURCES  If memory could not be allocated for the stirng list
-/// @retval EFI_NOT_FOUND         If the configuration path was not found
-/// @retval EFI_ACCESS_DENIED     If the configuration path is protected
-/// @retval EFI_SUCCESS           If the string list was returned successfully
+// ConfigInspect
+/// Inspect configuration values
+/// @param Path      The configuration path or NULL for root
+/// @param Inspector The inspection callback
+/// @param Context   The context to pass to the callback
+/// @param Recursive Whether the inspection recursively inspects children
+/// @param ...       The argument list
+/// @return Whether the inspection finished or not
+/// @retval EFI_INVALID_PARAMETER If Inspector is NULL
+/// @retval EFI_NOT_FOUND         If Path is not found
+/// @retval EFI_ABORTED           If the inspection was aborted in the callback
+/// @retval EFI_SUCCESSS          If the inspection finished successfully
 EFI_STATUS
 EFIAPI
-ConfigGetList (
-  IN  CHAR16   *Path OPTIONAL,
-  OUT CHAR16 ***List,
-  OUT UINTN    *Count
+ConfigInspect (
+  IN CHAR16         *Path OPTIONAL,
+  IN CONFIG_INSPECT  Inspector,
+  IN VOID           *Context OPTIONAL,
+  IN BOOLEAN         Recursive,
+  ...
 );
-// ConfigSGetList
+// ConfigVInspect
+/// Inspect configuration values
+/// @param Path      The configuration path or NULL for root
+/// @param Inspector The inspection callback
+/// @param Context   The context to pass to the callback
+/// @param Recursive Whether the inspection recursively inspects children
+/// @param Args      The argument list
+/// @return Whether the inspection finished or not
+/// @retval EFI_INVALID_PARAMETER If Inspector is NULL
+/// @retval EFI_NOT_FOUND         If Path is not found
+/// @retval EFI_ABORTED           If the inspection was aborted in the callback
+/// @retval EFI_SUCCESSS          If the inspection finished successfully
+EFI_STATUS
+EFIAPI
+ConfigVInspect (
+  IN CHAR16         *Path OPTIONAL,
+  IN CONFIG_INSPECT  Inspector,
+  IN VOID           *Context OPTIONAL,
+  IN BOOLEAN         Recursive,
+  IN VA_LIST         Args
+);
+
+// ConfigGetList
 /// Get a list of names for the children of the configuration path
 /// @param Path  The configuration path of which to get child names or NULL for root
 /// @param List  On output, the string list of names of children
@@ -195,15 +262,15 @@ ConfigGetList (
 /// @retval EFI_SUCCESS           If the string list was returned successfully
 EFI_STATUS
 EFIAPI
-ConfigSGetList (
-  IN  CHAR16   *Path,
+ConfigGetList (
+  IN  CHAR16   *Path OPTIONAL,
   OUT CHAR16 ***List,
   OUT UINTN    *Count,
   IN  ...
 );
-// ConfigVSGetList
+// ConfigVGetList
 /// Get a list of names for the children of the configuration path
-/// @param Path  The configuration path of which to get child names
+/// @param Path  The configuration path of which to get child names or NULL for root
 /// @param List  On output, the string list of names of children
 /// @param Count On output, the count of strings in the list
 /// @param Args  The argument list
@@ -215,28 +282,47 @@ ConfigSGetList (
 /// @retval EFI_SUCCESS           If the string list was returned successfully
 EFI_STATUS
 EFIAPI
-ConfigVSGetList (
-  IN  CHAR16    *Path,
+ConfigVGetList (
+  IN  CHAR16    *Path OPTIONAL,
   OUT CHAR16  ***List,
   OUT UINTN     *Count,
   IN  VA_LIST    Args
 );
 
-// ConfigGetType
-/// Get the type of a configuration value
-/// @param Path The path of the configuration value of which to get the type
-/// @param Type On output, the configuration value type
-/// @retval EFI_INVALID_PARAMETER If Path or Type is NULL
-/// @retval EFI_NOT_FOUND         If the configuration value was not found
-/// @retval EFI_ACCESS_DENIED     If the configuration value is protected
-/// @retval EFI_SUCCESS           If the configuration value was retrieved successfully
+// ConfigGetCount
+/// Get the count of children of the configuration path
+/// @param Path  The configuration path or NULL for root
+/// @param Count On output, the count of children
+/// @param ...   The argument list
+/// @return Whether the count was returned or not
+/// @retval EFI_INVALID_PARAMETER If Path or Count is NULL
+/// @retval EFI_NOT_FOUND         If the configuration path was not found
+/// @retval EFI_SUCCESS           If the count was returned successfully
 EFI_STATUS
 EFIAPI
-ConfigGetType (
-  IN  CHAR16      *Path,
-  OUT CONFIG_TYPE *Type
+ConfigGetCount (
+  IN  CHAR16 *Path OPTIONAL,
+  OUT UINTN  *Count,
+  IN  ...
 );
-// ConfigSGetType
+// ConfigVGetCount
+/// Get the count of children of the configuration path
+/// @param Path  The configuration path or NULL for root
+/// @param Count On output, the count of children
+/// @param Args  The argument list
+/// @return Whether the count was returned or not
+/// @retval EFI_INVALID_PARAMETER If Path or Count is NULL
+/// @retval EFI_NOT_FOUND         If the configuration path was not found
+/// @retval EFI_SUCCESS           If the count was returned successfully
+EFI_STATUS
+EFIAPI
+ConfigVGetCount (
+  IN  CHAR16  *Path OPTIONAL,
+  OUT UINTN   *Count,
+  IN  VA_LIST  Args
+);
+
+// ConfigGetType
 /// Get the type of a configuration value
 /// @param Path The path of the configuration value of which to get the type
 /// @param Type On output, the configuration value type
@@ -247,12 +333,12 @@ ConfigGetType (
 /// @retval EFI_SUCCESS           If the configuration value was retrieved successfully
 EFI_STATUS
 EFIAPI
-ConfigSGetType (
+ConfigGetType (
   IN  CHAR16      *Path,
   OUT CONFIG_TYPE *Type,
   IN  ...
 );
-// ConfigVSGetType
+// ConfigVGetType
 /// Get the type of a configuration value
 /// @param Path The path of the configuration value of which to get the type
 /// @param Type On output, the configuration value type
@@ -263,7 +349,7 @@ ConfigSGetType (
 /// @retval EFI_SUCCESS           If the configuration value was retrieved successfully
 EFI_STATUS
 EFIAPI
-ConfigVSGetType (
+ConfigVGetType (
   IN  CHAR16      *Path,
   OUT CONFIG_TYPE *Type,
   IN  VA_LIST      Args
@@ -274,6 +360,7 @@ ConfigVSGetType (
 /// @param Path  The path of the configuration value
 /// @param Type  On output, the type of the configuration value
 /// @param Value On output, the value of the configuration value
+/// @param ...   The argument list
 /// @return Whether the configuration value was retrieved or not
 /// @retval EFI_INVALID_PARAMETER If Path, Type, or Value is NULL
 /// @retval EFI_NOT_FOUND         If the configuration value was not found
@@ -284,28 +371,10 @@ EFIAPI
 ConfigGetValue (
   IN  CHAR16       *Path,
   OUT CONFIG_TYPE  *Type,
-  OUT CONFIG_VALUE *Value
-);
-// ConfigSGetValue
-/// Get a configuration value
-/// @param Path  The path of the configuration value
-/// @param Type  On output, the type of the configuration value
-/// @param Value On output, the value of the configuration value
-/// @param ...   The argument list
-/// @return Whether the configuration value was retrieved or not
-/// @retval EFI_INVALID_PARAMETER If Path, Type, or Value is NULL
-/// @retval EFI_NOT_FOUND         If the configuration value was not found
-/// @retval EFI_ACCESS_DENIED     If the configuration value is protected
-/// @retval EFI_SUCCESS           If the configuration value was retrieved successfully
-EFI_STATUS
-EFIAPI
-ConfigSGetValue (
-  IN  CHAR16       *Path,
-  OUT CONFIG_TYPE  *Type,
   OUT CONFIG_VALUE *Value,
   IN  ...
 );
-// ConfigVSGetValue
+// ConfigVGetValue
 /// Get a configuration value
 /// @param Path  The path of the configuration value
 /// @param Type  On output, the type of the configuration value
@@ -318,7 +387,7 @@ ConfigSGetValue (
 /// @retval EFI_SUCCESS           If the configuration value was retrieved successfully
 EFI_STATUS
 EFIAPI
-ConfigVSGetValue (
+ConfigVGetValue (
   IN  CHAR16       *Path,
   OUT CONFIG_TYPE  *Type,
   OUT CONFIG_VALUE *Value,
@@ -329,6 +398,7 @@ ConfigVSGetValue (
 /// Get a boolean configuration value
 /// @param Path    The path of the configuration value
 /// @param Boolean On output, the boolean configuration value
+/// @param ...     The argument list
 /// @return Whether the configuration value was retrieved or not
 /// @retval EFI_INVALID_PARAMETER If Path or Boolean is NULL
 /// @retval EFI_NOT_FOUND         If the configuration value path was not found
@@ -339,27 +409,10 @@ EFI_STATUS
 EFIAPI
 ConfigGetBoolean (
   IN  CHAR16  *Path,
-  OUT BOOLEAN *Boolean
-);
-// ConfigSGetBoolean
-/// Get a boolean configuration value
-/// @param Path    The path of the configuration value
-/// @param Boolean On output, the boolean configuration value
-/// @param ...     The argument list
-/// @return Whether the configuration value was retrieved or not
-/// @retval EFI_INVALID_PARAMETER If Path or Boolean is NULL
-/// @retval EFI_NOT_FOUND         If the configuration value path was not found
-/// @retval EFI_ABORTED           If the configuration value type does not match
-/// @retval EFI_ACCESS_DENIED     If the configuration value is protected
-/// @retval EFI_SUCCESS           If the configuration value was retrieved successfully
-EFI_STATUS
-EFIAPI
-ConfigSGetBoolean (
-  IN  CHAR16  *Path,
   OUT BOOLEAN *Boolean,
   IN  ...
 );
-// ConfigVSGetBoolean
+// ConfigVGetBoolean
 /// Get a boolean configuration value
 /// @param Path    The path of the configuration value
 /// @param Boolean On output, the boolean configuration value
@@ -372,7 +425,7 @@ ConfigSGetBoolean (
 /// @retval EFI_SUCCESS           If the configuration value was retrieved successfully
 EFI_STATUS
 EFIAPI
-ConfigVSGetBoolean (
+ConfigVGetBoolean (
   IN  CHAR16  *Path,
   OUT BOOLEAN *Boolean,
   IN  VA_LIST  Args
@@ -382,6 +435,7 @@ ConfigVSGetBoolean (
 /// Get an integer configuration value
 /// @param Path    The path of the configuration value
 /// @param Integer On output, the integer configuration value
+/// @param ...     The argument list
 /// @return Whether the configuration value was retrieved or not
 /// @retval EFI_INVALID_PARAMETER If Path or Integer is NULL
 /// @retval EFI_NOT_FOUND         If the configuration value path was not found
@@ -392,27 +446,10 @@ EFI_STATUS
 EFIAPI
 ConfigGetInteger (
   IN  CHAR16 *Path,
-  OUT INTN   *Integer
-);
-// ConfigSGetInteger
-/// Get an integer configuration value
-/// @param Path    The path of the configuration value
-/// @param Integer On output, the integer configuration value
-/// @param ...     The argument list
-/// @return Whether the configuration value was retrieved or not
-/// @retval EFI_INVALID_PARAMETER If Path or Integer is NULL
-/// @retval EFI_NOT_FOUND         If the configuration value path was not found
-/// @retval EFI_ABORTED           If the configuration value type does not match
-/// @retval EFI_ACCESS_DENIED     If the configuration value is protected
-/// @retval EFI_SUCCESS           If the configuration value was retrieved successfully
-EFI_STATUS
-EFIAPI
-ConfigSGetInteger (
-  IN  CHAR16 *Path,
   OUT INTN   *Integer,
   IN  ...
 );
-// ConfigVSGetInteger
+// ConfigVGetInteger
 /// Get an integer configuration value
 /// @param Path    The path of the configuration value
 /// @param Integer On output, the integer configuration value
@@ -425,29 +462,13 @@ ConfigSGetInteger (
 /// @retval EFI_SUCCESS           If the configuration value was retrieved successfully
 EFI_STATUS
 EFIAPI
-ConfigVSGetInteger (
+ConfigVGetInteger (
   IN  CHAR16  *Path,
   OUT INTN    *Integer,
   IN  VA_LIST  Args
 );
 
 // ConfigGetUnsigned
-/// Get an unsigned integer configuration value
-/// @param Path    The path of the configuration value
-/// @param Unsigned On output, the unsigned integer configuration value
-/// @return Whether the configuration value was retrieved or not
-/// @retval EFI_INVALID_PARAMETER If Path or Unsigned is NULL
-/// @retval EFI_NOT_FOUND         If the configuration value path was not found
-/// @retval EFI_ABORTED           If the configuration value type does not match
-/// @retval EFI_ACCESS_DENIED     If the configuration value is protected
-/// @retval EFI_SUCCESS           If the configuration value was retrieved successfully
-EFI_STATUS
-EFIAPI
-ConfigGetUnsigned (
-  IN  CHAR16 *Path,
-  OUT UINTN  *Unsigned
-);
-// ConfigSGetUnsigned
 /// Get an unsigned integer configuration value
 /// @param Path    The path of the configuration value
 /// @param Unsigned On output, the unsigned integer configuration value
@@ -460,12 +481,12 @@ ConfigGetUnsigned (
 /// @retval EFI_SUCCESS           If the configuration value was retrieved successfully
 EFI_STATUS
 EFIAPI
-ConfigSGetUnsigned (
+ConfigGetUnsigned (
   IN  CHAR16 *Path,
   OUT UINTN  *Unsigned,
   IN  ...
 );
-// ConfigVSGetUnsigned
+// ConfigVGetUnsigned
 /// Get an unsigned integer configuration value
 /// @param Path     The path of the configuration value
 /// @param Unsigned On output, the unsigned integer configuration value
@@ -478,29 +499,13 @@ ConfigSGetUnsigned (
 /// @retval EFI_SUCCESS           If the configuration value was retrieved successfully
 EFI_STATUS
 EFIAPI
-ConfigVSGetUnsigned (
+ConfigVGetUnsigned (
   IN  CHAR16  *Path,
   OUT UINTN   *Unsigned,
   IN  VA_LIST  Args
 );
 
 // ConfigGetString
-/// Get a string configuration value
-/// @param Path   The path of the configuration value
-/// @param String On output, the string configuration value
-/// @return Whether the configuration value was retrieved or not
-/// @retval EFI_INVALID_PARAMETER If Path or String is NULL
-/// @retval EFI_NOT_FOUND         If the configuration value path was not found
-/// @retval EFI_ABORTED           If the configuration value type does not match
-/// @retval EFI_ACCESS_DENIED     If the configuration value is protected
-/// @retval EFI_SUCCESS           If the configuration value was retrieved successfully
-EFI_STATUS
-EFIAPI
-ConfigGetString (
-  IN  CHAR16  *Path,
-  OUT CHAR16 **String
-);
-// ConfigSGetString
 /// Get a string configuration value
 /// @param Path   The path of the configuration value
 /// @param String On output, the string configuration value
@@ -513,12 +518,12 @@ ConfigGetString (
 /// @retval EFI_SUCCESS           If the configuration value was retrieved successfully
 EFI_STATUS
 EFIAPI
-ConfigSGetString (
+ConfigGetString (
   IN  CHAR16  *Path,
   OUT CHAR16 **String,
   IN  ...
 );
-// ConfigVSGetString
+// ConfigVGetString
 /// Get a string configuration value
 /// @param Path   The path of the configuration value
 /// @param String On output, the string configuration value
@@ -531,31 +536,13 @@ ConfigSGetString (
 /// @retval EFI_SUCCESS           If the configuration value was retrieved successfully
 EFI_STATUS
 EFIAPI
-ConfigVSGetString (
+ConfigVGetString (
   IN  CHAR16   *Path,
   OUT CHAR16  **String,
   IN  VA_LIST   Args
 );
 
 // ConfigGetData
-/// Get a data configuration value
-/// @param Path The path of the configuration value
-/// @param Size On output, the data configuration value size in bytes
-/// @param Data On output, the data configuration value
-/// @return Whether the configuration value was retrieved or not
-/// @retval EFI_INVALID_PARAMETER If Path, Size, or Data is NULL
-/// @retval EFI_NOT_FOUND         If the configuration value path was not found
-/// @retval EFI_ABORTED           If the configuration value type does not match
-/// @retval EFI_ACCESS_DENIED     If the configuration value is protected
-/// @retval EFI_SUCCESS           If the configuration value was retrieved successfully
-EFI_STATUS
-EFIAPI
-ConfigGetData (
-  IN  CHAR16  *Path,
-  OUT UINTN   *Size,
-  OUT VOID   **Data
-);
-// ConfigSGetData
 /// Get a data configuration value
 /// @param Path The path of the configuration value
 /// @param Size On output, the data configuration value size in bytes
@@ -569,13 +556,13 @@ ConfigGetData (
 /// @retval EFI_SUCCESS           If the configuration value was retrieved successfully
 EFI_STATUS
 EFIAPI
-ConfigSGetData (
+ConfigGetData (
   IN  CHAR16  *Path,
   OUT UINTN   *Size,
   OUT VOID   **Data,
   IN  ...
 );
-// ConfigVSGetData
+// ConfigVGetData
 /// Get a data configuration value
 /// @param Path The path of the configuration value
 /// @param Size On output, the data configuration value size in bytes
@@ -589,7 +576,7 @@ ConfigSGetData (
 /// @retval EFI_SUCCESS           If the configuration value was retrieved successfully
 EFI_STATUS
 EFIAPI
-ConfigVSGetData (
+ConfigVGetData (
   IN  CHAR16   *Path,
   OUT UINTN    *Size,
   OUT VOID    **Data,
@@ -603,6 +590,7 @@ ConfigVSGetData (
 /// @param DefaultValue The default value of the configuration value
 /// @param Type         On output, the type of the configuration value
 /// @param Value        On output, the value of the configuration value
+/// @param ...          The argument list
 /// @return Whether the configuration value was retrieved or not
 /// @retval EFI_INVALID_PARAMETER If Path, DefaultValue, Type or Value is NULL or DefaultType is invalid
 /// @retval EFI_ACCESS_DENIED     If the configuration value is protected
@@ -614,31 +602,10 @@ ConfigGetValueWithDefault (
   IN  CONFIG_TYPE   DefaultType,
   IN  CONFIG_VALUE *DefaultValue,
   OUT CONFIG_TYPE  *Type,
-  OUT CONFIG_VALUE *Value
-);
-// ConfigSGetValueWithDefault
-/// Get a configuration value with a default fallback value
-/// @param Path         The path of the configuration value
-/// @param DefaultType  The default type of the configuration value
-/// @param DefaultValue The default value of the configuration value
-/// @param Type         On output, the type of the configuration value
-/// @param Value        On output, the value of the configuration value
-/// @param ...          The argument list
-/// @return Whether the configuration value was retrieved or not
-/// @retval EFI_INVALID_PARAMETER If Path, DefaultValue, Type or Value is NULL or DefaultType is invalid
-/// @retval EFI_ACCESS_DENIED     If the configuration value is protected
-/// @retval EFI_SUCCESS           If the configuration value was retrieved successfully
-EFI_STATUS
-EFIAPI
-ConfigSGetValueWithDefault (
-  IN  CHAR16       *Path,
-  IN  CONFIG_TYPE   DefaultType,
-  IN  CONFIG_VALUE *DefaultValue,
-  OUT CONFIG_TYPE  *Type,
   OUT CONFIG_VALUE *Value,
   IN  ...
 );
-// ConfigVSGetValueWithDefault
+// ConfigVGetValueWithDefault
 /// Get a configuration value with a default fallback value
 /// @param Path         The path of the configuration value
 /// @param DefaultType  The default type of the configuration value
@@ -652,7 +619,7 @@ ConfigSGetValueWithDefault (
 /// @retval EFI_SUCCESS           If the configuration value was retrieved successfully
 EFI_STATUS
 EFIAPI
-ConfigVSGetValueWithDefault (
+ConfigVGetValueWithDefault (
   IN  CHAR16       *Path,
   IN  CONFIG_TYPE   DefaultType,
   IN  CONFIG_VALUE *DefaultValue,
@@ -665,27 +632,16 @@ ConfigVSGetValueWithDefault (
 /// Get a boolean configuration value with default
 /// @param Path           The path of the configuration value
 /// @param DefaultBoolean The default boolean configuration value
+/// @param ...            The argument list
 /// @return The boolean configuration value
 BOOLEAN
 EFIAPI
 ConfigGetBooleanWithDefault (
   IN CHAR16  *Path,
-  IN BOOLEAN  DefaultBoolean
-);
-// ConfigSGetBooleanWithDefault
-/// Get a boolean configuration value with default
-/// @param Path           The path of the configuration value
-/// @param DefaultBoolean The default boolean configuration value
-/// @param ...            The argument list
-/// @return The boolean configuration value
-BOOLEAN
-EFIAPI
-ConfigSGetBooleanWithDefault (
-  IN CHAR16  *Path,
   IN BOOLEAN  DefaultBoolean,
   IN ...
 );
-// ConfigVSGetBooleanWithDefault
+// ConfigVGetBooleanWithDefault
 /// Get a boolean configuration value with default
 /// @param Path           The path of the configuration value
 /// @param DefaultBoolean The default boolean configuration value
@@ -693,7 +649,7 @@ ConfigSGetBooleanWithDefault (
 /// @return The boolean configuration value
 BOOLEAN
 EFIAPI
-ConfigVSGetBooleanWithDefault (
+ConfigVGetBooleanWithDefault (
   IN CHAR16  *Path,
   IN BOOLEAN  DefaultBoolean,
   IN VA_LIST  Args
@@ -703,27 +659,16 @@ ConfigVSGetBooleanWithDefault (
 /// Get an integer configuration value with default
 /// @param Path           The path of the configuration value
 /// @param DefaultInteger The default integer configuration value
+/// @param ...            The argument list
 /// @return The integer configuration value
 INTN
 EFIAPI
 ConfigGetIntegerWithDefault (
   IN CHAR16 *Path,
-  IN INTN    DefaultInteger
-);
-// ConfigSGetIntegerWithDefault
-/// Get an integer configuration value with default
-/// @param Path           The path of the configuration value
-/// @param DefaultInteger The default integer configuration value
-/// @param ...            The argument list
-/// @return The integer configuration value
-INTN
-EFIAPI
-ConfigSGetIntegerWithDefault (
-  IN CHAR16 *Path,
   IN INTN    DefaultInteger,
   IN ...
 );
-// ConfigVSGetIntegerWithDefault
+// ConfigVGetIntegerWithDefault
 /// Get an integer configuration value with default
 /// @param Path           The path of the configuration value
 /// @param DefaultInteger The default integer configuration value
@@ -731,7 +676,7 @@ ConfigSGetIntegerWithDefault (
 /// @return The integer configuration value
 INTN
 EFIAPI
-ConfigVSGetIntegerWithDefault (
+ConfigVGetIntegerWithDefault (
   IN CHAR16  *Path,
   IN INTN     DefaultInteger,
   IN VA_LIST  Args
@@ -741,27 +686,16 @@ ConfigVSGetIntegerWithDefault (
 /// Get an unsigned integer configuration value with default
 /// @param Path           The path of the configuration value
 /// @param DefaulUnsigned The default unsigned configuration value
+/// @param ...            The argument list
 /// @return The unsigned integer configuration value
 UINTN
 EFIAPI
 ConfigGetUnsignedWithDefault (
   IN CHAR16 *Path,
-  IN UINTN   DefaultUnsigned
-);
-// ConfigSGetUnsignedWithDefault
-/// Get an unsigned integer configuration value with default
-/// @param Path           The path of the configuration value
-/// @param DefaulUnsigned The default unsigned configuration value
-/// @param ...            The argument list
-/// @return The unsigned integer configuration value
-UINTN
-EFIAPI
-ConfigSGetUnsignedWithDefault (
-  IN CHAR16 *Path,
   IN UINTN   DefaultUnsigned,
   IN ...
 );
-// ConfigVSGetUnsignedWithDefault
+// ConfigVGetUnsignedWithDefault
 /// Get an unsigned integer configuration value with default
 /// @param Path           The path of the configuration value
 /// @param DefaulUnsigned The default unsigned configuration value
@@ -769,7 +703,7 @@ ConfigSGetUnsignedWithDefault (
 /// @return The unsigned integer configuration value
 UINTN
 EFIAPI
-ConfigVSGetUnsignedWithDefault (
+ConfigVGetUnsignedWithDefault (
   IN CHAR16  *Path,
   IN UINTN    DefaultUnsigned,
   IN VA_LIST  Args
@@ -779,27 +713,16 @@ ConfigVSGetUnsignedWithDefault (
 /// Get a string configuration value with default
 /// @param Path          The path of the configuration value
 /// @param DefaultString The default string configuration value
+/// @param ...           The argument list
 /// @return The string configuration value
 CHAR16 *
 EFIAPI
 ConfigGetStringWithDefault (
   IN CHAR16 *Path,
-  IN CHAR16 *DefaultString
-);
-// ConfigSGetStringWithDefault
-/// Get a string configuration value with default
-/// @param Path          The path of the configuration value
-/// @param DefaultString The default string configuration value
-/// @param ...           The argument list
-/// @return The string configuration value
-CHAR16 *
-EFIAPI
-ConfigSGetStringWithDefault (
-  IN CHAR16 *Path,
   IN CHAR16 *DefaultString,
   IN ...
 );
-// ConfigVSGetStringWithDefault
+// ConfigVGetStringWithDefault
 /// Get a string configuration value with default
 /// @param Path          The path of the configuration value
 /// @param DefaultString The default string configuration value
@@ -807,7 +730,7 @@ ConfigSGetStringWithDefault (
 /// @return The string configuration value
 CHAR16 *
 EFIAPI
-ConfigVSGetStringWithDefault (
+ConfigVGetStringWithDefault (
   IN CHAR16  *Path,
   IN CHAR16  *DefaultString,
   IN VA_LIST  Args
@@ -819,6 +742,7 @@ ConfigVSGetStringWithDefault (
 /// @param DefaultSize The default data configuration value size
 /// @param DefaultData The default data configuration value
 /// @param Size        On output, the data configuration value size
+/// @param ...         The argument list
 /// @return The data configuration value
 VOID *
 EFIAPI
@@ -826,26 +750,10 @@ ConfigGetDataWithDefault (
   IN  CHAR16 *Path,
   IN  UINTN   DefaultSize,
   IN  VOID   *DefaultData,
-  OUT UINTN  *Size
-);
-// ConfigSGetDataWithDefault
-/// Get a data configuration value with default
-/// @param Path        The path of the configuration value
-/// @param DefaultSize The default data configuration value size
-/// @param DefaultData The default data configuration value
-/// @param Size        On output, the data configuration value size
-/// @param ...         The argument list
-/// @return The data configuration value
-VOID *
-EFIAPI
-ConfigSGetDataWithDefault (
-  IN  CHAR16 *Path,
-  IN  UINTN   DefaultSize,
-  IN  VOID   *DefaultData,
   OUT UINTN  *Size,
   IN  ...
 );
-// ConfigVSGetDataWithDefault
+// ConfigVGetDataWithDefault
 /// Get a data configuration value with default
 /// @param Path        The path of the configuration value
 /// @param DefaultSize The default data configuration value size
@@ -855,7 +763,7 @@ ConfigSGetDataWithDefault (
 /// @return The data configuration value
 VOID *
 EFIAPI
-ConfigVSGetDataWithDefault (
+ConfigVGetDataWithDefault (
   IN  CHAR16  *Path,
   IN  UINTN    DefaultSize,
   IN  VOID    *DefaultData,
@@ -865,9 +773,11 @@ ConfigVSGetDataWithDefault (
 
 // ConfigSetValue
 /// Set a configuration value
-/// @param Path  The path of the configuration value
-/// @param Type  The configuration type to set
-/// @param Value The configuration value to set
+/// @param Path      The path of the configuration value
+/// @param Type      The configuration type to set
+/// @param Value     The configuration value to set
+/// @param Overwrite Whether to overwrite a value if already present
+/// @param ...       The argument list
 /// @return Whether the configuration value was set or not
 /// @retval EFI_INVALID_PARAMETER If Path or Value is NULL or Type is invalid
 /// @retval EFI_SUCCESS           If the configuration value was set successfully
@@ -876,47 +786,36 @@ EFIAPI
 ConfigSetValue (
   IN CHAR16       *Path,
   IN CONFIG_TYPE   Type,
-  IN CONFIG_VALUE *Value
-);
-// ConfigSSetValue
-/// Set a configuration value
-/// @param Path  The path of the configuration value
-/// @param Type  The configuration type to set
-/// @param Value The configuration value to set
-/// @param ...   The argument list
-/// @return Whether the configuration value was set or not
-/// @retval EFI_INVALID_PARAMETER If Path or Value is NULL or Type is invalid
-/// @retval EFI_SUCCESS           If the configuration value was set successfully
-EFI_STATUS
-EFIAPI
-ConfigSSetValue (
-  IN CHAR16       *Path,
-  IN CONFIG_TYPE   Type,
   IN CONFIG_VALUE *Value,
+  IN BOOLEAN       Overwrite,
   IN ...
 );
-// ConfigVSSetValue
+// ConfigVSetValue
 /// Set a configuration value
-/// @param Path  The path of the configuration value
-/// @param Type  The configuration type to set
-/// @param Value The configuration value to set
-/// @param Args  The argument list
+/// @param Path      The path of the configuration value
+/// @param Type      The configuration type to set
+/// @param Value     The configuration value to set
+/// @param Overwrite Whether to overwrite a value if already present
+/// @param Args      The argument list
 /// @return Whether the configuration value was set or not
 /// @retval EFI_INVALID_PARAMETER If Path or Value is NULL or Type is invalid
 /// @retval EFI_SUCCESS           If the configuration value was set successfully
 EFI_STATUS
 EFIAPI
-ConfigVSSetValue (
+ConfigVSetValue (
   IN CHAR16       *Path,
   IN CONFIG_TYPE   Type,
   IN CONFIG_VALUE *Value,
+  IN BOOLEAN       Overwrite,
   IN VA_LIST       Args
 );
 
 // ConfigSetBoolean
 /// Set a boolean configuration value
-/// @param Path    The path of the configuration value
-/// @param Boolean The boolean configuration value to set
+/// @param Path      The path of the configuration value
+/// @param Boolean   The boolean configuration value to set
+/// @param Overwrite Whether to overwrite a value if already present
+/// @param ...       The argument list
 /// @return Whether the configuration value was set or not
 /// @retval EFI_INVALID_PARAMETER If Path is NULL
 /// @retval EFI_OUT_OF_RESOURCES  If memory could not be allocated for configuration data
@@ -925,45 +824,35 @@ EFI_STATUS
 EFIAPI
 ConfigSetBoolean (
   IN CHAR16  *Path,
-  IN BOOLEAN  Boolean
-);
-// ConfigSSetBoolean
-/// Set a boolean configuration value
-/// @param Path    The path of the configuration value
-/// @param Boolean The boolean configuration value to set
-/// @param ...     The argument list
-/// @return Whether the configuration value was set or not
-/// @retval EFI_INVALID_PARAMETER If Path is NULL
-/// @retval EFI_OUT_OF_RESOURCES  If memory could not be allocated for configuration data
-/// @retval EFI_SUCCESS           If the configuration value was set successfully
-EFI_STATUS
-EFIAPI
-ConfigSSetBoolean (
-  IN CHAR16  *Path,
   IN BOOLEAN  Boolean,
+  IN BOOLEAN  Overwrite,
   IN ...
 );
-// ConfigVSSetBoolean
+// ConfigVSetBoolean
 /// Set a boolean configuration value
-/// @param Path    The path of the configuration value
-/// @param Boolean The boolean configuration value to set
-/// @param Args    The argument list
+/// @param Path      The path of the configuration value
+/// @param Boolean   The boolean configuration value to set
+/// @param Overwrite Whether to overwrite a value if already present
+/// @param Args      The argument list
 /// @return Whether the configuration value was set or not
 /// @retval EFI_INVALID_PARAMETER If Path is NULL
 /// @retval EFI_OUT_OF_RESOURCES  If memory could not be allocated for configuration data
 /// @retval EFI_SUCCESS           If the configuration value was set successfully
 EFI_STATUS
 EFIAPI
-ConfigVSSetBoolean (
+ConfigVSetBoolean (
   IN CHAR16  *Path,
   IN BOOLEAN  Boolean,
+  IN BOOLEAN  Overwrite,
   IN VA_LIST  Args
 );
 
 // ConfigSetInteger
 /// Set an integer configuration value
-/// @param Path    The path of the configuration value
-/// @param Integer The integer configuration value to set
+/// @param Path      The path of the configuration value
+/// @param Integer   The integer configuration value to set
+/// @param Overwrite Whether to overwrite a value if already present
+/// @param ...       The argument list
 /// @return Whether the configuration value was set or not
 /// @retval EFI_INVALID_PARAMETER If Path is NULL
 /// @retval EFI_OUT_OF_RESOURCES  If memory could not be allocated for configuration data
@@ -971,46 +860,36 @@ ConfigVSSetBoolean (
 EFI_STATUS
 EFIAPI
 ConfigSetInteger (
-  IN CHAR16 *Path,
-  IN INTN    Integer
-);
-// ConfigSSetInteger
-/// Set an integer configuration value
-/// @param Path    The path of the configuration value
-/// @param Integer The integer configuration value to set
-/// @param ...     The argument list
-/// @return Whether the configuration value was set or not
-/// @retval EFI_INVALID_PARAMETER If Path is NULL
-/// @retval EFI_OUT_OF_RESOURCES  If memory could not be allocated for configuration data
-/// @retval EFI_SUCCESS           If the configuration value was set successfully
-EFI_STATUS
-EFIAPI
-ConfigSSetInteger (
-  IN CHAR16 *Path,
-  IN INTN    Integer,
-  IN ...
-);
-// ConfigVSSetInteger
-/// Set an integer configuration value
-/// @param Path    The path of the configuration value
-/// @param Integer The integer configuration value to set
-/// @param Args    The argument list
-/// @return Whether the configuration value was set or not
-/// @retval EFI_INVALID_PARAMETER If Path is NULL
-/// @retval EFI_OUT_OF_RESOURCES  If memory could not be allocated for configuration data
-/// @retval EFI_SUCCESS           If the configuration value was set successfully
-EFI_STATUS
-EFIAPI
-ConfigVSSetInteger (
   IN CHAR16  *Path,
   IN INTN     Integer,
+  IN BOOLEAN  Overwrite,
+  IN ...
+);
+// ConfigVSetInteger
+/// Set an integer configuration value
+/// @param Path      The path of the configuration value
+/// @param Integer   The integer configuration value to set
+/// @param Overwrite Whether to overwrite a value if already present
+/// @param Args      The argument list
+/// @return Whether the configuration value was set or not
+/// @retval EFI_INVALID_PARAMETER If Path is NULL
+/// @retval EFI_OUT_OF_RESOURCES  If memory could not be allocated for configuration data
+/// @retval EFI_SUCCESS           If the configuration value was set successfully
+EFI_STATUS
+EFIAPI
+ConfigVSetInteger (
+  IN CHAR16  *Path,
+  IN INTN     Integer,
+  IN BOOLEAN  Overwrite,
   IN VA_LIST  Args
 );
 
 // ConfigSetUnsigned
 /// Set an unsigned integer configuration value
-/// @param Path     The path of the configuration value
-/// @param Unsigned The unsigned integer configuration value to set
+/// @param Path      The path of the configuration value
+/// @param Unsigned  The unsigned integer configuration value to set
+/// @param Overwrite Whether to overwrite a value if already present
+/// @param ...       The argument list
 /// @return Whether the configuration value was set or not
 /// @retval EFI_INVALID_PARAMETER If Path is NULL
 /// @retval EFI_OUT_OF_RESOURCES  If memory could not be allocated for configuration data
@@ -1018,46 +897,36 @@ ConfigVSSetInteger (
 EFI_STATUS
 EFIAPI
 ConfigSetUnsigned (
-  IN CHAR16 *Path,
-  IN UINTN   Unsigned
-);
-// ConfigSSetUnsigned
-/// Set an unsigned integer configuration value
-/// @param Path     The path of the configuration value
-/// @param Unsigned The unsigned integer configuration value to set
-/// @param ...      The argument list
-/// @return Whether the configuration value was set or not
-/// @retval EFI_INVALID_PARAMETER If Path is NULL
-/// @retval EFI_OUT_OF_RESOURCES  If memory could not be allocated for configuration data
-/// @retval EFI_SUCCESS           If the configuration value was set successfully
-EFI_STATUS
-EFIAPI
-ConfigSSetUnsigned (
-  IN CHAR16 *Path,
-  IN UINTN   Unsigned,
-  IN ...
-);
-// ConfigVSSetUnsigned
-/// Set an unsigned integer configuration value
-/// @param Path     The path of the configuration value
-/// @param Unsigned The unsigned integer configuration value to set
-/// @param Args     The argument list
-/// @return Whether the configuration value was set or not
-/// @retval EFI_INVALID_PARAMETER If Path is NULL
-/// @retval EFI_OUT_OF_RESOURCES  If memory could not be allocated for configuration data
-/// @retval EFI_SUCCESS           If the configuration value was set successfully
-EFI_STATUS
-EFIAPI
-ConfigVSSetUnsigned (
   IN CHAR16  *Path,
   IN UINTN    Unsigned,
+  IN BOOLEAN  Overwrite,
+  IN ...
+);
+// ConfigVSetUnsigned
+/// Set an unsigned integer configuration value
+/// @param Path      The path of the configuration value
+/// @param Unsigned  The unsigned integer configuration value to set
+/// @param Overwrite Whether to overwrite a value if already present
+/// @param Args      The argument list
+/// @return Whether the configuration value was set or not
+/// @retval EFI_INVALID_PARAMETER If Path is NULL
+/// @retval EFI_OUT_OF_RESOURCES  If memory could not be allocated for configuration data
+/// @retval EFI_SUCCESS           If the configuration value was set successfully
+EFI_STATUS
+EFIAPI
+ConfigVSetUnsigned (
+  IN CHAR16  *Path,
+  IN UINTN    Unsigned,
+  IN BOOLEAN  Overwrite,
   IN VA_LIST  Args
 );
 
 // ConfigSetString
 /// Set a string configuration value
-/// @param Path   The path of the configuration value
-/// @param String The string configuration value to set
+/// @param Path      The path of the configuration value
+/// @param String    The string configuration value to set
+/// @param Overwrite Whether to overwrite a value if already present
+/// @param ...       The argument list
 /// @return Whether the configuration value was set or not
 /// @retval EFI_INVALID_PARAMETER If Path or String is NULL
 /// @retval EFI_OUT_OF_RESOURCES  If memory could not be allocated for configuration data
@@ -1065,47 +934,37 @@ ConfigVSSetUnsigned (
 EFI_STATUS
 EFIAPI
 ConfigSetString (
-  IN CHAR16 *Path,
-  IN CHAR16 *String
-);
-// ConfigSSetString
-/// Set a string configuration value
-/// @param Path   The path of the configuration value
-/// @param String The string configuration value to set
-/// @param ...    The argument list
-/// @return Whether the configuration value was set or not
-/// @retval EFI_INVALID_PARAMETER If Path or String is NULL
-/// @retval EFI_OUT_OF_RESOURCES  If memory could not be allocated for configuration data
-/// @retval EFI_SUCCESS           If the configuration value was set successfully
-EFI_STATUS
-EFIAPI
-ConfigSSetString (
-  IN CHAR16 *Path,
-  IN CHAR16 *String,
-  IN ...
-);
-// ConfigVSSetString
-/// Set a string configuration value
-/// @param Path   The path of the configuration value
-/// @param String The string configuration value to set
-/// @param Args   The argument list
-/// @return Whether the configuration value was set or not
-/// @retval EFI_INVALID_PARAMETER If Path or String is NULL
-/// @retval EFI_OUT_OF_RESOURCES  If memory could not be allocated for configuration data
-/// @retval EFI_SUCCESS           If the configuration value was set successfully
-EFI_STATUS
-EFIAPI
-ConfigVSSetString (
   IN CHAR16  *Path,
   IN CHAR16  *String,
+  IN BOOLEAN  Overwrite,
+  IN ...
+);
+// ConfigVSetString
+/// Set a string configuration value
+/// @param Path      The path of the configuration value
+/// @param String    The string configuration value to set
+/// @param Overwrite Whether to overwrite a value if already present
+/// @param Args      The argument list
+/// @return Whether the configuration value was set or not
+/// @retval EFI_INVALID_PARAMETER If Path or String is NULL
+/// @retval EFI_OUT_OF_RESOURCES  If memory could not be allocated for configuration data
+/// @retval EFI_SUCCESS           If the configuration value was set successfully
+EFI_STATUS
+EFIAPI
+ConfigVSetString (
+  IN CHAR16  *Path,
+  IN CHAR16  *String,
+  IN BOOLEAN  Overwrite,
   IN VA_LIST  Args
 );
 
 // ConfigSetData
 /// Set a data configuration value
-/// @param Path The path of the configuration value
-/// @param Size The size of the data configuration value
-/// @param Data The data configuration value to set
+/// @param Path      The path of the configuration value
+/// @param Size      The size of the data configuration value
+/// @param Data      The data configuration value to set
+/// @param Overwrite Whether to overwrite a value if already present
+/// @param ...       The argument list
 /// @return Whether the configuration value was set or not
 /// @retval EFI_INVALID_PARAMETER If Path or Data is NULL or Size is zero
 /// @retval EFI_OUT_OF_RESOURCES  If memory could not be allocated for configuration data
@@ -1113,44 +972,30 @@ ConfigVSSetString (
 EFI_STATUS
 EFIAPI
 ConfigSetData (
-  IN CHAR16 *Path,
-  IN UINTN   Size,
-  IN VOID   *Data
-);
-// ConfigSSetData
-/// Set a data configuration value
-/// @param Path The path of the configuration value
-/// @param Size The size of the data configuration value
-/// @param Data The data configuration value to set
-/// @param ...  The argument list
-/// @return Whether the configuration value was set or not
-/// @retval EFI_INVALID_PARAMETER If Path or Data is NULL or Size is zero
-/// @retval EFI_OUT_OF_RESOURCES  If memory could not be allocated for configuration data
-/// @retval EFI_SUCCESS           If the configuration value was set successfully
-EFI_STATUS
-EFIAPI
-ConfigSSetData (
-  IN CHAR16 *Path,
-  IN UINTN   Size,
-  IN VOID   *Data,
-  IN ...
-);
-// ConfigVSSetData
-/// Set a data configuration value
-/// @param Path The path of the configuration value
-/// @param Size The size of the data configuration value
-/// @param Data The data configuration value to set
-/// @param Args The argument list
-/// @return Whether the configuration value was set or not
-/// @retval EFI_INVALID_PARAMETER If Path or Data is NULL or Size is zero
-/// @retval EFI_OUT_OF_RESOURCES  If memory could not be allocated for configuration data
-/// @retval EFI_SUCCESS           If the configuration value was set successfully
-EFI_STATUS
-EFIAPI
-ConfigVSSetData (
   IN CHAR16  *Path,
   IN UINTN    Size,
   IN VOID    *Data,
+  IN BOOLEAN  Overwrite,
+  IN ...
+);
+// ConfigVSetData
+/// Set a data configuration value
+/// @param Path      The path of the configuration value
+/// @param Size      The size of the data configuration value
+/// @param Data      The data configuration value to set
+/// @param Overwrite Whether to overwrite a value if already present
+/// @param Args      The argument list
+/// @return Whether the configuration value was set or not
+/// @retval EFI_INVALID_PARAMETER If Path or Data is NULL or Size is zero
+/// @retval EFI_OUT_OF_RESOURCES  If memory could not be allocated for configuration data
+/// @retval EFI_SUCCESS           If the configuration value was set successfully
+EFI_STATUS
+EFIAPI
+ConfigVSetData (
+  IN CHAR16  *Path,
+  IN UINTN    Size,
+  IN VOID    *Data,
+  IN BOOLEAN  Overwrite,
   IN VA_LIST  Args
 );
 

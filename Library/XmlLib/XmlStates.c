@@ -320,7 +320,7 @@ XmlCallback (
       break;
 
     case XML_LANG_STATE_TAG_NAME:
-      // Check if this is an immdiate close tag
+      // Check if this is an immediate close tag
       if (StrCmp(Token, L"/>") == 0) {
         if (XmlParser->Stack == NULL) {
           return EFI_NOT_READY;
@@ -474,7 +474,8 @@ XmlCallback (
       Stack = XmlParser->Stack;
       if ((Stack == NULL) || (Stack->Tree == NULL) || (Stack->Tree->Name == NULL) ||
           (StrCmp(Stack->Tree->Name, Token) != 0)) {
-        // TODO: Error: expected a different tag closed first
+        // Error: expected a different tag closed first
+        Status = ParseError(Parser, L"Expected </%s> before </%s>", Stack->Tree->Name, Token);
         return EFI_NOT_FOUND;
       }
       // Free stack object

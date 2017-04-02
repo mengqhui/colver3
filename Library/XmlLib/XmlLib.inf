@@ -15,8 +15,7 @@
   BASE_NAME                      = XmlLib
   FILE_GUID                      = D50B8198-095B-4E58-AABA-2EB4B07C3E5F
   MODULE_TYPE                    = BASE
-  VERSION_STRING                 = $(PROJECT_VERSION_BASE)
-  SUPPORTED_ARCHITECTURES        = X64|IA32|ARM|AARCH64
+  SUPPORTED_ARCHITECTURES        = X64|IA32|IPF|ARM|AARCH64
   CONSTRUCTOR                    = XmlLibInitialize
   DESTRUCTOR                     = XmlLibFinish
   LIBRARY_CLASS                  = XmlLib

@@ -12,9 +12,6 @@
 
 #include <Protocol/PciIo.h>
 
-#include "CPU/Intel.h"
-#include "CPU/AMD.h"
-
 // PACKAGE_COUNT
 /// The maximum count of physical packages
 #define PACKAGE_COUNT 4
@@ -294,6 +291,23 @@ typedef UINT32 CPU_MODEL;
 // CPU_MODEL_UNKNOWN
 /// Unknown CPU model
 #define CPU_MODEL_UNKNOWN 0
+
+// GetCPUVendorString
+/// Get the CPU vendor string
+/// @param Vendor The CPU vendor identifier
+/// @return The CPU vendor string
+CHAR16 *
+GetCPUVendorString (
+  CPU_VENDOR Vendor
+);
+// GetCPUFamilyString
+/// Get the CPU family string
+/// @param Family The CPU family identifier
+/// @return The CPU family string
+CHAR16 *
+GetCPUFamilyString (
+  CPU_FAMILY Family
+);
 
 // GetCPUVendor
 /// Get CPU vendor information

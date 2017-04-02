@@ -421,6 +421,25 @@ AsciiStrListFree (
   IN UINTN   Count
 );
 
+// ToAscii
+/// Convert string to ASCII
+/// @param String The string to convert
+/// @return The converted string or NULL if there was an error
+CHAR8 *
+EFIAPI
+ToAscii (
+  IN CHAR16 *String
+);
+// FromAscii
+/// Convert string from ASCII
+/// @param String The string to convert
+/// @return The converted string or NULL if there was an error
+CHAR16 *
+EFIAPI
+FromAscii (
+  IN CHAR8 *String
+);
+
 // SetLanguage
 /// Set the language
 /// @param Language The language code to discover collation protocol or NULL for default english

@@ -15,8 +15,7 @@
   BASE_NAME                      = ConfigLib
   FILE_GUID                      = 4CE59D91-5694-46C8-8A39-7F6FA0629D7C
   MODULE_TYPE                    = BASE
-  VERSION_STRING                 = $(PROJECT_VERSION_BASE)
-  SUPPORTED_ARCHITECTURES        = X64|IA32|ARM|AARCH64
+  SUPPORTED_ARCHITECTURES        = X64|IA32|IPF|ARM|AARCH64
   CONSTRUCTOR                    = ConfigLibInitialize
   DESTRUCTOR                     = ConfigLibFinish
   LIBRARY_CLASS                  = ConfigLib

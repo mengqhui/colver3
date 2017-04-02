@@ -1,17 +1,4 @@
 <?xml version="1.0"?>
 <configuration>
-  <include arch="X64">\efi\clover\x64\clover.xml</include>
-  <CPU>
-    <Cores></Cores>
-    <Threads></Threads>
-    <Count></Count>
-    <Package>
-      <Clock>
-        <unsigned>100000000</unsigned>
-      </Clock>
-    </Package>
-  </CPU>
-  <GUI></GUI>
-  <Memory></Memory>
   <Language></Language>
 </configuration>

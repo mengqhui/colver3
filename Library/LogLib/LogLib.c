@@ -6,20 +6,24 @@
 
 #include <Library/LogLib.h>
 
+#include <Library/GUILib.h>
+#include <Library/ConfigLib.h>
 #include <Library/SmBiosLib.h>
 
 #include <Library/BaseLib.h>
 #include <Library/PrintLib.h>
+#include <Library/SerialPortLib.h>
 #include <Library/TimerLib.h>
 #include <Library/UefiBootServicesTableLib.h>
 #include <Library/UefiRuntimeServicesTableLib.h>
 
+// LOG_OUTPUT_DEFAULT
+/// Default log output methods
+# define LOG_OUTPUT_DEFAULT LOG_OUTPUT_CONSOLE
+
 // LOG_CHUNK_SIZE
 /// The size of a log chunk - 32KB
 #define LOG_CHUNK_SIZE (0x8000 - OFFSET_OF(LOG_CHUNK, Text))
-// LOG_DEFAULT_FILE
-/// The default log file
-#define LOG_DEFAULT_FILE PROJECT_ROOT_PATH L"\\" PROJECT_SAFE_NAME L"\\" PROJECT_SAFE_ARCH L"\\" PROJECT_SAFE_NAME L".log"
 
 // LOG_CHUNK
 /// A chunk of the log
@@ -63,7 +67,8 @@ typedef UINT64
 );
 // LOG_SAVE
 /// Save log contents to file
-/// @param Path The log file path
+/// @param Path   The log file path
+/// @param Append Append the log to the file instead of overwrite
 /// @return Whether the log file was saved or not
 /// @retval EFI_INVALID_PARAMETER Path is NULL
 /// @retval EFI_NOT_FOUND         The log file path could not be found
@@ -71,7 +76,8 @@ typedef UINT64
 typedef EFI_STATUS
 (EFIAPI
 *LOG_SAVE) (
-  IN CHAR16 *Path
+  IN CHAR16  *Path,
+  IN BOOLEAN  Append
 );
 
 // LOG_PROTOCOL
@@ -91,9 +97,12 @@ struct _LOG_PROTOCOL {
 
 };
 
+// mConOut
+/// Console output protocol
+STATIC EFI_SIMPLE_TEXT_OUTPUT_PROTOCOL *mConOut = NULL;
 // mLogOutputs
 /// Enabled log outputs
-STATIC UINT32        mLogOutputs = LOG_OUTPUT_ALL;
+STATIC UINT32        mLogOutputs = LOG_OUTPUT_DEFAULT;
 // mLogPath
 /// Log file path
 STATIC CHAR16       *mLogPath = NULL;
@@ -191,10 +200,13 @@ LogVPrint (
   IN     CHAR16  *Format,
   IN     VA_LIST  Args
 ) {
-  UINTN Count = 0;
+  EFI_STATUS  Status;
+  CHAR16     *Buffer;
+  UINTN       Size;
+  UINTN       Count = 0;
   // Get size needed for log output
-  UINTN Size = SPrintLength(Format, Args);
-  if ((Size++ > 0) && (Size <= (LOG_CHUNK_SIZE / (4 * sizeof(CHAR16))))) {
+  Size = SPrintLength(Format, Args);
+  if ((Size++ > 0) && (Size <= (LOG_CHUNK_SIZE / sizeof(CHAR16)))) {
     Size *= sizeof(CHAR16);
     // Create a new chunk if needed
     if (mLogChunk == NULL) {
@@ -212,7 +224,7 @@ LogVPrint (
       }
     }
     // Check to make sure there is a valid chunk
-    if ((mLogChunk->Size + Size + sizeof(CHAR16)) >= LOG_CHUNK_SIZE) {
+    if ((mLogChunk->Size + Size) >= LOG_CHUNK_SIZE) {
       mLogChunk->Next = (LOG_CHUNK *)AllocatePages(EFI_SIZE_TO_PAGES(LOG_CHUNK_SIZE));
       if (mLogChunk->Next == NULL) {
         return 0;
@@ -222,38 +234,52 @@ LogVPrint (
       mLogChunk->Size = 0;
     }
     // Create formatted text
-    Count = UnicodeVSPrint(mLogChunk->Text + mLogChunk->Size, LOG_CHUNK_SIZE - mLogChunk->Size, Format, Args);
+    Buffer = mLogChunk->Text + (mLogChunk->Size / sizeof(CHAR16));
+    Count = UnicodeVSPrint(Buffer, LOG_CHUNK_SIZE - mLogChunk->Size, Format, Args);
     if (Count > 0) {
-      // Print to log file
-      if (((*Outputs) & LOG_OUTPUT_FILE) != 0) {
-        // Can only output if there is valid path
-        if (Path == NULL) {
-          Path = mLogPath;
+      CHAR8 *Text = ToAscii(Buffer);
+      if (Text != NULL) {
+        Size = AsciiStrLen(Text) * sizeof(CHAR8);
+
+#if defined(PROJECT_DEBUG)
+
+        // Print to serial
+        if (((*Outputs) & LOG_OUTPUT_SERIAL) != 0) {
+          if (SerialPortWrite((UINT8 *)Text, Size) == 0) {
+            (*Outputs) &= ~LOG_OUTPUT_SERIAL;
+          }
         }
-        if (Path != NULL) {
-          EFI_STATUS Status;
-          // Append to log file
-          Size = Count * sizeof(CHAR16);
-          Status = FileHandleAppendByPath(NULL, Path, &Size, mLogChunk->Text + mLogChunk->Size);
-          if (EFI_ERROR(Status)) {
+
+#endif
+
+        // Print to log file
+        if (((*Outputs) & LOG_OUTPUT_FILE) != 0) {
+          // Can only output if there is valid path
+          if (Path == NULL) {
+            Path = mLogPath;
+          }
+          if (Path != NULL) {
+            // Append to log file
+            Status = FileHandleAppendByPath(NULL, Path, &Size, Text);
+            if (EFI_ERROR(Status)) {
+              (*Outputs) &= ~LOG_OUTPUT_FILE;
+            }
+          } else {
             (*Outputs) &= ~LOG_OUTPUT_FILE;
           }
-        } else {
-          (*Outputs) &= ~LOG_OUTPUT_FILE;
         }
+        FreePool(Text);
       }
       // Print to console
       if (((*Outputs) & LOG_OUTPUT_CONSOLE) != 0) {
         // Write to console
-        if (Count >= 256) {
-          CHAR16 Tmp[256];
-          // We may need to break the print string down to be 256 characters since some firmware freak out about larger
-          for (Size = 0; Size < Count; Size += 255) {
-            StrnCpyS(Tmp, 256, mLogChunk->Text + mLogChunk->Size + Size, 255);
-            Print(L"%s", Tmp);
+        if ((mConOut != NULL) && (mConOut->OutputString != NULL)) {
+          Status  = mConOut->OutputString(mConOut, Buffer);
+          if (EFI_ERROR(Status)) {
+            (*Outputs) &= ~LOG_OUTPUT_CONSOLE;
           }
         } else {
-          Print(L"%s", mLogChunk->Text + mLogChunk->Size);
+          (*Outputs) &= ~LOG_OUTPUT_CONSOLE;
         }
       }
       // Advance the log
@@ -318,6 +344,133 @@ VLog3 (
   return Count;
 }
 
+// Verbose
+/// Log formatted text to log and/or console
+/// @param Level  The verbosity level, levels equal or below the current threshold will log which means a level of zero will always log
+/// @param Format The format specifier for formatting the text
+/// @param ...    The parameters for the format string
+/// @return The count of characters written to the log output
+UINTN
+EFIAPI
+Verbose (
+  UINTN   Level,
+  CHAR16 *Format,
+  ...
+) {
+  UINTN   Count;
+  VA_LIST Args;
+  VA_START(Args, Format);
+  Count = VVerbose(Level, Format, Args);
+  VA_END(Args);
+  return Count;
+}
+// Verbose2
+/// Log formatted text to log and/or console
+/// @param Level  The verbosity level, levels equal or below the current threshold will log which means a level of zero will always log
+/// @param Prefix The aligned prefix
+/// @param Format The format specifier for formatting the text
+/// @param ...    The parameters for the format string
+/// @return The count of characters written to the log output
+UINTN
+EFIAPI
+Verbose2 (
+  UINTN   Level,
+  CHAR16 *Prefix,
+  CHAR16 *Format,
+  ...
+) {
+  UINTN   Count;
+  VA_LIST Args;
+  VA_START(Args, Format);
+  Count = VVerbose2(Level, Prefix, Format, Args);
+  VA_END(Args);
+  return Count;
+}
+// Verbose3
+/// Log formatted text to log and/or console
+/// @param Level  The verbosity level, levels equal or below the current threshold will log which means a level of zero will always log
+/// @param Width  The alignment width
+/// @param Prefix The aligned prefix
+/// @param Format The format specifier for formatting the text
+/// @param ...    The parameters for the format string
+/// @return The count of characters written to the log output
+UINTN
+EFIAPI
+Verbose3 (
+  UINTN   Level,
+  UINTN   Width,
+  CHAR16 *Prefix,
+  CHAR16 *Format,
+  ...
+) {
+  UINTN   Count;
+  VA_LIST Args;
+  VA_START(Args, Format);
+  Count = VVerbose3(Level, Width, Prefix, Format, Args);
+  VA_END(Args);
+  return Count;
+}
+// VVerbose
+/// Log formatted text to log and/or console
+/// @param Level  The verbosity level, levels equal or below the current threshold will log which means a level of zero will always log
+/// @param Format The format specifier for formatting the text
+/// @param Args   The parameters for the format string
+/// @return The count of characters written to the log output
+UINTN
+EFIAPI
+VVerbose (
+  UINTN    Level,
+  CHAR16  *Format,
+  VA_LIST  Args
+) {
+  if (Level > ConfigGetUnsignedWithDefault(L"\\Log\\Verbose", LOG_VERBOSE_LEVEL)) {
+    return 0;
+  }
+  return VLog(Format, Args);
+}
+// VVerbose2
+/// Log formatted text to log and/or console
+/// @param Level  The verbosity level, levels equal or below the current threshold will log which means a level of zero will always log
+/// @param Prefix The aligned prefix
+/// @param Format The format specifier for formatting the text
+/// @param Args   The parameters for the format string
+/// @return The count of characters written to the log output
+UINTN
+EFIAPI
+VVerbose2 (
+  UINTN    Level,
+  CHAR16  *Prefix,
+  CHAR16  *Format,
+  VA_LIST  Args
+) {
+  if (Level > ConfigGetUnsignedWithDefault(L"\\Log\\Verbose", LOG_VERBOSE_LEVEL)) {
+    return 0;
+  }
+  return VLog2(Prefix, Format, Args);
+}
+// VVerbose3
+/// Log formatted text to log and/or console
+/// @param Level  The verbosity level, levels equal or below the current threshold will log which means a level of zero will always log
+/// @param Width  The alignment width
+/// @param Prefix The aligned prefix
+/// @param Format The format specifier for formatting the text
+/// @param Args   The parameters for the format string
+/// @return The count of characters written to the log output
+UINTN
+EFIAPI
+VVerbose3 (
+  UINTN    Level,
+  UINTN    Width,
+  CHAR16  *Prefix,
+  CHAR16  *Format,
+  VA_LIST  Args
+) {
+  if (Level > ConfigGetUnsignedWithDefault(L"\\Log\\Verbose", LOG_VERBOSE_LEVEL)) {
+    return 0;
+  }
+  return VLog3(Width, Prefix, Format, Args);
+}
+
 // SetLogOutput
 /// Set log output methods
 /// @return The log output methods that are enabled
@@ -371,8 +524,9 @@ GetLogPath (
 }
 // SetLogPath
 /// Set log file path for output
-/// @param Path The log file path
-/// @param Save Whether to save the contents of the log or start empty
+/// @param Path   The log file path
+/// @param Save   Whether to save the contents of the log or start empty
+/// @param Append Append the log to the file instead of overwrite
 /// @return Whether the log file was opened or not
 /// @retval EFI_INVALID_PARAMETER Path is NULL
 /// @retval EFI_NOT_FOUND         The log file path could not be found
@@ -381,7 +535,8 @@ EFI_STATUS
 EFIAPI
 SetLogPath (
   IN CHAR16  *Path,
-  IN BOOLEAN  Save
+  IN BOOLEAN  Save,
+  IN BOOLEAN  Append
 ) {
   // Check parameters
   if (Path == NULL) {
@@ -389,7 +544,7 @@ SetLogPath (
   }
   // Save log
   if (Save) {
-    EFI_STATUS Status = SaveLog(Path);
+    EFI_STATUS Status = SaveLog(Path, Append);
     if (EFI_ERROR(Status)) {
       return Status;
     }
@@ -405,7 +560,8 @@ SetLogPath (
 
 // LogSaveLog
 /// Save log contents to file
-/// @param Path The log file path
+/// @param Path   The log file path
+/// @param Append Append the log to the file instead of overwrite
 /// @return Whether the log file was saved or not
 /// @retval EFI_INVALID_PARAMETER Path is NULL
 /// @retval EFI_NOT_FOUND         The log file path could not be found
@@ -413,7 +569,8 @@ SetLogPath (
 STATIC EFI_STATUS
 EFIAPI
 LogSaveLog (
-  IN CHAR16  *Path
+  IN CHAR16  *Path,
+  IN BOOLEAN  Append
 ) {
   EFI_STATUS       Status = EFI_NOT_FOUND;
   LOG_CHUNK       *Chunk = mLogChunks;
@@ -429,16 +586,25 @@ LogSaveLog (
   // Open log file
   Status = FileHandleOpen(&Handle, NULL, Path, EFI_FILE_MODE_READ | EFI_FILE_MODE_WRITE | EFI_FILE_MODE_CREATE, 0);
   if (!EFI_ERROR(Status)) {
-    // Make sure the file size is zero ie truncate
-    Status = FileHandleSetSize(Handle, 0);
+    if (Append) {
+      // Move the position to the end ie append
+      Status = FileHandleSetPosition(Handle, 0xFFFFFFFFFFFFFFFF);
+    } else {
+      // Make sure the file size is zero ie truncate
+      Status = FileHandleSetSize(Handle, 0);
+    }
     if (!EFI_ERROR(Status)) {
       // Write each chunk to log file
       while (Chunk != NULL) {
         // Write this chunk to log file
-        UINTN Size = Chunk->Size;
-        Status = FileHandleWrite(Handle, &Size, (VOID *)Chunk->Text);
-        if (EFI_ERROR(Status)) {
-          break;
+        CHAR8 *Text = ToAscii(Chunk->Text);
+        if (Text != NULL) {
+          UINTN Size = AsciiStrLen(Text) * sizeof(CHAR8);
+          Status = FileHandleWrite(Handle, &Size, (VOID *)Text);
+          FreePool(Text);
+          if (EFI_ERROR(Status)) {
+            break;
+          }
         }
         // Get next chunk
         Chunk = Chunk->Next;
@@ -452,7 +618,8 @@ LogSaveLog (
 }
 // SaveLog
 /// Save log contents to file
-/// @param Path The log file path
+/// @param Path   The log file path
+/// @param Append Append the log to the file instead of overwrite
 /// @return Whether the log file was saved or not
 /// @retval EFI_INVALID_PARAMETER Path is NULL
 /// @retval EFI_NOT_FOUND         The log file path could not be found
@@ -460,12 +627,13 @@ LogSaveLog (
 EFI_STATUS
 EFIAPI
 SaveLog (
-  IN CHAR16  *Path
+  IN CHAR16  *Path,
+  IN BOOLEAN  Append
 ) {
   if ((mLog != NULL) && (mLog->Save != NULL)) {
-    return mLog->Save(Path);
+    return mLog->Save(Path, Append);
   }
-  return LogSaveLog(Path);
+  return LogSaveLog(Path, Append);
 }
 
 // LogDateTime
@@ -547,35 +715,6 @@ LogTimestamp (
   return Log(L"%u:%02u:%02u.%03u", (UINT32)Hours, (UINT32)Minutes, (UINT32)Seconds, (UINT32)DivU64x32(Nanoseconds, 1000000));
 }
 
-// PrintLogInformation
-/// Print log information
-STATIC VOID
-EFIAPI
-PrintLogInformation (
-  VOID
-) {
-  // Print version information
-  Log(L"%s %s\n", PROJECT_NAME, PROJECT_VERSION);
-  Log2(L"Architecture:", L"%s\n", PROJECT_ARCH);
-  Log2(L"Build date/time:", L"%s\n", PROJECT_DATETIME);
-  Log2(L"Start:", NULL);
-  LogDateAndTime();
-  Log(L"\n");
-  // Print log information
-  if ((mLogPath != NULL) && ((mLogOutputs & LOG_OUTPUT_FILE) != 0)) {
-    Log2(L"Log path:", L"\"%s\"\n", mLogPath);
-  }
-  if ((mLogOutputs & LOG_OUTPUT_ALL) == LOG_OUTPUT_ALL) {
-    Log2(L"Log outputs:", L"File & Console\n");
-  } else if ((mLogOutputs & LOG_OUTPUT_FILE) != 0) {
-    Log2(L"Log outputs:", L"File\n");
-  } else if ((mLogOutputs & LOG_OUTPUT_CONSOLE) != 0) {
-    Log2(L"Log outputs:", L"Console\n");
-  } else {
-    Log2(L"Log outputs:", L"None\n");
-  }
-}
-
 // SetBestConsoleMode
 /// Set the best console mode available
 STATIC EFI_STATUS
@@ -583,42 +722,69 @@ EFIAPI
 SetBestConsoleMode (
   VOID
 ) {
-  UINTN Columns = 0;
-  UINTN Rows = 0;
-  UINTN BestCols = 0;
-  UINTN BestRows = 0;
-  UINTN Best = 0;
-  UINTN Index = 0;
+  EFI_STATUS  Status;
+  UINTN       Index;
+  UINTN       Columns = 0;
+  UINTN       Rows = 0;
+  UINTN       BestCols = 0;
+  UINTN       BestRows = 0;
+  UINTN       Best = 0;
+  UINTN       Mode = 0;
+  UINTN       Count = 0;
+  EFI_HANDLE *Handles = NULL;
 
   // Check for system table and con out
-  if ((gST == NULL) || (gST->ConOut == NULL) || (gST->ConOut->Mode == NULL) ||
-      (gST->ConOut->QueryMode == NULL) || (gST->ConOut->SetMode == NULL)) {
+  if ((gBS == NULL) || (gBS->LocateHandleBuffer == NULL)) {
     return EFI_UNSUPPORTED;
   }
 
-  // Hide console cursor
-  if (gST->ConOut->EnableCursor != NULL) {
-    gST->ConOut->EnableCursor(gST->ConOut, FALSE);
+  // Locate all console protocols
+  Status = gBS->LocateHandleBuffer(ByProtocol, &gEfiSimpleTextOutProtocolGuid, NULL, &Count, &Handles);
+  if (EFI_ERROR(Status)) {
+    return Status;
   }
-  // Query modes to find the best text mode
-  while (Index <= (UINTN)(gST->ConOut->Mode->MaxMode)) {
-    if (!EFI_ERROR(gST->ConOut->QueryMode(gST->ConOut, Index, &Columns, &Rows))) {
-      // Set best mode
-      if (((Columns > BestCols) && (Rows > BestRows)) || ((Columns * Rows) > (BestCols * BestRows))) {
-        BestCols = Columns;
-        BestRows = Rows;
-        Best = Index;
+  if (Handles == NULL) {
+    return EFI_NOT_FOUND;
+  }
+  if (Count == 0) {
+    FreePool(Handles);
+    return EFI_NOT_FOUND;
+  }
+
+  // Find all console protocols
+  for (Index = 0; Index < Count; ++Index) {
+    EFI_SIMPLE_TEXT_OUTPUT_PROTOCOL *ConOut = NULL;
+    if (Handles[Index] != NULL) {
+      // Get each console protocol
+      if (!EFI_ERROR(gBS->HandleProtocol(Handles[Index], &gEfiSimpleTextOutProtocolGuid, (VOID **)&ConOut)) &&
+          (ConOut != NULL) && (ConOut->Mode != NULL)) {
+        // Query modes to find the best text mode
+        while (Mode <= (UINTN)(ConOut->Mode->MaxMode)) {
+          if (!EFI_ERROR(ConOut->QueryMode(ConOut, Mode, &Columns, &Rows))) {
+            // Set best mode
+            if (((Columns > BestCols) && (Rows > BestRows)) || ((Columns * Rows) > (BestCols * BestRows))) {
+              mConOut = ConOut;
+              BestCols = Columns;
+              BestRows = Rows;
+              Best = Mode;
+            }
+          }
+          ++Mode;
+        }
       }
     }
-    ++Index;
   }
   // Check if mode needs changed
-  if ((BestCols != 0) && (BestRows != 0) && (Best != (UINTN)(gST->ConOut->Mode->Mode))) {
+  if ((mConOut != NULL) && (mConOut->Mode != NULL) && (BestCols != 0) && (BestRows != 0) && (Best != (UINTN)(mConOut->Mode->Mode))) {
     // Change console mode
-    return gST->ConOut->SetMode(gST->ConOut, Best);
+    Status = mConOut->SetMode(mConOut, Best);
+    // Hide console cursor
+    if (mConOut->EnableCursor != NULL) {
+      mConOut->EnableCursor(mConOut, FALSE);
+    }
   }
   // No mode change
-  return EFI_SUCCESS;
+  return Status;
 }
 
 // LogGetStart
@@ -655,12 +821,23 @@ LogLibInitialize (
       (gBS->UninstallMultipleProtocolInterfaces == NULL)) {
     return EFI_UNSUPPORTED;
   }
+
   // Get the performance counter for the start
   mLogCounterStart = GetPerformanceCounter();
   // Check if CPU information already exists
   if ((gBS->LocateProtocol(&mLogGuid, NULL, (VOID **)&mLog) == EFI_SUCCESS) && (mLog != NULL)) {
     return EFI_SUCCESS;
   }
+
+#if defined(PROJECT_DEBUG)
+
+  // Initialize the serial port
+  if (!EFI_ERROR(SerialPortInitialize())) {
+    // Add the output to the outputs
+    mLogOutputs |= LOG_OUTPUT_SERIAL;
+  }
+
+#endif
 
   // Create a default log path if needed
   if (mLogPath == NULL) {
@@ -673,8 +850,6 @@ LogLibInitialize (
   if ((mLogOutputs & LOG_OUTPUT_CONSOLE) != 0) {
     SetBestConsoleMode();
   }
-  // Print log information
-  PrintLogInformation();
   // Install log protocol
   mLogHandle = NULL;
   mLogProtocol.VPrint = LogVPrint,

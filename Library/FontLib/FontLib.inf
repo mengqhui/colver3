@@ -15,8 +15,7 @@
   BASE_NAME                      = FontLib
   FILE_GUID                      = 4C523EF6-65C1-4EE2-82F6-189E9CF5A696
   MODULE_TYPE                    = BASE
-  VERSION_STRING                 = $(PROJECT_VERSION_BASE)
-  SUPPORTED_ARCHITECTURES        = X64|IA32|ARM|AARCH64
+  SUPPORTED_ARCHITECTURES        = X64|IA32|IPF|ARM|AARCH64
   CONSTRUCTOR                    = FontLibInitialize
   DESTRUCTOR                     = FontLibFinish
   LIBRARY_CLASS                  = FontLib

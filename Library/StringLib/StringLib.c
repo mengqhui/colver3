@@ -299,7 +299,7 @@ MetaiMatch (
     return mCollationProtocol->MetaiMatch(mCollationProtocol, String, Pattern);
   }
   // Fallback to english collation
-  for (; CharP = *Pattern++;) {
+  while ((CharP = *Pattern++) != '\0') {
 
     switch (CharP) {
 
@@ -973,7 +973,7 @@ AsciiMetaiMatch (
     return FALSE;
   }
 
-  for (; CharP = *Pattern++;) {
+  while ((CharP = *Pattern++) != '\0') {
 
     switch (CharP) {
 
@@ -1417,6 +1417,69 @@ AsciiStrListFree (
   // Free the list
   FreePool(List);
   return EFI_SUCCESS;
+}
+
+// ToAscii
+/// Convert string to ASCII
+/// @param String The string to convert
+/// @return The converted string or NULL if there was an error
+CHAR8 *
+EFIAPI
+ToAscii (
+  IN CHAR16 *String
+) {
+  UINTN  Length;
+  CHAR8 *Str;
+  // Check parameters
+  if (String == NULL) {
+    return NULL;
+  }
+  // Get string length
+  Length = StrLen(String);
+  if (Length == 0) {
+    return NULL;
+  }
+  // Allocate new string
+  Str = (CHAR8 *)AllocateZeroPool((Length + 1) * sizeof(CHAR8));
+  if (Str != NULL) {
+    // Convert the string
+    if (EFI_ERROR(UnicodeStrToAsciiStrS(String, Str, Length + 1))) {
+      FreePool(Str);
+      Str = NULL;
+    }
+  }
+  return Str;
+}
+// FromAscii
+/// Convert string from ASCII
+/// @param String The string to convert
+/// @return The converted string or NULL if there was an error
+CHAR16 *
+EFIAPI
+FromAscii (
+  IN CHAR8 *String
+) {
+  UINTN   Length;
+  CHAR16 *Str;
+  // Check parameters
+  if (String == NULL) {
+    return NULL;
+  }
+  // Get string length
+  Length = AsciiStrLen(String);
+  if (Length == 0) {
+    return NULL;
+  }
+  // Allocate new string
+  Str = (CHAR16 *)AllocateZeroPool((Length + 1) * sizeof(CHAR16));
+  if (Str != NULL) {
+    // Convert the string
+    if (EFI_ERROR(AsciiStrToUnicodeStrS(String, Str, Length + 1))) {
+      FreePool(Str);
+      Str = NULL;
+    }
+  }
+  return Str;
 }
 
 // SetLanguage
